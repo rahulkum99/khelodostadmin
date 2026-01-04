@@ -8,7 +8,7 @@ import PrivateRoute from "./routes/PrivateRoute";
 import PublicRoute from "./routes/PublicRoute";
 
 import LoginScreen from "./screen/LoginScreen";
-
+import DashboardScreen from "./screen/DashboardScreen";
 
 
 // import PublicFaqsScreen from "./screen/PublicFaqsScreen";
@@ -21,7 +21,7 @@ function App() {
   ];
 
   const privateRoutes = [
-   
+    { path: "/dashboard", component: <DashboardScreen/> },
   ];
 
   return (

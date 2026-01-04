@@ -24,7 +24,7 @@ function LoginScreen() {
         user: overrideUser || username,
       })
     );
-    navigate('/');
+    navigate('/dashboard');
   };
 
   const handleLogin = () => {
@@ -42,9 +42,6 @@ function LoginScreen() {
 
   return (
     <div className="login-page">
-      <button className="login-close-btn" aria-label="Close" onClick={handleClose}>
-        ×
-      </button>
 
       <div className="login-card">
         <div className="login-logo">King</div>
@@ -79,7 +76,7 @@ function LoginScreen() {
         </div>
 
         <button className="login-btn primary" onClick={handleLogin}>Login</button>
-        <button className="login-btn secondary" onClick={handleLoginWithDemoID}>Login with Demo ID</button>
+        {/* <button className="login-btn secondary" onClick={handleLoginWithDemoID}>Login with Demo ID</button> */}
       </div>
     </div>
   );
