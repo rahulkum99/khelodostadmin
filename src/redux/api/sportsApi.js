@@ -1,0 +1,104 @@
+import { createApi } from '@reduxjs/toolkit/query/react';
+import axios from 'axios';
+
+// Custom baseQuery using axios
+const axiosBaseQuery =
+  ({ baseUrl } = { baseUrl: '' }) =>
+  async ({ url, method = 'get', data, params }) => {
+    try {
+      const result = await axios({
+        url: baseUrl + url,
+        method,
+        data,
+        params,
+      });
+      return { data: result.data };
+    } catch (axiosError) {
+      const err = axiosError;
+      return {
+        error: {
+          status: err.response?.status,
+          data: err.response?.data || err.message,
+        },
+      };
+    }
+  };
+
+export const sportsApi = createApi({
+  reducerPath: 'sportsApi',
+  // Use local proxy to avoid CORS in the browser
+  baseQuery: axiosBaseQuery({ baseUrl: '' }),
+  endpoints: (builder) => ({
+    getCricketData: builder.query({
+      query: () => ({
+        url: '/api/cricket',
+        params: { sportname: 'cricket' },
+      }),
+      transformResponse: (response) => {
+        try {
+          return JSON.parse(response?.data || '[]');
+        } catch (err) {
+          console.error('Failed to parse cricket data', err);
+          return [];
+        }
+      },
+    }),
+    getSoccerData: builder.query({
+      query: () => ({
+        url: '/api/cricket',
+        params: { sportname: 'soccer' },
+      }),
+      transformResponse: (response) => {
+        try {
+          return JSON.parse(response?.data || '[]');
+        } catch (err) {
+          console.error('Failed to parse soccer data', err);
+          return [];
+        }
+      },
+    }),
+    getTennisData: builder.query({
+      query: () => ({
+        url: '/api/cricket',
+        params: { sportname: 'tennis' },
+      }),
+      transformResponse: (response) => {
+        try {
+          return JSON.parse(response?.data || '[]');
+        } catch (err) {
+          console.error('Failed to parse tennis data', err);
+          return [];
+        }
+      },
+    }),
+    getEventData: builder.query({
+      query: (eventId) => ({
+        url: '/api/event-detail',
+        params: { eventId },
+      }),
+      transformResponse: (response) => {
+        try {
+          // The API returns response.response as a JSON string
+          const parsedResponse = typeof response?.response === 'string' 
+            ? JSON.parse(response.response) 
+            : response?.response || response;
+          
+          if (parsedResponse?.success && Array.isArray(parsedResponse?.data)) {
+            return parsedResponse.data;
+          }
+          return [];
+        } catch (err) {
+          console.error('Failed to parse event data', err);
+          return [];
+        }
+      },
+    }),
+  }),
+});
+
+export const { 
+  useGetCricketDataQuery, 
+  useGetSoccerDataQuery, 
+  useGetTennisDataQuery,
+  useGetEventDataQuery 
+} = sportsApi;
