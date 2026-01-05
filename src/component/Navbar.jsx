@@ -1,6 +1,19 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 function Navbar() {
+  const [openDropdowns, setOpenDropdowns] = useState({
+    downlineList: false,
+    myReports: false,
+    banking: false,
+    commission: false
+  });
+
+  const handleDropdownToggle = (dropdownName, isOpen) => {
+    setOpenDropdowns(prev => ({
+      ...prev,
+      [dropdownName]: isOpen
+    }));
+  };
   return (
     <>
       <nav className="navbar navbar-expand-lg navbar">
@@ -27,14 +40,44 @@ function Navbar() {
               <li className="nav-item">
                 <a className="nav-link active" aria-current="page" href="/dashboard">Dashboard</a>
               </li>
-              <li className="nav-item">
-                <a className="nav-link" aria-current="page" href="/dashboard">In-Play</a>
+              <li
+                className={`nav-item dropdown ${openDropdowns.downlineList ? 'show' : ''}`}
+                onMouseEnter={() => handleDropdownToggle('downlineList', true)}
+                onMouseLeave={() => handleDropdownToggle('downlineList', false)}
+              >
+                <a
+                  className="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  aria-expanded={openDropdowns.downlineList}
+                >
+                  Downline List
+                </a>
+                <ul className={`dropdown-menu ${openDropdowns.downlineList ? 'show' : ''}`}>
+                  <li><a className="dropdown-item" href="#">User Downline List</a></li>
+                  <li><a className="dropdown-item" href="#">Master Downline List</a></li>
+                </ul>
               </li>
               <li className="nav-item">
                 <a className="nav-link" aria-current="page" href="/my-account">My Account</a>
               </li>
-              <li className="nav-item">
-                <a className="nav-link" aria-current="page" href="#">Greyhound Racing</a>
+              <li
+                className={`nav-item dropdown ${openDropdowns.myReports ? 'show' : ''}`}
+                onMouseEnter={() => handleDropdownToggle('myReports', true)}
+                onMouseLeave={() => handleDropdownToggle('myReports', false)}
+              >
+                <a
+                  className="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  aria-expanded={openDropdowns.myReports}
+                >
+                  My Reports
+                </a>
+                <ul className={`dropdown-menu ${openDropdowns.myReports ? 'show' : ''}`}>
+                  <li><a className="dropdown-item" href="#">User Profit/Loss Report</a></li>
+                  <li><a className="dropdown-item" href="#">Downline Profit/Loss Report</a></li>
+                </ul>
               </li>
               <li className="nav-item">
                 <a className="nav-link" aria-current="page" href="/betlist">Betlist</a>
@@ -42,11 +85,41 @@ function Navbar() {
               <li className="nav-item">
                 <a className="nav-link" aria-current="page" href="/market-analysis">Market Analysis</a>
               </li>
-              <li className="nav-item">
-                <a className="nav-link" aria-current="page" href="#">Live Casino</a>
+              <li
+                className={`nav-item dropdown ${openDropdowns.banking ? 'show' : ''}`}
+                onMouseEnter={() => handleDropdownToggle('banking', true)}
+                onMouseLeave={() => handleDropdownToggle('banking', false)}
+              >
+                <a
+                  className="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  aria-expanded={openDropdowns.banking}
+                >
+                  Banking
+                </a>
+                <ul className={`dropdown-menu ${openDropdowns.banking ? 'show' : ''}`}>
+                  <li><a className="dropdown-item" href="#">User banking</a></li>
+                  <li><a className="dropdown-item" href="#">Master Banking</a></li>
+                </ul>
               </li>
-              <li className="nav-item">
-                <a className="nav-link" aria-current="page" href="#">Tips & Reviews</a>
+              <li
+                className={`nav-item dropdown ${openDropdowns.commission ? 'show' : ''}`}
+                onMouseEnter={() => handleDropdownToggle('commission', true)}
+                onMouseLeave={() => handleDropdownToggle('commission', false)}
+              >
+                <a
+                  className="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  aria-expanded={openDropdowns.commission}
+                >
+                Commission
+                </a>
+                <ul className={`dropdown-menu ${openDropdowns.commission ? 'show' : ''}`}>
+                  <li><a className="dropdown-item" href="#">User Commission</a></li>
+                  <li><a className="dropdown-item" href="#">Agent Commission</a></li>
+                </ul>
               </li>
               <li className="nav-item">
                 <a className="nav-link" aria-current="page" href="/password-history">Password History</a>
@@ -57,9 +130,9 @@ function Navbar() {
 
             </ul>
             <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-                <li className="nav-item">
-                    <a className="nav-link" aria-current="page" href="/logout">Logout</a>
-                </li>
+              <li className="nav-item">
+                <a className="nav-link" aria-current="page" href="/logout">Logout</a>
+              </li>
             </ul>
           </div>
         </div>
