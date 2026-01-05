@@ -1,0 +1,161 @@
+.my-account-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.my-account-content {
+  display: flex;
+  min-height: calc(100vh - 120px);
+  gap: 20px;
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Left Sidebar */
+.account-sidebar {
+  width: 250px;
+  background-color: white;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.sidebar-header {
+  background: linear-gradient(-180deg, #14805e 0, #184438 100%);
+  color: white;
+  padding: 15px 20px;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.sidebar-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-nav-item {
+  padding: 15px 20px;
+  cursor: pointer;
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.2s ease;
+  color: #333;
+  font-size: 15px;
+}
+
+.sidebar-nav-item:hover {
+  background-color: #f8f9fa;
+}
+
+.sidebar-nav-item.active {
+  background-color: #e8f5e9;
+  color: #14805e;
+  font-weight: 600;
+}
+
+.sidebar-nav-item:last-child {
+  border-bottom: none;
+}
+
+/* Right Main Content */
+.account-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.account-details-header {
+  background: linear-gradient(-180deg, #14805e 0, #184438 100%);
+  color: white;
+  padding: 15px 20px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.account-details-panel {
+  background-color: white;
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.detail-row {
+  display: flex;
+  padding: 12px 0;
+  border-bottom: 1px solid #e9ecef;
+  align-items: center;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #333;
+  min-width: 200px;
+  font-size: 15px;
+}
+
+.detail-value {
+  color: #666;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.detail-icons {
+  display: inline-flex;
+  gap: 8px;
+  margin-left: 10px;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.icon-btn:hover {
+  transform: scale(1.1);
+}
+
+.icon-btn:active {
+  transform: scale(0.95);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .my-account-content {
+    flex-direction: column;
+    padding: 15px;
+  }
+
+  .account-sidebar {
+    width: 100%;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .detail-label {
+    min-width: auto;
+  }
+}
+

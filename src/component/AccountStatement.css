@@ -1,0 +1,268 @@
+.account-statement-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.statement-section {
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.statement-header {
+  background: linear-gradient(-180deg, #14805e 0, #184438 100%);
+  color: white;
+  padding: 15px 20px;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.statement-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 15px;
+  padding: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.select-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.filter-select {
+  padding: 8px 30px 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+  appearance: none;
+  min-width: 150px;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 10px;
+  color: #666;
+}
+
+.date-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.filter-date {
+  padding: 8px 30px 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 150px;
+}
+
+.date-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 14px;
+}
+
+.get-statement-btn {
+  background: linear-gradient(-180deg, #14805e 0, #184438 100%);
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  height: fit-content;
+}
+
+.get-statement-btn:hover {
+  opacity: 0.9;
+}
+
+.get-statement-btn:active {
+  opacity: 0.8;
+}
+
+.statement-table-container {
+  padding: 20px;
+}
+
+.table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.entries-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.entries-select {
+  padding: 5px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.search-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.search-input {
+  padding: 5px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 200px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.statement-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.statement-table thead {
+  background-color: #f8f9fa;
+}
+
+.statement-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.statement-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e9ecef;
+  color: #666;
+}
+
+.statement-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.sort-arrows {
+  font-size: 10px;
+  color: #999;
+  margin-left: 5px;
+}
+
+.no-data {
+  text-align: center;
+  padding: 30px !important;
+  color: #999;
+  font-style: italic;
+}
+
+.table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e9ecef;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #666;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-btn {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background-color: white;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #f8f9fa;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .statement-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .filter-select,
+  .filter-date {
+    width: 100%;
+  }
+
+  .get-statement-btn {
+    width: 100%;
+  }
+
+  .table-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .table-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+

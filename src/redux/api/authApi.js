@@ -1,7 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
+  // You can override this with VITE_API_BASE_URL, otherwise it falls back to the local backend
+  baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth?.access_token;
     if (token) {
@@ -16,17 +17,30 @@ export const authApi = createApi({
   baseQuery,
   tagTypes: ['Auth'],
   endpoints: (builder) => ({
+    login: builder.mutation({
+      query: ({ username, password }) => ({
+        url: '/auth/login',
+        method: 'POST',
+        body: { username, password },
+      }),
+    }),
     refreshToken: builder.mutation({
       query: (body) => ({
-        url: '/auth/refresh',
+        url: '/auth/refresh-token',
         method: 'POST',
-        body: { refresh_token: body.refreshCookie },
+        body: { refreshToken: body.refreshToken },
+      }),
+    }),
+    getActivityLogs: builder.query({
+      query: () => ({
+        url: '/auth/activity-logs',
+        method: 'GET',
       }),
     }),
   }),
 });
 
-export const { useRefreshTokenMutation } = authApi;
+export const { useRefreshTokenMutation, useLoginMutation, useGetActivityLogsQuery } = authApi;
 
 
 

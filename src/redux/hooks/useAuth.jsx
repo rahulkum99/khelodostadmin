@@ -11,18 +11,31 @@ export const useAuth = () => {
   useEffect(() => {
     let refreshTimeout;
     const refreshAccessToken = async () => {
-      const refreshCookie = Cookies.get("refresh_token");
-      if (!refreshCookie) {
+      const refreshTokenCookie = Cookies.get("refresh_token");
+      if (!refreshTokenCookie) {
         console.warn("No refresh token found in cookies. User might be logged out.");
         return;
       }
       try {
-        const data = await refreshToken({ refreshCookie }).unwrap();
+        const response = await refreshToken({ refreshToken: refreshTokenCookie }).unwrap();
 
-        // Update cookies and Redux state
-        Cookies.set("access_token", data.access, { secure: true, sameSite: "Lax", expires: 90 });
-        dispatch(setCredentials({ access_token: data.access, refresh_token: refreshCookie }));
-        const refreshInterval = 1 * 60 * 1000;
+        // Handle the new response structure: response.data contains accessToken and refreshToken
+        const { accessToken, refreshToken: newRefreshToken } = response.data;
+
+        // Update cookies and Redux state with new tokens
+        Cookies.set("access_token", accessToken, { secure: true, sameSite: "Lax", expires: 1 }); // Expires in 1 day
+        Cookies.set("refresh_token", newRefreshToken, { secure: true, sameSite: "Lax", expires: 90 }); // Expires in 90 days
+        
+        // Get current user from state to preserve it
+        const currentUser = Cookies.get("user") ? JSON.parse(Cookies.get("user")) : null;
+        dispatch(setCredentials({ 
+          access_token: accessToken, 
+          refresh_token: newRefreshToken,
+          user: currentUser 
+        }));
+        
+        // Refresh token every 15 minutes (900000 ms) - adjust based on token expiry
+        const refreshInterval = 15 * 60 * 1000;
         refreshTimeout = setTimeout(refreshAccessToken, refreshInterval);
       } catch (err) {
         console.error("Error refreshing token:", err);
@@ -30,6 +43,7 @@ export const useAuth = () => {
           dispatch(clearCredentials());
           Cookies.remove("access_token");
           Cookies.remove("refresh_token");
+          Cookies.remove("user");
         }
       }
     };

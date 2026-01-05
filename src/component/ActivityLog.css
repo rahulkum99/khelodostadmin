@@ -1,0 +1,96 @@
+.activity-log-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-log-section {
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.activity-log-header {
+  background: linear-gradient(-180deg, #14805e 0, #184438 100%);
+  color: white;
+  padding: 15px 20px;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.activity-log-table-container {
+  padding: 20px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.activity-log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.activity-log-table thead {
+  background-color: #f8f9fa;
+}
+
+.activity-log-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.activity-log-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e9ecef;
+  color: #666;
+}
+
+.activity-log-table tbody tr.even-row {
+  background-color: white;
+}
+
+.activity-log-table tbody tr.odd-row {
+  background-color: #f8f9fa;
+}
+
+.activity-log-table tbody tr:hover {
+  background-color: #e8f5e9;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status-badge.success {
+  color: #28a745;
+  background-color: #d4edda;
+}
+
+.no-data,
+.loading-data {
+  text-align: center;
+  padding: 30px !important;
+  color: #999;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .activity-log-table {
+    font-size: 12px;
+  }
+
+  .activity-log-table th,
+  .activity-log-table td {
+    padding: 8px;
+  }
+}
+

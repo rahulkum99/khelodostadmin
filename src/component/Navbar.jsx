@@ -54,8 +54,8 @@ function Navbar() {
                   Downline List
                 </a>
                 <ul className={`dropdown-menu ${openDropdowns.downlineList ? 'show' : ''}`}>
-                  <li><a className="dropdown-item" href="#">User Downline List</a></li>
-                  <li><a className="dropdown-item" href="#">Master Downline List</a></li>
+                  <li><a className="dropdown-item" href="/downline-userlist">User Downline List</a></li>
+                  <li><a className="dropdown-item" href="/downline-masterlist">Master Downline List</a></li>
                 </ul>
               </li>
               <li className="nav-item">
@@ -75,8 +75,8 @@ function Navbar() {
                   My Reports
                 </a>
                 <ul className={`dropdown-menu ${openDropdowns.myReports ? 'show' : ''}`}>
-                  <li><a className="dropdown-item" href="#">User Profit/Loss Report</a></li>
-                  <li><a className="dropdown-item" href="#">Downline Profit/Loss Report</a></li>
+                  <li><a className="dropdown-item" href="/report-event">User Profit/Loss Report</a></li>
+                  <li><a className="dropdown-item" href="/report-downline">Downline Profit/Loss Report</a></li>
                 </ul>
               </li>
               <li className="nav-item">
@@ -99,8 +99,8 @@ function Navbar() {
                   Banking
                 </a>
                 <ul className={`dropdown-menu ${openDropdowns.banking ? 'show' : ''}`}>
-                  <li><a className="dropdown-item" href="#">User banking</a></li>
-                  <li><a className="dropdown-item" href="#">Master Banking</a></li>
+                  <li><a className="dropdown-item" href="/banking-user">User banking</a></li>
+                  <li><a className="dropdown-item" href="/banking-master">Master Banking</a></li>
                 </ul>
               </li>
               <li
@@ -117,15 +117,15 @@ function Navbar() {
                 Commission
                 </a>
                 <ul className={`dropdown-menu ${openDropdowns.commission ? 'show' : ''}`}>
-                  <li><a className="dropdown-item" href="#">User Commission</a></li>
-                  <li><a className="dropdown-item" href="#">Agent Commission</a></li>
+                  <li><a className="dropdown-item" href="/commission-user">User Commission</a></li>
+                  <li><a className="dropdown-item" href="/commission-agent">Agent Commission</a></li>
                 </ul>
               </li>
               <li className="nav-item">
                 <a className="nav-link" aria-current="page" href="/password-history">Password History</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" aria-current="page" href="/restore-username">Restore User</a>
+                <a className="nav-link" aria-current="page" href="/restore-user">Restore User</a>
               </li>
 
             </ul>
