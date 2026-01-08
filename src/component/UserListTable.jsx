@@ -1,12 +1,42 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useGetUsersQuery } from '../redux/api/authApi'
+import { toast } from 'react-toastify'
 import './UserListTable.css'
+import AddUserModal from './AddUserModal'
 
 function UserListTable({ title = "User List" }) {
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
 
-  // Sample summary data
+  // Determine role based on title
+  const role = title.toLowerCase().includes('master') ? 'master' : 'user';
+
+  // Fetch users from API
+  const { data, isLoading, error, refetch } = useGetUsersQuery({ 
+    role, 
+    page: currentPage, 
+    limit: entriesPerPage 
+  });
+
+  // Extract users and pagination from API response
+  const users = data?.data?.users || [];
+  const pagination = data?.data?.pagination || { page: 1, limit: 10, total: 0, pages: 1 };
+
+  // Filter users based on search term (client-side filtering)
+  const filteredUsers = users.filter(user => {
+    if (!searchTerm) return true;
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      user.username?.toLowerCase().includes(searchLower) ||
+      user.name?.toLowerCase().includes(searchLower) ||
+      user.role?.toLowerCase().includes(searchLower) ||
+      (user.isActive ? 'active' : 'inactive').includes(searchLower)
+    );
+  });
+
+  // Calculate summary data (placeholder - might need separate API)
   const summaryData = {
     totalBalance: 4312,
     totalExposure: 0,
@@ -16,54 +46,38 @@ function UserListTable({ title = "User List" }) {
     uplinePL: 6562
   };
 
-  // Sample table data
-  const sampleData = [
-    {
-      id: 1,
-      username: 'demo2026',
-      userType: 'USER',
-      creditRef: 0.00,
-      balance: 1719,
-      exposure: 0,
-      exposureLimit: 2000000,
-      availBal: 1719,
-      refPL: 1719,
-      partnership: 100,
-      status: 'active'
-    },
-    {
-      id: 2,
-      username: 'dev2026',
-      userType: 'USER',
-      creditRef: 0.00,
-      balance: 1697,
-      exposure: 0,
-      exposureLimit: 2000000,
-      availBal: 1697,
-      refPL: 1697,
-      partnership: 100,
-      status: 'active'
-    }
-  ];
+  // Map API users to table format
+  const tableData = filteredUsers.map(user => ({
+    id: user._id || user.id,
+    username: user.username || '',
+    userType: user.role === 'master' ? 'MASTER' : 'USER',
+    creditRef: 0.00, // TODO: Get from separate API if available
+    balance: 0, // TODO: Get from separate API if available
+    exposure: 0, // TODO: Get from separate API if available
+    exposureLimit: user.exposureLimit || 0,
+    availBal: 0, // TODO: Calculate from balance - exposure
+    refPL: 0, // TODO: Get from separate API if available
+    partnership: user.commission || 0,
+    status: user.isActive ? 'active' : 'inactive',
+    userData: user // Store full user data for reference
+  }));
 
-  // Filter data based on search term
-  const filteredData = sampleData.filter(item => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      item.username.toLowerCase().includes(searchLower) ||
-      item.userType.toLowerCase().includes(searchLower) ||
-      item.status.toLowerCase().includes(searchLower)
-    );
-  });
+  // Pagination from API
+  const totalEntries = pagination.total || 0;
+  const totalPages = pagination.pages || 1;
+  const showingFrom = totalEntries > 0 ? ((currentPage - 1) * entriesPerPage) + 1 : 0;
+  const showingTo = Math.min(currentPage * entriesPerPage, totalEntries);
 
-  // Calculate pagination
-  const totalEntries = filteredData.length;
-  const totalPages = Math.ceil(totalEntries / entriesPerPage);
-  const startIndex = (currentPage - 1) * entriesPerPage;
-  const endIndex = startIndex + entriesPerPage;
-  const paginatedData = filteredData.slice(startIndex, endIndex);
-  const showingFrom = totalEntries > 0 ? startIndex + 1 : 0;
-  const showingTo = Math.min(endIndex, totalEntries);
+  // Refetch when page or limit changes
+  useEffect(() => {
+    refetch();
+  }, [currentPage, entriesPerPage, refetch]);
+
+  // Handle user creation success
+  const handleUserCreated = () => {
+    refetch();
+    toast.success('User created successfully');
+  };
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-IN').format(value);
@@ -73,10 +87,10 @@ function UserListTable({ title = "User List" }) {
     <div className="user-list-container">
       {/* Top Actions */}
       <div className="user-list-header-actions">
-        <button className="refresh-btn" title="Refresh">
+        <button className="refresh-btn" title="Refresh" onClick={() => refetch()}>
           <span>🔄</span>
         </button>
-        <button className="add-user-btn">
+        <button className="add-user-btn" onClick={() => setIsAddUserModalOpen(true)}>
           <span>👤</span>
           <span>Add User</span>
         </button>
@@ -115,14 +129,15 @@ function UserListTable({ title = "User List" }) {
         <div className="table-controls">
           <div className="entries-control">
             <label>Show</label>
-            <select 
-              className="entries-select"
-              value={entriesPerPage}
-              onChange={(e) => {
-                setEntriesPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-            >
+              <select 
+                className="entries-select"
+                value={entriesPerPage}
+                onChange={(e) => {
+                  setEntriesPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                disabled={isLoading}
+              >
               <option value={10}>10</option>
               <option value={25}>25</option>
               <option value={50}>50</option>
@@ -132,16 +147,17 @@ function UserListTable({ title = "User List" }) {
           </div>
           <div className="search-control">
             <label>Search:</label>
-            <input
-              type="text"
-              className="search-input"
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              placeholder=""
-            />
+                <input
+                  type="text"
+                  className="search-input"
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    // Don't reset page on search, just filter client-side
+                  }}
+                  placeholder="Search by username, name, or status..."
+                  disabled={isLoading}
+                />
           </div>
         </div>
 
@@ -162,12 +178,37 @@ function UserListTable({ title = "User List" }) {
               </tr>
             </thead>
             <tbody>
-              {paginatedData.length === 0 ? (
+              {isLoading ? (
                 <tr>
-                  <td colSpan="10" className="no-data">No data available</td>
+                  <td colSpan="10" className="no-data loading">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                      <span>🔄</span>
+                      <span>Loading users...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan="10" className="no-data">
+                    {error?.data?.message || 'Error loading users'}
+                  </td>
+                </tr>
+              ) : tableData.length === 0 ? (
+                <tr>
+                  <td colSpan="10" className="no-data">
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '48px' }}>📭</span>
+                      <div>
+                        <div style={{ fontWeight: 600, marginBottom: '4px' }}>No users found</div>
+                        <div style={{ fontSize: '13px', color: '#adb5bd' }}>
+                          {searchTerm ? 'Try adjusting your search' : 'Create your first user to get started'}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
                 </tr>
               ) : (
-                paginatedData.map((item) => (
+                tableData.map((item) => (
                   <tr key={item.id}>
                     <td>
                       <span className="user-badge">{item.userType}</span>
@@ -204,7 +245,7 @@ function UserListTable({ title = "User List" }) {
                         <button className="action-icon-btn" title="Settings">⚙️</button>
                         <button className="action-icon-btn" title="User">👤</button>
                         <button className="action-icon-btn" title="Balance">Ba</button>
-                        <button className="action-icon-btn" title="Delete">🗑️</button>
+                        <button className="action-icon-btn delete-btn" title="Delete">🗑️</button>
                       </div>
                     </td>
                   </tr>
@@ -221,14 +262,14 @@ function UserListTable({ title = "User List" }) {
           <div className="pagination-controls">
             <button 
               className="pagination-btn"
-              disabled={currentPage === 1}
+              disabled={currentPage === 1 || isLoading}
               onClick={() => setCurrentPage(1)}
             >
               First
             </button>
             <button 
               className="pagination-btn"
-              disabled={currentPage === 1}
+              disabled={currentPage === 1 || isLoading}
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
             >
               Previous
@@ -238,20 +279,21 @@ function UserListTable({ title = "User List" }) {
                 key={page}
                 className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
                 onClick={() => setCurrentPage(page)}
+                disabled={isLoading}
               >
                 {page}
               </button>
             ))}
             <button 
               className="pagination-btn"
-              disabled={currentPage === totalPages || totalPages === 0}
+              disabled={currentPage === totalPages || totalPages === 0 || isLoading}
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
             >
               Next
             </button>
             <button 
               className="pagination-btn"
-              disabled={currentPage === totalPages || totalPages === 0}
+              disabled={currentPage === totalPages || totalPages === 0 || isLoading}
               onClick={() => setCurrentPage(totalPages)}
             >
               Last
@@ -259,6 +301,12 @@ function UserListTable({ title = "User List" }) {
           </div>
         </div>
       </div>
+
+      <AddUserModal
+        isOpen={isAddUserModalOpen}
+        onClose={() => setIsAddUserModalOpen(false)}
+        onSubmit={handleUserCreated}
+      />
     </div>
   )
 }

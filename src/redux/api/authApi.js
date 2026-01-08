@@ -15,7 +15,7 @@ const baseQuery = fetchBaseQuery({
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery,
-  tagTypes: ['Auth'],
+  tagTypes: ['Auth', 'Users'],
   endpoints: (builder) => ({
     login: builder.mutation({
       query: ({ username, password }) => ({
@@ -37,10 +37,26 @@ export const authApi = createApi({
         method: 'GET',
       }),
     }),
+    createUser: builder.mutation({
+      query: (body) => ({
+        url: '/user/',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Users'],
+    }),
+    getUsers: builder.query({
+      query: ({ role = 'user', page = 1, limit = 10 } = {}) => ({
+        url: '/user/',
+        method: 'GET',
+        params: { role, page, limit },
+      }),
+      providesTags: ['Users'],
+    }),
   }),
 });
 
-export const { useRefreshTokenMutation, useLoginMutation, useGetActivityLogsQuery } = authApi;
+export const { useRefreshTokenMutation, useLoginMutation, useGetActivityLogsQuery, useCreateUserMutation, useGetUsersQuery } = authApi;
 
 
 
