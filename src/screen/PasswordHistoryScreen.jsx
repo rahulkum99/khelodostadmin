@@ -1,82 +1,113 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import Navbar from '../component/Navbar'
 import './PasswordHistoryScreen.css'
+import { useGetPasswordChangeHistoryQuery } from '../redux/api/authApi'
 
 function PasswordHistoryScreen() {
-  const [entriesPerPage, setEntriesPerPage] = useState(10);
+  const [entriesPerPage, setEntriesPerPage] = useState(20);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [expandedRows, setExpandedRows] = useState(new Set());
 
-  // Sample data - replace with API call
-  const sampleData = [
-    {
-      id: 1,
-      username: 'demo2026',
-      remarks: 'Password Changed By Self.',
-      dateTime: 'Dec 21, 2025, 2:15:18 PM'
-    },
-    {
-      id: 2,
-      username: 'demo2026',
-      remarks: 'User Password Changed By sixtynine1.',
-      dateTime: 'Dec 21, 2025, 1:54:15 PM'
-    },
-    {
-      id: 3,
-      username: 'demo2026',
-      remarks: 'Password Changed By Self.',
-      dateTime: 'Dec 19, 2025, 7:18:18 PM'
-    },
-    {
-      id: 4,
-      username: 'demo2026',
-      remarks: 'User Password Changed By sixtynine1.',
-      dateTime: 'Dec 19, 2025, 7:17:30 PM'
-    },
-    {
-      id: 5,
-      username: 'demo2026',
-      remarks: 'Password Changed By Self.',
-      dateTime: 'Nov 19, 2025, 11:32:56 AM'
-    },
-    {
-      id: 6,
-      username: 'dev2026',
-      remarks: 'Password Changed By Self.',
-      dateTime: 'Nov 19, 2025, 11:24:43 AM'
-    },
-    {
-      id: 7,
-      username: 'dev2026',
-      remarks: 'User Password Changed By sixtynine1.',
-      dateTime: 'Nov 19, 2025, 11:19:43 AM'
-    },
-    {
-      id: 8,
-      username: 'dev2026',
-      remarks: 'Password Changed By Self.',
-      dateTime: 'Oct 26, 2025, 5:40:55 PM'
-    }
-  ];
-
-  // Filter data based on search term
-  const filteredData = sampleData.filter(item => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      item.username.toLowerCase().includes(searchLower) ||
-      item.remarks.toLowerCase().includes(searchLower) ||
-      item.dateTime.toLowerCase().includes(searchLower)
-    );
+  // Fetch password change history from API
+  const { data, isLoading, error } = useGetPasswordChangeHistoryQuery({
+    page: currentPage,
+    limit: entriesPerPage,
   });
 
-  // Calculate pagination
-  const totalEntries = filteredData.length;
-  const totalPages = Math.ceil(totalEntries / entriesPerPage);
-  const startIndex = (currentPage - 1) * entriesPerPage;
-  const endIndex = startIndex + entriesPerPage;
-  const paginatedData = filteredData.slice(startIndex, endIndex);
-  const showingFrom = totalEntries > 0 ? startIndex + 1 : 0;
-  const showingTo = Math.min(endIndex, totalEntries);
+  // Format date to readable format
+  const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    const options = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    };
+    return date.toLocaleString('en-US', options);
+  };
+
+  // Format remarks based on changeType and changedBy
+  const formatRemarks = (changeType, changedBy) => {
+    if (changeType === 'self') {
+      return 'Password Changed By Self.';
+    }
+    if (changedBy?.username || changedBy?.name) {
+      return `User Password Changed By ${changedBy.username || changedBy.name}.`;
+    }
+    return 'Password Changed.';
+  };
+
+  // Transform API data to display format
+  const historyData = useMemo(() => {
+    if (!data?.data?.history) return [];
+    
+    return data.data.history.map((item) => ({
+      id: item.id || item._id,
+      username: item.changedBy?.username || item.changedBy?.name || '-',
+      remarks: formatRemarks(item.changeType, item.changedBy),
+      dateTime: formatDateTime(item.createdAt),
+      ipAddress: item.ipAddress || '-',
+      device: item.device || '-',
+      browser: item.browser || '-',
+      os: item.os || '-',
+      userAgent: item.userAgent || '-',
+      changeType: item.changeType || '-',
+      rawData: item // Keep raw data for search
+    }));
+  }, [data]);
+
+  // Toggle row expansion
+  const toggleRowExpansion = (id) => {
+    setExpandedRows(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  // Filter data based on search term
+  const filteredData = useMemo(() => {
+    if (!searchTerm) return historyData;
+    const searchLower = searchTerm.toLowerCase();
+    return historyData.filter(item => {
+      return (
+        item.username.toLowerCase().includes(searchLower) ||
+        item.remarks.toLowerCase().includes(searchLower) ||
+        item.dateTime.toLowerCase().includes(searchLower) ||
+        item.ipAddress.toLowerCase().includes(searchLower) ||
+        item.device.toLowerCase().includes(searchLower) ||
+        item.browser.toLowerCase().includes(searchLower) ||
+        item.os.toLowerCase().includes(searchLower) ||
+        item.userAgent.toLowerCase().includes(searchLower)
+      );
+    });
+  }, [historyData, searchTerm]);
+
+  // Get pagination info from API or calculate from filtered data
+  const pagination = data?.data?.pagination;
+  
+  // Use server-side pagination when no search, client-side when searching
+  const totalEntries = searchTerm ? filteredData.length : (pagination?.total ?? 0);
+  const totalPages = searchTerm 
+    ? Math.ceil(filteredData.length / entriesPerPage) 
+    : (pagination?.pages ?? 1);
+  
+  // For client-side pagination when using search, server-side otherwise
+  const paginatedData = searchTerm 
+    ? filteredData.slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage)
+    : filteredData;
+  
+  const showingFrom = totalEntries > 0 ? (currentPage - 1) * entriesPerPage + 1 : 0;
+  const showingTo = Math.min(currentPage * entriesPerPage, totalEntries);
 
   return (
     <div className="password-history-container">
@@ -97,6 +128,7 @@ function PasswordHistoryScreen() {
                   }}
                 >
                   <option value={10}>10</option>
+                  <option value={20}>20</option>
                   <option value={25}>25</option>
                   <option value={50}>50</option>
                   <option value={100}>100</option>
@@ -125,20 +157,82 @@ function PasswordHistoryScreen() {
                     <th>Username <span className="sort-arrows">▲▼</span></th>
                     <th>Remarks <span className="sort-arrows">▲▼</span></th>
                     <th>Date & Time <span className="sort-arrows">▲▼</span></th>
+                    <th>IP Address</th>
+                    <th>Device</th>
+                    <th>Browser</th>
+                    <th>OS</th>
+                    <th>Details</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedData.length === 0 ? (
+                  {isLoading ? (
                     <tr>
-                      <td colSpan="3" className="no-data">No data available</td>
+                      <td colSpan="8" className="no-data">Loading...</td>
+                    </tr>
+                  ) : error ? (
+                    <tr>
+                      <td colSpan="8" className="no-data">Error loading data. Please try again.</td>
+                    </tr>
+                  ) : paginatedData.length === 0 ? (
+                    <tr>
+                      <td colSpan="8" className="no-data">No data available</td>
                     </tr>
                   ) : (
                     paginatedData.map((item) => (
-                      <tr key={item.id}>
-                        <td>{item.username}</td>
-                        <td>{item.remarks}</td>
-                        <td>{item.dateTime}</td>
-                      </tr>
+                      <React.Fragment key={item.id}>
+                        <tr className={expandedRows.has(item.id) ? 'expanded' : ''}>
+                          <td>{item.username}</td>
+                          <td>{item.remarks}</td>
+                          <td>{item.dateTime}</td>
+                          <td>{item.ipAddress}</td>
+                          <td>{item.device}</td>
+                          <td>{item.browser}</td>
+                          <td>{item.os}</td>
+                          <td>
+                            <button
+                              className="details-toggle-btn"
+                              onClick={() => toggleRowExpansion(item.id)}
+                              title={expandedRows.has(item.id) ? 'Hide details' : 'Show details'}
+                            >
+                              {expandedRows.has(item.id) ? '▼' : '▶'}
+                            </button>
+                          </td>
+                        </tr>
+                        {expandedRows.has(item.id) && (
+                          <tr className="details-row">
+                            <td colSpan="8">
+                              <div className="details-content">
+                                <div className="details-grid">
+                                  <div className="detail-item">
+                                    <span className="detail-item-label">Change Type:</span>
+                                    <span className="detail-item-value">{item.changeType}</span>
+                                  </div>
+                                  <div className="detail-item">
+                                    <span className="detail-item-label">IP Address:</span>
+                                    <span className="detail-item-value">{item.ipAddress}</span>
+                                  </div>
+                                  <div className="detail-item">
+                                    <span className="detail-item-label">Device:</span>
+                                    <span className="detail-item-value">{item.device}</span>
+                                  </div>
+                                  <div className="detail-item">
+                                    <span className="detail-item-label">Browser:</span>
+                                    <span className="detail-item-value">{item.browser}</span>
+                                  </div>
+                                  <div className="detail-item">
+                                    <span className="detail-item-label">Operating System:</span>
+                                    <span className="detail-item-value">{item.os}</span>
+                                  </div>
+                                  <div className="detail-item full-width">
+                                    <span className="detail-item-label">User Agent:</span>
+                                    <span className="detail-item-value">{item.userAgent}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
                     ))
                   )}
                 </tbody>

@@ -12,10 +12,14 @@ import {
  * Hook to manage WebSocket connection for event detail data
  * @param {string} eventId - Event ID to subscribe to
  * @param {string} sport - Sport type: 'cricket', 'tennis', or 'soccer' (default: 'cricket')
- * @param {string} url - WebSocket URL (default: 'ws://localhost:5000')
+ * @param {string} url - WebSocket URL (defaults to VITE_WEBSOCKET_URL or 'ws://localhost:5000')
  * @returns {Object} - { data, isConnected, error, connectionStatus }
  */
-export const useEventDetailWebSocket = (eventId, sport = 'cricket', url = 'ws://localhost:5000') => {
+export const useEventDetailWebSocket = (
+  eventId,
+  sport = 'cricket',
+  url = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:5000'
+) => {
   const dispatch = useDispatch();
   const websocketState = useSelector((state) => state.websocket);
   const handlerRef = useRef(null);

@@ -1,8 +1,20 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
+// Normalize baseUrl to ensure it ends with /api
+const getBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (!envUrl) {
+    return 'http://localhost:5000/api';
+  }
+  // Remove trailing slash if present
+  const cleanUrl = envUrl.replace(/\/$/, '');
+  // Ensure it ends with /api
+  return cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+};
+
 const baseQuery = fetchBaseQuery({
   // You can override this with VITE_API_BASE_URL, otherwise it falls back to the local backend
-  baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+  baseUrl: getBaseUrl(),
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth?.access_token;
     if (token) {
@@ -53,10 +65,35 @@ export const authApi = createApi({
       }),
       providesTags: ['Users'],
     }),
+    getPasswordChangeHistory: builder.query({
+      query: ({ page = 1, limit = 20 } = {}) => ({
+        url: '/auth/password-change-history',
+        method: 'GET',
+        params: { page, limit },
+      }),
+    }),
+    changePassword: builder.mutation({
+      query: (body) => ({
+        url: '/auth/change-password',
+        method: 'PUT',
+        body: {
+          currentPassword: body.currentPassword,
+          newPassword: body.newPassword,
+        },
+      }),
+    }),
   }),
 });
 
-export const { useRefreshTokenMutation, useLoginMutation, useGetActivityLogsQuery, useCreateUserMutation, useGetUsersQuery } = authApi;
+export const { 
+  useRefreshTokenMutation, 
+  useLoginMutation, 
+  useGetActivityLogsQuery, 
+  useCreateUserMutation, 
+  useGetUsersQuery,
+  useGetPasswordChangeHistoryQuery,
+  useChangePasswordMutation 
+} = authApi;
 
 
 

@@ -24,14 +24,26 @@ const axiosBaseQuery =
     }
   };
 
+// Normalize baseUrl to ensure it ends with /api (same as authApi)
+const getSportsBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (!envUrl) {
+    return 'http://localhost:5000/api';
+  }
+  // Remove trailing slash if present
+  const cleanUrl = envUrl.replace(/\/$/, '');
+  // Ensure it ends with /api
+  return cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+};
+
 export const sportsApi = createApi({
   reducerPath: 'sportsApi',
-  // Use local proxy to avoid CORS in the browser
-  baseQuery: axiosBaseQuery({ baseUrl: '' }),
+  // Use API base URL from environment; fall back to relative proxy for dev
+  baseQuery: axiosBaseQuery({ baseUrl: getSportsBaseUrl() }),
   endpoints: (builder) => ({
     getCricketData: builder.query({
       query: () => ({
-        url: '/api/cricket',
+        url: '/cricket',
         params: { sportname: 'cricket' },
       }),
       transformResponse: (response) => {
@@ -45,7 +57,7 @@ export const sportsApi = createApi({
     }),
     getSoccerData: builder.query({
       query: () => ({
-        url: '/api/cricket',
+        url: '/cricket',
         params: { sportname: 'soccer' },
       }),
       transformResponse: (response) => {
@@ -59,7 +71,7 @@ export const sportsApi = createApi({
     }),
     getTennisData: builder.query({
       query: () => ({
-        url: '/api/cricket',
+        url: '/cricket',
         params: { sportname: 'tennis' },
       }),
       transformResponse: (response) => {
@@ -73,7 +85,7 @@ export const sportsApi = createApi({
     }),
     getEventData: builder.query({
       query: (eventId) => ({
-        url: '/api/event-detail',
+        url: '/event-detail',
         params: { eventId },
       }),
       transformResponse: (response) => {

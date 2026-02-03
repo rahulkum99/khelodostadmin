@@ -14,10 +14,13 @@ import {
 /**
  * Custom hook to manage WebSocket connections and data for sports
  * @param {Array<string>} sports - Array of sports to subscribe to: ['cricket', 'soccer', 'tennis'] or ['cricket_matches', 'soccer_matches', 'tennis_matches']
- * @param {string} url - WebSocket URL (default: 'ws://localhost:5000' or 'http://localhost:5000')
+ * @param {string} url - WebSocket URL (defaults to VITE_WEBSOCKET_URL or 'ws://localhost:5000')
  * @returns {Object} - { data, isConnected, error, connectionStatus }
  */
-export const useWebSocket = (sports = ['cricket', 'soccer', 'tennis'], url = 'ws://localhost:5000') => {
+export const useWebSocket = (
+  sports = ['cricket', 'soccer', 'tennis'],
+  url = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:5000'
+) => {
   const dispatch = useDispatch();
   const websocketState = useSelector((state) => state.websocket);
   const subscriptionsRef = useRef(new Set());
@@ -163,10 +166,13 @@ export const useWebSocket = (sports = ['cricket', 'soccer', 'tennis'], url = 'ws
 /**
  * Hook to get WebSocket data for a specific sport
  * @param {string} sport - 'cricket', 'soccer', or 'tennis'
- * @param {string} url - WebSocket URL
+ * @param {string} url - WebSocket URL (defaults to VITE_WEBSOCKET_URL or 'ws://localhost:5000')
  * @returns {Array} - Array of sport data
  */
-export const useWebSocketSport = (sport, url = 'ws://localhost:5000') => {
+export const useWebSocketSport = (
+  sport,
+  url = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:5000'
+) => {
   const { cricketData, soccerData, tennisData, isConnected, connectionStatus } = useWebSocket([sport], url);
   
   const dataMap = {
