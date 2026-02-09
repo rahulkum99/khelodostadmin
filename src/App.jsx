@@ -22,6 +22,7 @@ import DownloadMasterlistScreen from "./screen/DownloadMasterlistScreen";
 import DownloadUserlistScreen from "./screen/DownloadUserlistScreen";
 import MarketAnalysisScreen from "./screen/MarketAnalysisScreen";
 import BetlistScreen from "./screen/BetlistScreen";
+import WalletHistoryScreen from "./screen/WalletHistoryScreen";
 
 function App() {
   useAuth();
@@ -34,6 +35,7 @@ function App() {
     { path: "/dashboard", component: <DashboardScreen/> },
     { path: "/my-account", component: <MyAccountScreen/> },
     { path: "/password-history", component: <PasswordHistoryScreen/> },
+    { path: "/wallet-history", component: <WalletHistoryScreen/> },
     { path: "/report-event", component: <ReportEventScreen/> },
     { path: "/report-downline", component: <ReportDownlineScreen/> },
     { path: "/restore-user", component: <RestoreUserScreen/> },

@@ -132,6 +132,8 @@ function AddUserModal({ isOpen, onClose, onSubmit }) {
       name: formData.name || formData.username,
       password: formData.password,
       commission: parseFloat(formData.commission) || 0,
+      // Opening balance: use form value if provided, otherwise default to 100
+      openingBalance: parseFloat(formData.openingBalance) || 100,
       rollingCommission: rollingCommissionObj,
       agentRollingCommission: agentRollingCommission,
       currency: 'INR',

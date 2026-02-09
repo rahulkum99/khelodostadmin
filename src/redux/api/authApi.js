@@ -27,7 +27,7 @@ const baseQuery = fetchBaseQuery({
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery,
-  tagTypes: ['Auth', 'Users'],
+  tagTypes: ['Auth', 'Users', 'Wallet'],
   endpoints: (builder) => ({
     login: builder.mutation({
       query: ({ username, password }) => ({
@@ -82,6 +82,39 @@ export const authApi = createApi({
         },
       }),
     }),
+    getWalletBalance: builder.query({
+      query: () => ({
+        url: '/wallet/me/balance',
+        method: 'GET',
+      }),
+      providesTags: ['Wallet'],
+    }),
+    getWalletDetails: builder.query({
+      query: () => ({
+        url: '/wallet/me',
+        method: 'GET',
+      }),
+      providesTags: ['Wallet'],
+    }),
+    getWalletTransactions: builder.query({
+      query: ({ page = 1, limit = 20 } = {}) => ({
+        url: '/wallet/me/transactions',
+        method: 'GET',
+        params: { page, limit },
+      }),
+      providesTags: ['Wallet'],
+    }),
+    addAmountToWallet: builder.mutation({
+      query: (body) => ({
+        url: '/wallet/add',
+        method: 'POST',
+        body: {
+          amount: body.amount,
+          ...(body.description && { description: body.description }),
+        },
+      }),
+      invalidatesTags: ['Wallet'],
+    }),
   }),
 });
 
@@ -92,7 +125,11 @@ export const {
   useCreateUserMutation, 
   useGetUsersQuery,
   useGetPasswordChangeHistoryQuery,
-  useChangePasswordMutation 
+  useChangePasswordMutation,
+  useGetWalletBalanceQuery,
+  useGetWalletDetailsQuery,
+  useGetWalletTransactionsQuery,
+  useAddAmountToWalletMutation 
 } = authApi;
 
 

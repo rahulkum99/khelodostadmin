@@ -1,0 +1,278 @@
+/* Top bar - dark green, logo left / user info right */
+.navbar-top {
+  background-color: #1e5e4e;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.navbar-top .navbar-brand {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+}
+
+.navbar-top .navbar-brand img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Stylized text logo (yellow/orange gradient) - use when no image */
+.navbar-top .navbar-brand-logo-text {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 28px;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #f4d03f 0%, #f5b041 40%, #e67e22 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* User section - right side */
+.navbar-top .navbar-user-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.navbar-top .user-pill {
+  background-color: #2d2d2d;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.navbar-top .user-username {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.navbar-top .user-balance {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.navbar-top .user-add-balance-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+  background-color: #2d2d2d;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.navbar-top .user-add-balance-btn:hover {
+  background-color: #3d3d3d;
+  transform: scale(1.02);
+}
+
+.navbar-top .user-refresh-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background-color: #2d2d2d;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.navbar-top .user-refresh-btn:hover {
+  background-color: #3d3d3d;
+  transform: scale(1.05);
+}
+
+.navbar-top .user-refresh-btn:active {
+  transform: scale(0.98);
+}
+
+/* Refresh icon (simple circular arrow) */
+.navbar-top .user-refresh-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Links bar - keep existing look, optional tweaks */
+.navbar-top + .navbarlink {
+  border-top: none;
+}
+
+/* Add Balance Modal */
+.add-balance-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.add-balance-modal {
+  background: #fff;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 440px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.add-balance-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e9ecef;
+  background: linear-gradient(-180deg, #14805e 0, #184438 100%);
+  color: #fff;
+  border-radius: 8px 8px 0 0;
+}
+
+.add-balance-modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.add-balance-modal-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.add-balance-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.add-balance-modal-form {
+  padding: 20px;
+}
+
+.add-balance-form-group {
+  margin-bottom: 16px;
+}
+
+.add-balance-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.add-balance-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.add-balance-input:focus {
+  outline: none;
+  border-color: #14805e;
+  box-shadow: 0 0 0 2px rgba(20, 128, 94, 0.15);
+}
+
+.add-balance-textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.add-balance-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
+}
+
+.add-balance-btn-cancel,
+.add-balance-btn-submit {
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.add-balance-btn-cancel {
+  background: #f1f3f4;
+  color: #333;
+}
+
+.add-balance-btn-cancel:hover {
+  background: #e8eaed;
+}
+
+.add-balance-btn-submit {
+  background: linear-gradient(-180deg, #14805e 0, #184438 100%);
+  color: #fff;
+}
+
+.add-balance-btn-submit:hover:not(:disabled) {
+  opacity: 0.95;
+}
+
+.add-balance-btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .navbar-top {
+    padding: 0 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .navbar-top .navbar-user-section {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .navbar-top .user-username,
+  .navbar-top .user-balance {
+    font-size: 12px;
+  }
+
+  .navbar-top .navbar-brand-logo-text {
+    font-size: 22px;
+  }
+
+  .add-balance-modal {
+    width: 95%;
+    margin: 16px;
+  }
+}
