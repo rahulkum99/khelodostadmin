@@ -1,0 +1,289 @@
+ .report-event-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.report-event-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.report-filter-section {
+  background-color: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.report-filter-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.select-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.filter-select {
+  padding: 6px 32px 6px 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  min-width: 140px;
+  appearance: none;
+  background-color: #fff;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  pointer-events: none;
+  color: #666;
+}
+
+.datetime-wrapper {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-date,
+.filter-time {
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.report-get-btn {
+  padding: 8px 18px;
+  border-radius: 4px;
+  border: none;
+  background: linear-gradient(-180deg, #14805e 0, #184438 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.report-get-btn:hover {
+  opacity: 0.9;
+}
+
+.report-table-section {
+  background-color: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.report-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: linear-gradient(-180deg, #14805e 0, #184438 100%);
+  color: #fff;
+}
+
+.report-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.download-btn {
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: none;
+  background-color: #1e7e34;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.download-btn:hover {
+  background-color: #19692c;
+}
+
+.report-table-container {
+  padding: 18px 20px 16px;
+}
+
+.report-table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.entries-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.entries-select {
+  padding: 5px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.search-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.search-input {
+  padding: 5px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 200px;
+}
+
+.report-table-wrapper {
+  overflow-x: auto;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.report-table thead {
+  background-color: #f8f9fa;
+}
+
+.report-table th,
+.report-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e9ecef;
+  text-align: left;
+}
+
+.report-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.sport-link {
+  color: #007bff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.sport-link:hover {
+  text-decoration: underline;
+}
+
+.pl-positive {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.pl-negative {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.total-row {
+  background-color: #fffbe6;
+  font-weight: 600;
+}
+
+.no-data {
+  text-align: center;
+  padding: 30px !important;
+  color: #999;
+  font-style: italic;
+}
+
+.report-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e9ecef;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #666;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pagination-btn {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background-color: #ffffff;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 40px;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #f8f9fa;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .report-event-content {
+    padding: 15px;
+  }
+
+  .report-filter-row {
+    align-items: flex-start;
+  }
+
+  .search-input {
+    min-width: 140px;
+  }
+
+  .report-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+

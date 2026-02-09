@@ -3,12 +3,21 @@ import { useGetUsersQuery } from '../redux/api/authApi'
 import { toast } from 'react-toastify'
 import './UserListTable.css'
 import AddUserModal from './AddUserModal'
+import BankingModal from './BankingModal'
+import StatusModal from './StatusModal'
+import SportsSettingsModal from './SportsSettingsModal'
 
 function UserListTable({ title = "User List" }) {
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [isBankingModalOpen, setIsBankingModalOpen] = useState(false);
+  const [selectedBankingUser, setSelectedBankingUser] = useState(null);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [selectedStatusUser, setSelectedStatusUser] = useState(null);
+  const [isSportsModalOpen, setIsSportsModalOpen] = useState(false);
+  const [sportsState, setSportsState] = useState({}); // per-user sports config later
 
   // Determine role based on title
   const role = title.toLowerCase().includes('master') ? 'master' : 'user';
@@ -77,6 +86,41 @@ function UserListTable({ title = "User List" }) {
   const handleUserCreated = () => {
     refetch();
     toast.success('User created successfully');
+  };
+
+  const handleOpenBanking = (userRow) => {
+    setSelectedBankingUser(userRow);
+    setIsBankingModalOpen(true);
+  };
+
+  const handleSubmitBanking = (payload) => {
+    // TODO: wire to actual banking API
+    console.log('Banking submit:', payload);
+    setIsBankingModalOpen(false);
+    setSelectedBankingUser(null);
+  };
+
+  const handleOpenStatus = (userRow) => {
+    setSelectedStatusUser(userRow);
+    setIsStatusModalOpen(true);
+  };
+
+  const handleSubmitStatus = (payload) => {
+    // TODO: wire to actual status-change API
+    console.log('Status change submit:', payload);
+    setIsStatusModalOpen(false);
+    setSelectedStatusUser(null);
+  };
+
+  const handleOpenSports = () => {
+    setIsSportsModalOpen(true);
+  };
+
+  const handleToggleSport = (name, enabled) => {
+    setSportsState((prev) => ({
+      ...prev,
+      [name]: enabled,
+    }));
   };
 
   const formatCurrency = (value) => {
@@ -239,12 +283,44 @@ function UserListTable({ title = "User List" }) {
                     </td>
                     <td>
                       <div className="actions-group">
-                        <button className="action-icon-btn" title="Banking">💰</button>
+                        <button
+                          className="action-icon-btn"
+                          title="Banking"
+                          onClick={() =>
+                            handleOpenBanking({
+                              id: item.id,
+                              username: item.username,
+                              userType: item.userType,
+                              balance: item.balance,
+                            })
+                          }
+                        >
+                          💰
+                        </button>
                         <button className="action-icon-btn" title="Transfer">↕️</button>
                         <button className="action-icon-btn" title="More">☰</button>
-                        <button className="action-icon-btn" title="Settings">⚙️</button>
+                        <button
+                          className="action-icon-btn"
+                          title="Settings"
+                          onClick={() =>
+                            handleOpenStatus({
+                              id: item.id,
+                              username: item.username,
+                              userType: item.userType,
+                              status: item.status,
+                            })
+                          }
+                        >
+                          ⚙️
+                        </button>
                         <button className="action-icon-btn" title="User">👤</button>
-                        <button className="action-icon-btn" title="Balance">Ba</button>
+                        <button
+                          className="action-icon-btn"
+                          title="Balance"
+                          onClick={handleOpenSports}
+                        >
+                          Ba
+                        </button>
                         <button className="action-icon-btn delete-btn" title="Delete">🗑️</button>
                       </div>
                     </td>
@@ -306,6 +382,34 @@ function UserListTable({ title = "User List" }) {
         isOpen={isAddUserModalOpen}
         onClose={() => setIsAddUserModalOpen(false)}
         onSubmit={handleUserCreated}
+      />
+
+      <BankingModal
+        isOpen={isBankingModalOpen}
+        onClose={() => {
+          setIsBankingModalOpen(false)
+          setSelectedBankingUser(null)
+        }}
+        user={selectedBankingUser}
+        masterBalance={summaryData.balance}
+        onSubmit={handleSubmitBanking}
+      />
+
+      <StatusModal
+        isOpen={isStatusModalOpen}
+        onClose={() => {
+          setIsStatusModalOpen(false)
+          setSelectedStatusUser(null)
+        }}
+        user={selectedStatusUser}
+        onSubmit={handleSubmitStatus}
+      />
+
+      <SportsSettingsModal
+        isOpen={isSportsModalOpen}
+        onClose={() => setIsSportsModalOpen(false)}
+        activeSports={sportsState}
+        onToggle={handleToggleSport}
       />
     </div>
   )

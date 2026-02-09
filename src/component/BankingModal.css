@@ -1,0 +1,133 @@
+.banking-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.banking-modal {
+  width: 420px;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  font-size: 14px;
+}
+
+.banking-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(-180deg, #005792 0, #003f6b 100%);
+  color: #fff;
+  padding: 10px 14px;
+}
+
+.banking-modal-title {
+  font-weight: 600;
+}
+
+.banking-modal-close {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.banking-modal-user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.banking-user-badge {
+  background-color: #28a745;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.banking-user-name {
+  font-weight: 600;
+  margin-left: 8px;
+  flex: 1;
+}
+
+.banking-client-balance {
+  font-size: 13px;
+}
+
+.banking-client-balance span {
+  font-weight: 600;
+}
+
+.banking-modal-body {
+  padding: 12px 16px 4px;
+}
+
+.banking-form-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.banking-form-group label {
+  width: 120px;
+  font-size: 13px;
+}
+
+.banking-input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.banking-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 16px 12px;
+}
+
+.banking-action-btn {
+  min-width: 90px;
+  padding: 6px 12px;
+  border-radius: 3px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.banking-action-btn.deposit {
+  background-color: #7ed492;
+  color: #0b3d1c;
+}
+
+.banking-action-btn.withdraw {
+  background-color: #f48a8a;
+  color: #5a1515;
+}
+
+.banking-action-btn:hover {
+  filter: brightness(0.95);
+}
+
+@media (max-width: 480px) {
+  .banking-modal {
+    width: 95%;
+  }
+}
+
