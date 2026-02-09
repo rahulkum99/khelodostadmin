@@ -27,7 +27,7 @@ const baseQuery = fetchBaseQuery({
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery,
-  tagTypes: ['Auth', 'Users', 'Wallet'],
+  tagTypes: ['Auth', 'Users', 'Wallet', 'Bets'],
   endpoints: (builder) => ({
     login: builder.mutation({
       query: ({ username, password }) => ({
@@ -115,6 +115,14 @@ export const authApi = createApi({
       }),
       invalidatesTags: ['Wallet'],
     }),
+    getAdminBetList: builder.query({
+      query: ({ page = 1, limit = 10 } = {}) => ({
+        url: '/bets/admin/bet-list',
+        method: 'GET',
+        params: { page, limit },
+      }),
+      providesTags: ['Bets'],
+    }),
   }),
 });
 
@@ -129,7 +137,8 @@ export const {
   useGetWalletBalanceQuery,
   useGetWalletDetailsQuery,
   useGetWalletTransactionsQuery,
-  useAddAmountToWalletMutation 
+  useAddAmountToWalletMutation,
+  useGetAdminBetListQuery 
 } = authApi;
 
 

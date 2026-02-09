@@ -1,0 +1,228 @@
+.betlist-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.betlist-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.betlist-filter-section {
+  background-color: #f5f5f5;
+  border: 1px solid #d3d3d3;
+  border-radius: 4px;
+  padding: 14px 20px;
+  margin-bottom: 18px;
+}
+
+.betlist-filter-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+}
+
+.filter-select,
+.filter-date {
+  padding: 6px 10px;
+  border: 1px solid #c2c2c2;
+  border-radius: 3px;
+  font-size: 13px;
+  min-width: 150px;
+  background-color: #ffffff;
+}
+
+.betlist-get-btn {
+  background-color: #006699;
+  color: #ffffff;
+  border: 1px solid #004d73;
+  padding: 8px 18px;
+  border-radius: 3px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.betlist-get-btn:hover {
+  background-color: #005683;
+}
+
+.betlist-table-section {
+  background-color: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.betlist-header-bar {
+  background-color: #003b5c;
+  color: #ffffff;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.betlist-table-container {
+  padding: 16px;
+}
+
+.betlist-table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.entries-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.entries-select {
+  padding: 4px 8px;
+  border: 1px solid #c2c2c2;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.search-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.search-input {
+  padding: 4px 8px;
+  border: 1px solid #c2c2c2;
+  border-radius: 3px;
+  font-size: 13px;
+  min-width: 180px;
+}
+
+.betlist-table-wrapper {
+  overflow-x: auto;
+}
+
+.betlist-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.betlist-table thead {
+  background-color: #e5e5e5;
+}
+
+.betlist-table th,
+.betlist-table td {
+  padding: 8px 10px;
+  border: 1px solid #d4d4d4;
+  text-align: left;
+}
+
+.betlist-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.betlist-table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.betlist-link {
+  color: #006699;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.bet-type {
+  font-weight: 700;
+}
+
+.bet-type.lay {
+  color: #cc0000;
+}
+
+.bet-type.back {
+  color: #0066cc;
+}
+
+.betlist-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e0e0e0;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: #555;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pagination-btn {
+  padding: 4px 10px;
+  border: 1px solid #c2c2c2;
+  background-color: #ffffff;
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #f1f1f1;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .betlist-content {
+    padding: 15px;
+  }
+
+  .betlist-filter-row {
+    align-items: flex-start;
+  }
+
+  .search-input {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .betlist-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
