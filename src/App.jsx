@@ -20,6 +20,7 @@ import CommissionAgentScreen from "./screen/CommissionAgentScreen";
 import CommissionUserScreen from "./screen/CommissionUserScreen";
 import DownloadMasterlistScreen from "./screen/DownloadMasterlistScreen";
 import DownloadUserlistScreen from "./screen/DownloadUserlistScreen";
+import UserDetailScreen from "./screen/UserDetailScreen";
 import MarketAnalysisScreen from "./screen/MarketAnalysisScreen";
 import BetlistScreen from "./screen/BetlistScreen";
 import WalletHistoryScreen from "./screen/WalletHistoryScreen";
@@ -45,6 +46,7 @@ function App() {
     { path: "/commission-user", component: <CommissionUserScreen/> },
     { path: "/downline-masterlist", component: <DownloadMasterlistScreen/> },
     { path: "/downline-userlist", component: <DownloadUserlistScreen/> },
+    { path: "/user-detail/:userId", component: <UserDetailScreen/> },
     { path: "/market-analysis", component: <MarketAnalysisScreen/> },
     { path: "/betlist", component: <BetlistScreen/> },
   ];

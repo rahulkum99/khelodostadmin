@@ -49,6 +49,18 @@ export const authApi = createApi({
         method: 'GET',
       }),
     }),
+    getUserActivityLogs: builder.query({
+      query: ({ userId, page = 1, limit = 20, activityType } = {}) => ({
+        url: '/auth/activity-logs/user',
+        method: 'GET',
+        params: {
+          userId,
+          page,
+          limit,
+          ...(activityType ? { activityType } : {}),
+        },
+      }),
+    }),
     createUser: builder.mutation({
       query: (body) => ({
         url: '/user/',
@@ -104,6 +116,14 @@ export const authApi = createApi({
       }),
       providesTags: ['Wallet'],
     }),
+    getWalletTransactionsByUserId: builder.query({
+      query: ({ userId, page = 1, limit = 20 }) => ({
+        url: `/wallet/${userId}/transactions`,
+        method: 'GET',
+        params: { page, limit },
+      }),
+      providesTags: (result, error, { userId }) => [{ type: 'Wallet', id: userId }],
+    }),
     addAmountToWallet: builder.mutation({
       query: (body) => ({
         url: '/wallet/add',
@@ -123,22 +143,33 @@ export const authApi = createApi({
       }),
       providesTags: ['Bets'],
     }),
+    getUserBets: builder.query({
+      query: ({ userId, page = 1, limit = 10 } = {}) => ({
+        url: `/bets/admin/users/${userId}/bets`,
+        method: 'GET',
+        params: { page, limit },
+      }),
+      providesTags: (result, error, { userId }) => [{ type: 'Bets', id: userId }],
+    }),
   }),
 });
 
-export const { 
-  useRefreshTokenMutation, 
-  useLoginMutation, 
-  useGetActivityLogsQuery, 
-  useCreateUserMutation, 
+export const {
+  useRefreshTokenMutation,
+  useLoginMutation,
+  useGetActivityLogsQuery,
+  useGetUserActivityLogsQuery,
+  useCreateUserMutation,
   useGetUsersQuery,
   useGetPasswordChangeHistoryQuery,
   useChangePasswordMutation,
   useGetWalletBalanceQuery,
   useGetWalletDetailsQuery,
   useGetWalletTransactionsQuery,
+  useGetWalletTransactionsByUserIdQuery,
   useAddAmountToWalletMutation,
-  useGetAdminBetListQuery 
+  useGetAdminBetListQuery,
+  useGetUserBetsQuery,
 } = authApi;
 
 

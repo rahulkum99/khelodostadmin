@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useGetUsersQuery } from '../redux/api/authApi'
 import { toast } from 'react-toastify'
 import './UserListTable.css'
@@ -8,6 +9,7 @@ import StatusModal from './StatusModal'
 import SportsSettingsModal from './SportsSettingsModal'
 
 function UserListTable({ title = "User List" }) {
+  const navigate = useNavigate();
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -313,7 +315,17 @@ function UserListTable({ title = "User List" }) {
                         >
                           ⚙️
                         </button>
-                        <button className="action-icon-btn" title="User">👤</button>
+                        <button
+                          className="action-icon-btn"
+                          title="User"
+                          onClick={() =>
+                            navigate(`/user-detail/${item.id}`, {
+                              state: { user: item.userData },
+                            })
+                          }
+                        >
+                          👤
+                        </button>
                         <button
                           className="action-icon-btn"
                           title="Balance"

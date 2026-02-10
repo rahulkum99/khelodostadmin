@@ -1,25 +1,28 @@
 import React, { useMemo, useState } from 'react'
 import './AccountStatement.css'
-import { useGetWalletTransactionsQuery } from '../redux/api/authApi'
+import { useGetWalletTransactionsQuery, useGetWalletTransactionsByUserIdQuery } from '../redux/api/authApi'
 
-function AccountStatement() {
+function AccountStatement({ userId = null }) {
   const [dataSource, setDataSource] = useState('');
-  // Start with no date filters so all data shows
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const {
-    data,
-    isLoading,
-    isError,
-    refetch,
-  } = useGetWalletTransactionsQuery({
-    page: currentPage,
-    limit: entriesPerPage,
-  });
+  const meQuery = useGetWalletTransactionsQuery(
+    { page: currentPage, limit: entriesPerPage },
+    { skip: !!userId }
+  );
+  const userQuery = useGetWalletTransactionsByUserIdQuery(
+    { userId, page: currentPage, limit: entriesPerPage },
+    { skip: !userId }
+  );
+
+  const data = userId ? userQuery.data : meQuery.data;
+  const isLoading = userId ? userQuery.isLoading : meQuery.isLoading;
+  const isError = userId ? userQuery.isError : meQuery.isError;
+  const refetch = userId ? userQuery.refetch : meQuery.refetch;
 
   const handleGetStatement = () => {
     // Reset to first page and refetch with current filters
