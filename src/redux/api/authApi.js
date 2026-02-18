@@ -151,6 +151,31 @@ export const authApi = createApi({
       }),
       providesTags: (result, error, { userId }) => [{ type: 'Bets', id: userId }],
     }),
+    getUserProfitLoss: builder.query({
+      query: ({ userId, sport } = {}) => ({
+        url: '/bets/admin/user-profit-loss',
+        method: 'GET',
+        params: {
+          userId,
+          ...(sport ? { sport } : {}),
+        },
+      }),
+      providesTags: (result, error, { userId }) => [{ type: 'Bets', id: `profit-loss-${userId}` }],
+    }),
+    getUserEventProfitLoss: builder.query({
+      query: ({ userId, eventId, by } = {}) => ({
+        url: '/bets/admin/user-event-profit-loss',
+        method: 'GET',
+        params: {
+          userId,
+          eventId,
+          ...(by ? { by } : {}),
+        },
+      }),
+      providesTags: (result, error, { userId, eventId }) => [
+        { type: 'Bets', id: `event-pl-${userId}-${eventId}` },
+      ],
+    }),
   }),
 });
 
@@ -170,6 +195,8 @@ export const {
   useAddAmountToWalletMutation,
   useGetAdminBetListQuery,
   useGetUserBetsQuery,
+  useGetUserProfitLossQuery,
+  useGetUserEventProfitLossQuery,
 } = authApi;
 
 

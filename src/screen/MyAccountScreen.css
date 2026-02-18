@@ -12,6 +12,11 @@
   margin: 0 auto;
 }
 
+.my-account-content.full-width {
+  max-width: none;
+  margin: 0;
+}
+
 /* Left Sidebar */
 .account-sidebar {
   width: 250px;

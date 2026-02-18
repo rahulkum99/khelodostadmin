@@ -9,6 +9,17 @@
   padding: 20px;
 }
 
+.report-event-content.full-width {
+  max-width: none;
+  margin: 0;
+  width: 100%;
+}
+
+.report-filter-section,
+.report-table-section {
+  width: 100%;
+}
+
 .report-filter-section {
   background-color: #ffffff;
   border-radius: 4px;
