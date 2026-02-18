@@ -191,6 +191,11 @@
   font-size: 14px;
 }
 
+.table-nowrap th,
+.table-nowrap td {
+  white-space: nowrap;
+}
+
 .report-table thead {
   background-color: #f8f9fa;
 }

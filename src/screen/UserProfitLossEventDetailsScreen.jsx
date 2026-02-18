@@ -143,7 +143,7 @@ function UserProfitLossEventDetailsScreen() {
             </div>
 
             <div className="report-table-wrapper">
-              <table className="report-table">
+              <table className="report-table table-nowrap">
                 <thead>
                   <tr>
                     <th>Sport Name</th>
