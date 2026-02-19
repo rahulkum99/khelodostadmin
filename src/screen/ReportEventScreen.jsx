@@ -101,6 +101,45 @@ function ReportEventScreen() {
   const showingFrom = totalEntries > 0 ? (currentPage - 1) * entriesPerPage + 1 : 0
   const showingTo = Math.min(currentPage * entriesPerPage, totalEntries)
 
+  const handleDownloadXls = () => {
+    if (!filteredRows || filteredRows.length === 0) return
+
+    const headers = [
+      'Sport Name',
+      'Upline Profit/Loss',
+      'Downline Profit/Loss',
+      'Commission',
+    ]
+
+    const rows = filteredRows.map((row) => [
+      row.sportName ?? '',
+      row.uplineProfitLoss ?? 0,
+      row.downlineProfitLoss ?? 0,
+      row.commission ?? 0,
+    ])
+
+    const escapeCell = (value) => {
+      const str = String(value ?? '')
+      return `"${str.replace(/"/g, '""')}"`
+    }
+
+    const csvContent = [
+      headers.map(escapeCell).join(','),
+      ...rows.map((row) => row.map(escapeCell).join(',')),
+    ].join('\n')
+
+    const blob = new Blob([csvContent], {
+      type: 'application/vnd.ms-excel;charset=utf-8;',
+    })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'profit-loss-summary-by-sport.xls'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
   const handleGetPL = () => {
     setCurrentPage(1)
   }
@@ -185,7 +224,7 @@ function ReportEventScreen() {
         <div className="report-table-section">
           <div className="report-table-header">
             <div className="report-title">Profit Loss</div>
-            <button className="download-btn">
+            <button className="download-btn" onClick={handleDownloadXls}>
               Download XLS
             </button>
           </div>
