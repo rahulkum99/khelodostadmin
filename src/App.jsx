@@ -13,6 +13,9 @@ import MyAccountScreen from "./screen/MyAccountScreen";
 import PasswordHistoryScreen from "./screen/PasswordHistoryScreen";
 import ReportEventScreen from "./screen/ReportEventScreen";
 import ReportDownlineScreen from "./screen/ReportDownlineScreen";
+import ReportEventSportEventsScreen from "./screen/ReportEventSportEventsScreen";
+import ReportEventMarketsScreen from "./screen/ReportEventMarketsScreen";
+import ReportEventUserBetsScreen from "./screen/ReportEventUserBetsScreen";
 import RestoreUserScreen from "./screen/RestoreUserScreen";
 import BankingMasterScreen from "./screen/BankingMasterScreen";
 import BankingUserScreen from "./screen/BankingUserScreen";
@@ -41,6 +44,9 @@ function App() {
     { path: "/password-history", component: <PasswordHistoryScreen/> },
     { path: "/wallet-history", component: <WalletHistoryScreen/> },
     { path: "/report-event", component: <ReportEventScreen/> },
+    { path: "/report-event/sport/:sportName", component: <ReportEventSportEventsScreen/> },
+    { path: "/report-event/sport/:sportName/event/:eventId", component: <ReportEventMarketsScreen/> },
+    { path: "/report-event/sport/:sportName/event/:eventId/market/:marketId/users", component: <ReportEventUserBetsScreen/> },
     { path: "/report-downline", component: <ReportDownlineScreen/> },
     { path: "/restore-user", component: <RestoreUserScreen/> },
     { path: "/banking-master", component: <BankingMasterScreen/> },

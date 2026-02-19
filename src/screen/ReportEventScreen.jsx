@@ -1,26 +1,12 @@
 import React, { useMemo, useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Navbar from '../component/Navbar'
 import './ReportEventScreen.css'
-
-// Temporary mock data for design/demo purposes
-const MOCK_PROFIT_LOSS = [
-  {
-    id: 1,
-    sportName: 'CRICKET',
-    uplineProfitLoss: 1037,
-    downlineProfitLoss: 1037,
-    commission: 0,
-  },
-  {
-    id: 2,
-    sportName: 'TENNIS',
-    uplineProfitLoss: 46.06,
-    downlineProfitLoss: 47,
-    commission: 0.94,
-  },
-]
+import { useGetHierarchyProfitLossQuery } from '../redux/api/authApi'
 
 function ReportEventScreen() {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [dataSource, setDataSource] = useState('LIVE_DATA')
   const [fromDate, setFromDate] = useState('2025-02-01')
   const [fromTime, setFromTime] = useState('00:00')
@@ -30,9 +16,57 @@ function ReportEventScreen() {
   const [currentPage, setCurrentPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
 
+  const buildDateTime = (date, time, isEnd) => {
+    if (!date) return undefined
+    if (!time) {
+      return isEnd ? `${date}T23:59:59Z` : `${date}T00:00:00Z`
+    }
+    const suffix = isEnd ? ':59Z' : ':00Z'
+    return `${date}T${time}${suffix}`
+  }
+
+  const fromIso = buildDateTime(fromDate, fromTime, false)
+  const toIso = buildDateTime(toDate, toTime, true)
+
+  const { data, isLoading, isError } = useGetHierarchyProfitLossQuery(
+    {
+      // Explicitly request cricket to match backend example
+      sport: 'cricket',
+      from: fromIso,
+      to: toIso,
+    },
+    {
+      skip: !fromIso || !toIso,
+    }
+  )
+
+  const apiRows = useMemo(() => Array.isArray(data?.data) ? data.data : [], [data])
+
+  const groupedBySport = useMemo(() => {
+    const map = new Map()
+    apiRows.forEach((item) => {
+      const sportName = (item.sport || 'UNKNOWN').toUpperCase()
+      const profit = Number(item.profitLoss || 0)
+
+      const current = map.get(sportName) || {
+        id: sportName,
+        sportName,
+        uplineProfitLoss: 0,
+        downlineProfitLoss: 0,
+        commission: 0,
+      }
+
+      current.uplineProfitLoss += profit
+      current.downlineProfitLoss += profit
+      map.set(sportName, current)
+    })
+
+    return Array.from(map.values())
+  }, [apiRows])
+
   const filteredRows = useMemo(() => {
     const q = searchTerm.trim().toLowerCase()
-    let rows = [...MOCK_PROFIT_LOSS]
+    let rows = [...groupedBySport]
 
     if (q) {
       rows = rows.filter((row) =>
@@ -41,7 +75,7 @@ function ReportEventScreen() {
     }
 
     return rows
-  }, [searchTerm])
+  }, [groupedBySport, searchTerm])
 
   const totalEntries = filteredRows.length
   const totalPages = Math.max(1, Math.ceil(totalEntries / entriesPerPage))
@@ -68,8 +102,18 @@ function ReportEventScreen() {
   const showingTo = Math.min(currentPage * entriesPerPage, totalEntries)
 
   const handleGetPL = () => {
-    // For now this just resets the page and would trigger API in future
     setCurrentPage(1)
+  }
+
+  const handleSportClick = (row) => {
+    if (!row?.sportName) return
+    navigate(`/report-event/sport/${encodeURIComponent(row.sportName)}`, {
+      state: {
+        from: location.pathname,
+        fromIso,
+        toIso,
+      },
+    })
   }
 
   return (
@@ -201,7 +245,12 @@ function ReportEventScreen() {
                     <>
                       {paginatedRows.map((row) => (
                         <tr key={row.id}>
-                          <td className="sport-link">{row.sportName}</td>
+                          <td
+                            className="sport-link"
+                            onClick={() => handleSportClick(row)}
+                          >
+                            {row.sportName}
+                          </td>
                           <td className={row.uplineProfitLoss >= 0 ? 'pl-positive' : 'pl-negative'}>
                             {row.uplineProfitLoss.toLocaleString('en-IN', {
                               minimumFractionDigits: 2,

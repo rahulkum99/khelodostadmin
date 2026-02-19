@@ -176,6 +176,31 @@ export const authApi = createApi({
         { type: 'Bets', id: `event-pl-${userId}-${eventId}` },
       ],
     }),
+    getHierarchyProfitLoss: builder.query({
+      query: ({ sport, from, to } = {}) => ({
+        url: '/bets/admin/hierarchy-profit-loss',
+        method: 'GET',
+        params: {
+          ...(sport ? { sport } : {}),
+          ...(from ? { from } : {}),
+          ...(to ? { to } : {}),
+        },
+      }),
+      providesTags: ['Bets'],
+    }),
+    getHierarchySettledBets: builder.query({
+      query: ({ sport, from, to, marketName } = {}) => ({
+        url: '/bets/admin/hierarchy-settled-bets',
+        method: 'GET',
+        params: {
+          ...(sport ? { sport } : {}),
+          ...(from ? { from } : {}),
+          ...(to ? { to } : {}),
+          ...(marketName ? { marketName } : {}),
+        },
+      }),
+      providesTags: ['Bets'],
+    }),
   }),
 });
 
@@ -197,6 +222,8 @@ export const {
   useGetUserBetsQuery,
   useGetUserProfitLossQuery,
   useGetUserEventProfitLossQuery,
+  useGetHierarchyProfitLossQuery,
+  useGetHierarchySettledBetsQuery,
 } = authApi;
 
 
