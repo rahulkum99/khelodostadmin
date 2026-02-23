@@ -3,39 +3,35 @@ import { useNavigate } from 'react-router-dom'
 import { useGetUsersQuery } from '../redux/api/authApi'
 import { toast } from 'react-toastify'
 import './UserListTable.css'
-import AddUserModal from './AddUserModal'
+import AddMasterModal from './AddMasterModal'
 import BankingModal from './BankingModal'
 import StatusModal from './StatusModal'
 import SportsSettingsModal from './SportsSettingsModal'
 
-function UserListTable({ title = "User List" }) {
+function MasterListTable({ title = "Master List" }) {
   const navigate = useNavigate();
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [isAddMasterModalOpen, setIsAddMasterModalOpen] = useState(false);
   const [isBankingModalOpen, setIsBankingModalOpen] = useState(false);
   const [selectedBankingUser, setSelectedBankingUser] = useState(null);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [selectedStatusUser, setSelectedStatusUser] = useState(null);
   const [isSportsModalOpen, setIsSportsModalOpen] = useState(false);
-  const [sportsState, setSportsState] = useState({}); // per-user sports config later
+  const [sportsState, setSportsState] = useState({});
 
-  // Determine role based on title
-  const role = title.toLowerCase().includes('master') ? 'master' : 'user';
+  const role = 'master';
 
-  // Fetch users from API
-  const { data, isLoading, error, refetch } = useGetUsersQuery({ 
-    role, 
-    page: currentPage, 
-    limit: entriesPerPage 
+  const { data, isLoading, error, refetch } = useGetUsersQuery({
+    role,
+    page: currentPage,
+    limit: entriesPerPage
   });
 
-  // Extract users and pagination from API response
   const users = data?.data?.users || [];
   const pagination = data?.data?.pagination || { page: 1, limit: 10, total: 0, pages: 1 };
 
-  // Filter users based on search term (client-side filtering)
   const filteredUsers = users.filter(user => {
     if (!searchTerm) return true;
     const searchLower = searchTerm.toLowerCase();
@@ -47,7 +43,6 @@ function UserListTable({ title = "User List" }) {
     );
   });
 
-  // Calculate summary data (placeholder - might need separate API)
   const summaryData = {
     totalBalance: 4312,
     totalExposure: 0,
@@ -57,37 +52,33 @@ function UserListTable({ title = "User List" }) {
     uplinePL: 6562
   };
 
-  // Map API users to table format
   const tableData = filteredUsers.map(user => ({
     id: user._id || user.id,
     username: user.username || '',
-    userType: user.role === 'master' ? 'MASTER' : 'USER',
-    creditRef: 0.00, // TODO: Get from separate API if available
-    balance: 0, // TODO: Get from separate API if available
-    exposure: 0, // TODO: Get from separate API if available
+    userType: 'MASTER',
+    creditRef: 0.00,
+    balance: 0,
+    exposure: 0,
     exposureLimit: user.exposureLimit || 0,
-    availBal: 0, // TODO: Calculate from balance - exposure
-    refPL: 0, // TODO: Get from separate API if available
+    availBal: 0,
+    refPL: 0,
     partnership: user.commission || 0,
     status: user.isActive ? 'active' : 'inactive',
-    userData: user // Store full user data for reference
+    userData: user
   }));
 
-  // Pagination from API
   const totalEntries = pagination.total || 0;
   const totalPages = pagination.pages || 1;
   const showingFrom = totalEntries > 0 ? ((currentPage - 1) * entriesPerPage) + 1 : 0;
   const showingTo = Math.min(currentPage * entriesPerPage, totalEntries);
 
-  // Refetch when page or limit changes
   useEffect(() => {
     refetch();
   }, [currentPage, entriesPerPage, refetch]);
 
-  // Handle user creation success
-  const handleUserCreated = () => {
+  const handleMasterCreated = () => {
     refetch();
-    toast.success('User created successfully');
+    toast.success('Master created successfully');
   };
 
   const handleOpenBanking = (userRow) => {
@@ -96,7 +87,6 @@ function UserListTable({ title = "User List" }) {
   };
 
   const handleSubmitBanking = (payload) => {
-    // TODO: wire to actual banking API
     console.log('Banking submit:', payload);
     setIsBankingModalOpen(false);
     setSelectedBankingUser(null);
@@ -108,7 +98,6 @@ function UserListTable({ title = "User List" }) {
   };
 
   const handleSubmitStatus = (payload) => {
-    // TODO: wire to actual status-change API
     console.log('Status change submit:', payload);
     setIsStatusModalOpen(false);
     setSelectedStatusUser(null);
@@ -131,18 +120,16 @@ function UserListTable({ title = "User List" }) {
 
   return (
     <div className="user-list-container">
-      {/* Top Actions */}
       <div className="user-list-header-actions">
         <button className="refresh-btn" title="Refresh" onClick={() => refetch()}>
           <span>🔄</span>
         </button>
-        <button className="add-user-btn" onClick={() => setIsAddUserModalOpen(true)}>
+        <button className="add-user-btn" onClick={() => setIsAddMasterModalOpen(true)}>
           <span>👤</span>
-          <span>Add User</span>
+          <span>Add Master</span>
         </button>
       </div>
 
-      {/* Summary Metrics */}
       <div className="summary-metrics">
         <div className="metric-box">
           <div className="metric-label">Total Balance</div>
@@ -170,20 +157,19 @@ function UserListTable({ title = "User List" }) {
         </div>
       </div>
 
-      {/* Main Table Section */}
       <div className="user-list-table-section">
         <div className="table-controls">
           <div className="entries-control">
             <label>Show</label>
-              <select 
-                className="entries-select"
-                value={entriesPerPage}
-                onChange={(e) => {
-                  setEntriesPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                disabled={isLoading}
-              >
+            <select
+              className="entries-select"
+              value={entriesPerPage}
+              onChange={(e) => {
+                setEntriesPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              disabled={isLoading}
+            >
               <option value={10}>10</option>
               <option value={25}>25</option>
               <option value={50}>50</option>
@@ -193,17 +179,16 @@ function UserListTable({ title = "User List" }) {
           </div>
           <div className="search-control">
             <label>Search:</label>
-                <input
-                  type="text"
-                  className="search-input"
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    // Don't reset page on search, just filter client-side
-                  }}
-                  placeholder="Search by username, name, or status..."
-                  disabled={isLoading}
-                />
+            <input
+              type="text"
+              className="search-input"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+              }}
+              placeholder="Search by username, name, or status..."
+              disabled={isLoading}
+            />
           </div>
         </div>
 
@@ -229,14 +214,14 @@ function UserListTable({ title = "User List" }) {
                   <td colSpan="10" className="no-data loading">
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                       <span>🔄</span>
-                      <span>Loading users...</span>
+                      <span>Loading masters...</span>
                     </div>
                   </td>
                 </tr>
               ) : error ? (
                 <tr>
                   <td colSpan="10" className="no-data">
-                    {error?.data?.message || 'Error loading users'}
+                    {error?.data?.message || 'Error loading masters'}
                   </td>
                 </tr>
               ) : tableData.length === 0 ? (
@@ -245,9 +230,9 @@ function UserListTable({ title = "User List" }) {
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
                       <span style={{ fontSize: '48px' }}>📭</span>
                       <div>
-                        <div style={{ fontWeight: 600, marginBottom: '4px' }}>No users found</div>
+                        <div style={{ fontWeight: 600, marginBottom: '4px' }}>No masters found</div>
                         <div style={{ fontSize: '13px', color: '#adb5bd' }}>
-                          {searchTerm ? 'Try adjusting your search' : 'Create your first user to get started'}
+                          {searchTerm ? 'Try adjusting your search' : 'Create your first master to get started'}
                         </div>
                       </div>
                     </div>
@@ -299,8 +284,7 @@ function UserListTable({ title = "User List" }) {
                         >
                           💰
                         </button>
-                        <button className="action-icon-btn" title="Transfer">↕️</button>
-                        <button className="action-icon-btn" title="More">☰</button>
+                       
                         <button
                           className="action-icon-btn"
                           title="Settings"
@@ -348,14 +332,14 @@ function UserListTable({ title = "User List" }) {
             Showing {showingFrom} to {showingTo} of {totalEntries} entries
           </div>
           <div className="pagination-controls">
-            <button 
+            <button
               className="pagination-btn"
               disabled={currentPage === 1 || isLoading}
               onClick={() => setCurrentPage(1)}
             >
               First
             </button>
-            <button 
+            <button
               className="pagination-btn"
               disabled={currentPage === 1 || isLoading}
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
@@ -372,14 +356,14 @@ function UserListTable({ title = "User List" }) {
                 {page}
               </button>
             ))}
-            <button 
+            <button
               className="pagination-btn"
               disabled={currentPage === totalPages || totalPages === 0 || isLoading}
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
             >
               Next
             </button>
-            <button 
+            <button
               className="pagination-btn"
               disabled={currentPage === totalPages || totalPages === 0 || isLoading}
               onClick={() => setCurrentPage(totalPages)}
@@ -390,10 +374,10 @@ function UserListTable({ title = "User List" }) {
         </div>
       </div>
 
-      <AddUserModal
-        isOpen={isAddUserModalOpen}
-        onClose={() => setIsAddUserModalOpen(false)}
-        onSubmit={handleUserCreated}
+      <AddMasterModal
+        isOpen={isAddMasterModalOpen}
+        onClose={() => setIsAddMasterModalOpen(false)}
+        onSubmit={handleMasterCreated}
       />
 
       <BankingModal
@@ -427,5 +411,5 @@ function UserListTable({ title = "User List" }) {
   )
 }
 
-export default UserListTable
+export default MasterListTable
 

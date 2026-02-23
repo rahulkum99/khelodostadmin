@@ -310,14 +310,19 @@ function UserDetailScreen() {
   const navigate = useNavigate()
   const location = useLocation()
   const user = location.state?.user
+  const HIDE_PL_ROLES = ['agent', 'master', 'super_master', 'admin']
+  const shouldHidePLTabs = HIDE_PL_ROLES.includes((user?.role || '').toLowerCase())
+  const visibleTabs = shouldHidePLTabs
+    ? SIDE_MENU_TABS.filter((t) => t.id !== 'bet-history' && t.id !== 'profit-loss')
+    : SIDE_MENU_TABS
   const [activeTab, setActiveTab] = useState('profile')
 
   useEffect(() => {
     const tab = new URLSearchParams(location.search).get('tab')
-    if (tab && SIDE_MENU_TABS.some((t) => t.id === tab)) {
+    if (tab && visibleTabs.some((t) => t.id === tab)) {
       setActiveTab(tab)
     }
-  }, [location.search])
+  }, [location.search, visibleTabs])
 
   const formatRollingCommission = (rollingCommission) => {
     if (!rollingCommission || typeof rollingCommission !== 'object') {
@@ -454,7 +459,7 @@ function UserDetailScreen() {
         <div className="account-sidebar">
           <div className="sidebar-header">User Detail</div>
           <ul className="sidebar-nav">
-            {SIDE_MENU_TABS.map((tab) => (
+            {visibleTabs.map((tab) => (
               <li
                 key={tab.id}
                 className={`sidebar-nav-item ${activeTab === tab.id ? 'active' : ''}`}

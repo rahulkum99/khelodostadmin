@@ -1,12 +1,12 @@
 import React from 'react'
 import Navbar from '../component/Navbar'
-import UserListTable from '../component/UserListTable'
+import MasterListTable from '../component/MasterListTable'
 
 function DownloadMasterlistScreen() {
   return (
     <div>
       <Navbar />
-      <UserListTable title="Master Downline List" />
+      <MasterListTable title="Master Downline List" />
     </div>
   )
 }

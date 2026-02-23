@@ -3,11 +3,19 @@ import { useCreateUserMutation } from '../redux/api/authApi'
 import { toast } from 'react-toastify'
 import './AddUserModal.css'
 
-function AddUserModal({ isOpen, onClose, onSubmit }) {
+const ROLES = {
+  AGENT: 'agent',
+  MASTER: 'master',
+  SUPER_MASTER: 'super_master',
+  ADMIN: 'admin'
+};
+
+function AddMasterModal({ isOpen, onClose, onSubmit }) {
   const [createUser, { isLoading }] = useCreateUserMutation();
   const [formData, setFormData] = useState({
     username: '',
     name: '',
+    role: ROLES.MASTER,
     commission: '',
     openingBalance: '',
     exposureLimit: '',
@@ -42,21 +50,18 @@ function AddUserModal({ isOpen, onClose, onSubmit }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate password confirmation
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match');
       return;
     }
 
-    // Validate required fields
-    if (!formData.username  || !formData.exposureLimit || 
-        !formData.creditReference || !formData.password || 
+    if (!formData.username || !formData.exposureLimit ||
+        !formData.creditReference  || !formData.password ||
         !formData.masterPassword) {
       toast.error('Please fill all required fields');
       return;
     }
 
-    // Rolling commission is no longer configurable; always send zeros
     const zeroRollingCommission = {
       fancy: 0,
       matka: 0,
@@ -71,37 +76,35 @@ function AddUserModal({ isOpen, onClose, onSubmit }) {
       soccer: 0
     };
 
-    // Prepare request body
     const requestBody = {
       adminPassword: formData.masterPassword,
       username: formData.username,
       name: formData.name || formData.username,
       password: formData.password,
       commission: parseFloat(formData.commission) || 0,
-      // Opening balance: use form value if provided, otherwise default to 100
       openingBalance: parseFloat(formData.openingBalance) || 100,
       rollingCommission: zeroRollingCommission,
       agentRollingCommission: zeroRollingCommission,
       currency: 'INR',
       exposureLimit: parseFloat(formData.exposureLimit) || 0,
-      role: 'user'
+      role: formData.role || ROLES.MASTER
     };
 
     try {
       const result = await createUser(requestBody).unwrap();
-      
+
       if (result.success) {
-        toast.success(result.message || 'User created successfully');
+        toast.success(result.message || 'Master created successfully');
         if (onSubmit) {
           onSubmit(result.data);
         }
         handleClose();
       } else {
-        toast.error(result.message || 'Failed to create user');
+        toast.error(result.message || 'Failed to create master');
       }
     } catch (error) {
-      console.error('Error creating user:', error);
-      const errorMessage = error?.data?.message || error?.message || 'Failed to create user';
+      console.error('Error creating master:', error);
+      const errorMessage = error?.data?.message || error?.message || 'Failed to create master';
       toast.error(errorMessage);
     }
   };
@@ -110,6 +113,7 @@ function AddUserModal({ isOpen, onClose, onSubmit }) {
     setFormData({
       username: '',
       name: '',
+      role: ROLES.MASTER,
       commission: '',
       openingBalance: '',
       exposureLimit: '',
@@ -129,7 +133,7 @@ function AddUserModal({ isOpen, onClose, onSubmit }) {
       <div className="modal-backdrop" onClick={handleClose}></div>
       <div className="modal-container">
         <div className="modal-header">
-          <h2 className="modal-title">Add User</h2>
+          <h2 className="modal-title">Add Master</h2>
           <button className="modal-close-btn" onClick={handleClose}>×</button>
         </div>
 
@@ -161,26 +165,29 @@ function AddUserModal({ isOpen, onClose, onSubmit }) {
                 onChange={handleInputChange}
               />
             </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                Account Type
+              </label>
+              <select
+                name="role"
+                className="form-input"
+                value={formData.role}
+                onChange={handleInputChange}
+              >
+                <option value={ROLES.AGENT}>Agent</option>
+                <option value={ROLES.MASTER}>Master</option>
+                <option value={ROLES.SUPER_MASTER}>Super Master</option>
+                <option value={ROLES.ADMIN}>Admin</option>
+              </select>
+            </div>
           </div>
 
           <div className="form-row">
-            {/* <div className="form-group">
-              <label className="form-label">
-                Commission(%) <span className="required">*</span>
-              </label>
-              <input
-                type="text"
-                name="commission"
-                className="form-input"
-                placeholder="Commission.."
-                value={formData.commission}
-                onChange={handleInputChange}
-                required
-              />
-            </div> */}
             <div className="form-group">
               <label className="form-label">
-                Mobile Number
+                Mobile Number 
               </label>
               <input
                 type="text"
@@ -192,7 +199,6 @@ function AddUserModal({ isOpen, onClose, onSubmit }) {
                 optional
               />
             </div>
-
 
             <div className="form-group">
               <label className="form-label">
@@ -243,7 +249,6 @@ function AddUserModal({ isOpen, onClose, onSubmit }) {
           </div>
 
           <div className="form-row">
-            
             <div className="form-group">
               <label className="form-label">
                 Password <span className="required">*</span>
@@ -292,7 +297,6 @@ function AddUserModal({ isOpen, onClose, onSubmit }) {
             </div>
           </div>
 
-
           <div className="form-divider"></div>
 
           <div className="form-row master-password-row">
@@ -332,4 +336,5 @@ function AddUserModal({ isOpen, onClose, onSubmit }) {
   )
 }
 
-export default AddUserModal
+export default AddMasterModal
+
