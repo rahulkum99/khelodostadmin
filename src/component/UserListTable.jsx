@@ -47,31 +47,42 @@ function UserListTable({ title = "User List" }) {
     );
   });
 
-  // Calculate summary data (placeholder - might need separate API)
-  const summaryData = {
-    totalBalance: 4312,
-    totalExposure: 0,
-    availableBalance: 4312,
-    balance: 2250,
-    totalAvailBal: 6562,
-    uplinePL: 6562
-  };
+  // Map API users to table format using latest response shape
+  const tableData = filteredUsers.map(user => {
+    const balance = Number(user.balance ?? 0);
+    const exposure = Number(user.exposer ?? 0);
+    const exposureLimit = Number(user.exposureLimit ?? 0);
+    const availBal = balance - exposure;
 
-  // Map API users to table format
-  const tableData = filteredUsers.map(user => ({
-    id: user._id || user.id,
-    username: user.username || '',
-    userType: user.role === 'master' ? 'MASTER' : 'USER',
-    creditRef: 0.00, // TODO: Get from separate API if available
-    balance: 0, // TODO: Get from separate API if available
-    exposure: 0, // TODO: Get from separate API if available
-    exposureLimit: user.exposureLimit || 0,
-    availBal: 0, // TODO: Calculate from balance - exposure
-    refPL: 0, // TODO: Get from separate API if available
-    partnership: user.commission || 0,
-    status: user.isActive ? 'active' : 'inactive',
-    userData: user // Store full user data for reference
-  }));
+    return {
+      id: user._id || user.id,
+      username: user.username || '',
+      userType: user.role === 'master' ? 'MASTER' : 'USER',
+      creditRef: exposureLimit, // using exposureLimit as effective credit reference
+      balance,
+      exposure,
+      exposureLimit,
+      availBal,
+      refPL: 0, // still placeholder until backend provides it
+      partnership: user.commission || 0,
+      status: user.isActive ? 'active' : 'inactive',
+      userData: user, // Store full user data for reference
+    };
+  });
+
+  // Calculate summary data from table rows
+  const totalBalance = tableData.reduce((sum, u) => sum + (u.balance || 0), 0);
+  const totalExposure = tableData.reduce((sum, u) => sum + (u.exposure || 0), 0);
+  const totalAvailBal = tableData.reduce((sum, u) => sum + (u.availBal || 0), 0);
+
+  const summaryData = {
+    totalBalance,
+    totalExposure,
+    availableBalance: totalAvailBal,
+    balance: totalBalance,
+    totalAvailBal,
+    uplinePL: 0,
+  };
 
   // Pagination from API
   const totalEntries = pagination.total || 0;

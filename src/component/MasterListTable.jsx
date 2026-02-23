@@ -21,10 +21,11 @@ function MasterListTable({ title = "Master List" }) {
   const [isSportsModalOpen, setIsSportsModalOpen] = useState(false);
   const [sportsState, setSportsState] = useState({});
 
-  const role = 'master';
+  // Fetch all downline roles in one request: admin, master, agent, super_master
+  const rolesQuery = 'admin,master,agent,super_master';
 
   const { data, isLoading, error, refetch } = useGetUsersQuery({
-    role,
+    role: rolesQuery,
     page: currentPage,
     limit: entriesPerPage
   });
@@ -43,29 +44,49 @@ function MasterListTable({ title = "Master List" }) {
     );
   });
 
-  const summaryData = {
-    totalBalance: 4312,
-    totalExposure: 0,
-    availableBalance: 4312,
-    balance: 2250,
-    totalAvailBal: 6562,
-    uplinePL: 6562
-  };
+  // Map API users to table format using latest response shape
+  const tableData = filteredUsers.map(user => {
+    const balance = Number(user.balance ?? 0);
+    const exposure = Number(user.exposer ?? 0);
+    const exposureLimit = Number(user.exposureLimit ?? 0);
+    const availBal = balance - exposure;
 
-  const tableData = filteredUsers.map(user => ({
-    id: user._id || user.id,
-    username: user.username || '',
-    userType: 'MASTER',
-    creditRef: 0.00,
-    balance: 0,
-    exposure: 0,
-    exposureLimit: user.exposureLimit || 0,
-    availBal: 0,
-    refPL: 0,
-    partnership: user.commission || 0,
-    status: user.isActive ? 'active' : 'inactive',
-    userData: user
-  }));
+    const role = (user.role || '').toLowerCase();
+    let userType = 'USER';
+    if (role === 'master') userType = 'MASTER';
+    else if (role === 'admin') userType = 'ADMIN';
+    else if (role === 'agent') userType = 'AGENT';
+    else if (role === 'super_master') userType = 'SUPER MASTER';
+
+    return {
+      id: user._id || user.id,
+      username: user.username || '',
+      userType,
+      creditRef: exposureLimit, // using exposureLimit as effective credit reference
+      balance,
+      exposure,
+      exposureLimit,
+      availBal,
+      refPL: 0,
+      partnership: user.commission || 0,
+      status: user.isActive ? 'active' : 'inactive',
+      userData: user,
+    };
+  });
+
+  // Calculate summary data from table rows
+  const totalBalance = tableData.reduce((sum, u) => sum + (u.balance || 0), 0);
+  const totalExposure = tableData.reduce((sum, u) => sum + (u.exposure || 0), 0);
+  const totalAvailBal = tableData.reduce((sum, u) => sum + (u.availBal || 0), 0);
+
+  const summaryData = {
+    totalBalance,
+    totalExposure,
+    availableBalance: totalAvailBal,
+    balance: totalBalance,
+    totalAvailBal,
+    uplinePL: 0,
+  };
 
   const totalEntries = pagination.total || 0;
   const totalPages = pagination.pages || 1;
