@@ -7,6 +7,9 @@ function WalletHistoryScreen() {
     const [entriesPerPage, setEntriesPerPage] = useState(20)
     const [searchTerm, setSearchTerm] = useState('')
     const [currentPage, setCurrentPage] = useState(1)
+    const [fromDate, setFromDate] = useState('')
+    const [toDate, setToDate] = useState('')
+    const [actionFilter, setActionFilter] = useState('')
 
     const { data: walletData, isLoading: isWalletLoading, error: walletError } = useGetWalletDetailsQuery()
     const wallet = walletData?.data?.wallet
@@ -15,7 +18,13 @@ function WalletHistoryScreen() {
         data: txData,
         isLoading: isTxLoading,
         error: txError,
-    } = useGetWalletTransactionsQuery({ page: currentPage, limit: entriesPerPage })
+    } = useGetWalletTransactionsQuery({
+        page: currentPage,
+        limit: entriesPerPage,
+        ...(fromDate && { fromDate }),
+        ...(toDate && { toDate }),
+        ...(actionFilter && { action: actionFilter }),
+    })
 
     const transactions = txData?.data?.transactions || []
     const pagination = txData?.data?.pagination || { page: 1, limit: entriesPerPage, total: 0, pages: 1 }
@@ -146,6 +155,47 @@ function WalletHistoryScreen() {
                     {/* <div className="wallet-history-header">Wallet Transactions</div> */}
                     <div className="wallet-history-table-container">
                         <div className="wallet-history-controls">
+                            <div className="wallet-history-filters">
+                                <div className="filter-group">
+                                    <label>From</label>
+                                    <input
+                                        type="date"
+                                        className="filter-date-input"
+                                        value={fromDate}
+                                        onChange={(e) => {
+                                            setFromDate(e.target.value)
+                                            setCurrentPage(1)
+                                        }}
+                                    />
+                                </div>
+                                <div className="filter-group">
+                                    <label>To</label>
+                                    <input
+                                        type="date"
+                                        className="filter-date-input"
+                                        value={toDate}
+                                        onChange={(e) => {
+                                            setToDate(e.target.value)
+                                            setCurrentPage(1)
+                                        }}
+                                    />
+                                </div>
+                                <div className="filter-group">
+                                    <label>Action</label>
+                                    <select
+                                        className="filter-action-select"
+                                        value={actionFilter}
+                                        onChange={(e) => {
+                                            setActionFilter(e.target.value)
+                                            setCurrentPage(1)
+                                        }}
+                                    >
+                                        <option value="">All</option>
+                                        <option value="deposit">Deposit</option>
+                                        <option value="withdrawal">Withdrawal</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div className="entries-control">
                                 <label>Show</label>
                                 <select
@@ -173,6 +223,7 @@ function WalletHistoryScreen() {
                                         setSearchTerm(e.target.value)
                                         setCurrentPage(1)
                                     }}
+                                    placeholder="Search in results"
                                 />
                             </div>
                         </div>

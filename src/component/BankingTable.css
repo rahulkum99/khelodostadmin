@@ -93,6 +93,19 @@
   background-color: #f8f9fa;
 }
 
+.banking-table-row-clickable {
+  cursor: pointer;
+}
+
+.banking-table-row-clickable:hover {
+  background-color: #e8f4f0 !important;
+}
+
+.uid-cell-clickable {
+  cursor: pointer;
+  font-weight: 500;
+}
+
 .sort-arrows {
   font-size: 10px;
   color: #999;

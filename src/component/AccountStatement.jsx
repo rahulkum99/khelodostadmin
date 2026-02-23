@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import './AccountStatement.css'
 import { useGetWalletTransactionsQuery, useGetWalletTransactionsByUserIdQuery } from '../redux/api/authApi'
 
@@ -10,12 +10,27 @@ function AccountStatement({ userId = null }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
+  const actionParam = dataSource === 'deposit' ? 'deposit' : dataSource === 'withdraw' ? 'withdrawal' : '';
+
   const meQuery = useGetWalletTransactionsQuery(
-    { page: currentPage, limit: entriesPerPage },
+    {
+      page: currentPage,
+      limit: entriesPerPage,
+      ...(fromDate && { fromDate }),
+      ...(toDate && { toDate }),
+      ...(actionParam && { action: actionParam }),
+    },
     { skip: !!userId }
   );
   const userQuery = useGetWalletTransactionsByUserIdQuery(
-    { userId, page: currentPage, limit: entriesPerPage },
+    {
+      userId,
+      page: currentPage,
+      limit: entriesPerPage,
+      ...(fromDate && { fromDate }),
+      ...(toDate && { toDate }),
+      ...(actionParam && { action: actionParam }),
+    },
     { skip: !userId }
   );
 
@@ -24,8 +39,11 @@ function AccountStatement({ userId = null }) {
   const isError = userId ? userQuery.isError : meQuery.isError;
   const refetch = userId ? userQuery.refetch : meQuery.refetch;
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [fromDate, toDate, dataSource]);
+
   const handleGetStatement = () => {
-    // Reset to first page and refetch with current filters
     setCurrentPage(1);
     refetch();
   };
@@ -50,27 +68,7 @@ function AccountStatement({ userId = null }) {
   const filteredTransactions = useMemo(() => {
     let txns = [...rawTransactions];
 
-    // Filter by data source (credit/debit)
-    if (dataSource === 'deposit') {
-      txns = txns.filter((t) => t.transactionType === 'credit');
-    } else if (dataSource === 'withdraw') {
-      txns = txns.filter((t) => t.transactionType === 'debit');
-    }
-
-    // Filter by date range (inclusive)
-    if (fromDate) {
-      const from = new Date(fromDate);
-      from.setHours(0, 0, 0, 0);
-      txns = txns.filter((t) => new Date(t.createdAt) >= from);
-    }
-
-    if (toDate) {
-      const to = new Date(toDate);
-      to.setHours(23, 59, 59, 999);
-      txns = txns.filter((t) => new Date(t.createdAt) <= to);
-    }
-
-    // Text search
+    // Date/action filtering is done by API (fromDate, toDate, action). Only client-side text search here.
     if (searchTerm.trim()) {
       const term = searchTerm.trim().toLowerCase();
       txns = txns.filter((t) => {
@@ -92,7 +90,7 @@ function AccountStatement({ userId = null }) {
     }
 
     return txns;
-  }, [rawTransactions, dataSource, fromDate, toDate, searchTerm]);
+  }, [rawTransactions, searchTerm]);
 
   const showingFrom = totalEntries === 0 ? 0 : (page - 1) * entriesPerPage + 1;
   const showingTo = totalEntries === 0

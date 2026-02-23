@@ -109,18 +109,30 @@ export const authApi = createApi({
       providesTags: ['Wallet'],
     }),
     getWalletTransactions: builder.query({
-      query: ({ page = 1, limit = 20 } = {}) => ({
+      query: ({ page = 1, limit = 20, fromDate, toDate, action } = {}) => ({
         url: '/wallet/me/transactions',
         method: 'GET',
-        params: { page, limit },
+        params: {
+          page,
+          limit,
+          ...(fromDate && { fromDate }),
+          ...(toDate && { toDate }),
+          ...(action && { action }),
+        },
       }),
       providesTags: ['Wallet'],
     }),
     getWalletTransactionsByUserId: builder.query({
-      query: ({ userId, page = 1, limit = 20 }) => ({
+      query: ({ userId, page = 1, limit = 20, fromDate, toDate, action } = {}) => ({
         url: `/wallet/${userId}/transactions`,
         method: 'GET',
-        params: { page, limit },
+        params: {
+          page,
+          limit,
+          ...(fromDate && { fromDate }),
+          ...(toDate && { toDate }),
+          ...(action && { action }),
+        },
       }),
       providesTags: (result, error, { userId }) => [{ type: 'Wallet', id: userId }],
     }),
@@ -131,6 +143,24 @@ export const authApi = createApi({
         body: {
           amount: body.amount,
           ...(body.description && { description: body.description }),
+        },
+      }),
+      invalidatesTags: ['Wallet'],
+    }),
+    getBankingUsers: builder.query({
+      query: () => ({
+        url: '/wallet/banking/users',
+        method: 'GET',
+      }),
+      providesTags: ['Wallet'],
+    }),
+    walletBulkAction: builder.mutation({
+      query: (body) => ({
+        url: '/wallet/bulk/action',
+        method: 'POST',
+        body: {
+          adminPassword: body.adminPassword,
+          entries: body.entries,
         },
       }),
       invalidatesTags: ['Wallet'],
@@ -218,6 +248,8 @@ export const {
   useGetWalletTransactionsQuery,
   useGetWalletTransactionsByUserIdQuery,
   useAddAmountToWalletMutation,
+  useGetBankingUsersQuery,
+  useWalletBulkActionMutation,
   useGetAdminBetListQuery,
   useGetUserBetsQuery,
   useGetUserProfitLossQuery,

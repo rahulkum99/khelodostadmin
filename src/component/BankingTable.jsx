@@ -1,44 +1,66 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import { toast } from 'react-toastify'
 import './BankingTable.css'
+import BankingModal from './BankingModal'
+import { useWalletBulkActionMutation, useGetBankingUsersQuery } from '../redux/api/authApi'
 
-function BankingTable({ title = "Banking" }) {
+function toArray(data) {
+  if (Array.isArray(data)) return data
+  if (data && Array.isArray(data.data)) return data.data
+  if (data && Array.isArray(data.users)) return data.users
+  return []
+}
+
+// Maps API response: { data: [{ userId, username, balance, exposer }, ...] } or legacy _id
+function mapBankingUsersToTableData(apiData) {
+  const list = toArray(apiData)
+  return list.map((row, index) => ({
+    id: row.username ?? index,
+    userId: row.userId ?? row._id ?? null,
+    uid: row.username ?? '',
+    balance: row.balance ?? 0,
+    availableDW: '',
+    exposure: row.exposer ?? 0,
+    creditRef: 0,
+    refPL: row.balance ?? 0,
+    depositWithdraw: 0,
+    remark: ''
+  }))
+}
+
+function BankingTable({ title = "Banking", data: externalData, isLoading, error, onBankingSubmit, masterBalance = 0 }) {
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [password, setPassword] = useState('');
   const [formData, setFormData] = useState({});
+  const [bankingModalOpen, setBankingModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [walletBulkAction, { isLoading: isSubmitting }] = useWalletBulkActionMutation();
+  const { refetch: refetchBankingUsers } = useGetBankingUsersQuery();
 
-  // Sample table data
-  const sampleData = [
-    {
-      id: 1,
-      uid: 'dev2026',
-      balance: 1697.12,
-      availableDW: '',
-      exposure: 0,
-      creditRef: 0,
-      refPL: 1697.12,
-      depositWithdraw: 0,
-      remark: 'Remark'
-    },
-    {
-      id: 2,
-      uid: 'demo2026',
-      balance: 1719,
-      availableDW: '',
-      exposure: 0,
-      creditRef: 0,
-      refPL: 1719,
-      depositWithdraw: 0,
-      remark: 'Remark'
-    }
-  ];
+  // Keep table data in state so it does not disappear on click/re-render. Update only when prop has new non-empty data.
+  const [tableData, setTableData] = useState([]);
+  const lastDataRef = useRef(null);
 
-  // Filter data based on search term
-  const filteredData = sampleData.filter(item => {
-    const searchLower = searchTerm.toLowerCase();
-    return item.uid.toLowerCase().includes(searchLower);
-  });
+  useEffect(() => {
+    const raw = toArray(externalData);
+    if (raw.length === 0) return;
+    // Update when we get new data (by reference or when we didn't have this data before)
+    if (externalData === lastDataRef.current) return;
+    lastDataRef.current = externalData;
+    setTableData(mapBankingUsersToTableData(externalData));
+  }, [externalData]);
+
+  // Filter data based on search term (trim and avoid filtering when empty)
+  const searchLower = (searchTerm || '').trim().toLowerCase();
+  const filteredData = searchLower === ''
+    ? tableData
+    : tableData.filter(item => {
+        const uid = item?.uid != null ? String(item.uid) : '';
+        return uid.toLowerCase().includes(searchLower);
+      });
+  const hasNoSearchResults = tableData.length > 0 && filteredData.length === 0;
 
   // Calculate pagination
   const totalEntries = filteredData.length;
@@ -102,9 +124,78 @@ function BankingTable({ title = "Banking" }) {
     setPassword('');
   };
 
-  const handleSubmitPayment = () => {
-    // TODO: Implement API call
-    console.log('Submit Payment:', { formData, password });
+  const handleSubmitPayment = async () => {
+    const adminPassword = (password || '').trim();
+    if (!adminPassword) {
+      toast.error('Admin password is required for bulk action');
+      return;
+    }
+
+    const entries = [];
+    for (const item of tableData) {
+      const fd = formData[item.id];
+      if (!fd?.transactionType || !item.userId) continue;
+      const rawAmount = fd.depositWithdraw;
+      const amount = Number(String(rawAmount ?? '').replace(/,/g, ''));
+      if (!Number.isFinite(amount) || amount <= 0) continue;
+      const entry = {
+        userId: item.userId,
+        amount: Math.round(amount * 100) / 100,
+        action: fd.transactionType,
+      };
+      const desc = fd.remark != null ? String(fd.remark).trim() : '';
+      if (desc) entry.description = desc;
+      entries.push(entry);
+    }
+
+    if (entries.length === 0) {
+      const hasAnyFormData = tableData.some((item) => formData[item.id]?.transactionType);
+      const hasUserIds = tableData.some((item) => item.userId);
+      if (!hasUserIds) {
+        toast.error('User IDs missing. Ensure the banking users API returns _id or userId for each user.');
+      } else if (!hasAnyFormData) {
+        toast.error('Select Deposit (D) or Withdraw (W) and enter an amount for at least one user.');
+      } else {
+        toast.error('Enter a valid amount (greater than 0) for each selected deposit or withdraw.');
+      }
+      return;
+    }
+    if (entries.length > 100) {
+      toast.error('Maximum 100 entries per request.');
+      return;
+    }
+
+    try {
+      const result = await walletBulkAction({ adminPassword, entries }).unwrap();
+      const msg = result?.message ?? 'Bulk action completed';
+      const failed = result?.data?.failed?.length ?? 0;
+      if (failed > 0) {
+        toast.warning(`${msg} (${failed} failed)`);
+      } else {
+        toast.success(msg);
+      }
+      handleClearAll();
+      await refetchBankingUsers();
+    } catch (err) {
+      const msg = err?.data?.message ?? err?.message ?? 'Bulk action failed';
+      const errors = err?.data?.errors;
+      if (Array.isArray(errors) && errors.length) {
+        toast.error(errors.map((e) => e.msg || e.message).join('. '));
+      } else {
+        toast.error(msg);
+      }
+    }
+  };
+
+  const handleRowClick = (item) => {
+    setSelectedUser({ username: item.uid, balance: item.balance, userType: 'USER' });
+    setBankingModalOpen(true);
+  };
+
+  const handleBankingModalSubmit = (payload) => {
+    onBankingSubmit?.(payload);
+    setBankingModalOpen(false);
+    setSelectedUser(null);
   };
 
   return (
@@ -130,16 +221,27 @@ function BankingTable({ title = "Banking" }) {
               <label>entries</label>
             </div>
             <div className="search-control">
-              <label>Search:</label>
+              <label htmlFor="banking-search">Search:</label>
               <input
-                type="text"
+                id="banking-search"
+                type="search"
+                name="banking-uid-search"
                 className="search-input"
                 value={searchTerm}
                 onChange={(e) => {
-                  setSearchTerm(e.target.value);
+                  const v = e.target.value;
+                  setSearchTerm(v === 'superadmin' ? '' : v);
                   setCurrentPage(1);
                 }}
-                placeholder=""
+                onFocus={() => {
+                  if (searchTerm === 'superadmin') setSearchTerm('');
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
+                placeholder="Search by UID"
+                autoComplete="nope"
+                data-lpignore="true"
+                data-form-type="other"
+                data-1p-ignore
               />
             </div>
           </div>
@@ -161,25 +263,43 @@ function BankingTable({ title = "Banking" }) {
               </tr>
             </thead>
             <tbody>
-              {paginatedData.length === 0 ? (
+              {isLoading && tableData.length === 0 ? (
                 <tr>
-                  <td colSpan="9" className="no-data">No data available</td>
+                  <td colSpan="9" className="no-data">Loading...</td>
+                </tr>
+              ) : error && tableData.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="no-data">Failed to load banking users.</td>
+                </tr>
+              ) : paginatedData.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="no-data">
+                    {hasNoSearchResults ? 'No matching users for this search.' : 'No data available'}
+                  </td>
                 </tr>
               ) : (
                 paginatedData.map((item) => (
                   <tr key={item.id}>
-                    <td>{item.uid}</td>
+                    <td
+                      className="uid-cell-clickable"
+                      onClick={() => handleRowClick(item)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleRowClick(item); } }}
+                    >
+                      {item.uid}
+                    </td>
                     <td>{formatCurrency(item.balance)}</td>
                     <td>{item.availableDW || '-'}</td>
                     <td className={item.exposure === 0 ? 'exposure-zero' : ''}>
                       ({formatCurrency(item.exposure)})
                     </td>
-                    <td>
+                    <td onClick={(e) => e.stopPropagation()}>
                       <span>{formatCurrency(item.creditRef)}</span>
                       <button className="icon-btn" title="Edit">✏️</button>
                     </td>
                     <td className="ref-pl-positive">{formatCurrency(item.refPL)}</td>
-                    <td>
+                    <td onClick={(e) => e.stopPropagation()}>
                       <div className="deposit-withdraw-controls">
                         <button 
                           className={`dw-btn deposit-btn ${formData[item.id]?.transactionType === 'deposit' ? 'active' : ''}`}
@@ -202,7 +322,7 @@ function BankingTable({ title = "Banking" }) {
                         />
                       </div>
                     </td>
-                    <td>
+                    <td onClick={(e) => e.stopPropagation()}>
                       <button 
                         className="full-btn"
                         onClick={() => handleFull(item.id, item.balance)}
@@ -210,7 +330,7 @@ function BankingTable({ title = "Banking" }) {
                         Full
                       </button>
                     </td>
-                    <td>
+                    <td onClick={(e) => e.stopPropagation()}>
                       <input
                         type="text"
                         className="remark-input"
@@ -283,11 +403,26 @@ function BankingTable({ title = "Banking" }) {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password.."
           />
-          <button className="submit-payment-btn" onClick={handleSubmitPayment}>
-            Submit Payment
+          <button
+            className="submit-payment-btn"
+            onClick={handleSubmitPayment}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Submitting...' : 'Submit Payment'}
           </button>
         </div>
       </div>
+
+      <BankingModal
+        isOpen={bankingModalOpen}
+        onClose={() => {
+          setBankingModalOpen(false);
+          setSelectedUser(null);
+        }}
+        user={selectedUser}
+        masterBalance={masterBalance}
+        onSubmit={handleBankingModalSubmit}
+      />
     </div>
   )
 }
