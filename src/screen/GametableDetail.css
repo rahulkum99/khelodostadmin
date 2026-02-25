@@ -1,0 +1,1412 @@
+.gd-container {
+  padding: 10px;
+  background: #e8e8e8;
+  min-height: calc(100vh - 120px);
+}
+
+/* Loading & Error States */
+.gd-loading,
+.gd-error,
+.gd-no-data {
+  text-align: center;
+  padding: 40px;
+  background: white;
+  border-radius: 4px;
+  color: #666;
+}
+
+.gd-error {
+  color: #c62828;
+  background: #ffebee;
+}
+
+/* ==================== SCOREBOARD ==================== */
+.gd-scoreboard {
+  background: #1a1a2e;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.gd-scoreboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 15px;
+  background: #16213e;
+  border-bottom: 1px solid #0f3460;
+}
+
+.powered-by {
+  color: #00d9ff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.score-stats {
+  display: flex;
+  gap: 25px;
+}
+
+.stat-label {
+  color: #aaa;
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 45px;
+  text-align: center;
+}
+
+.gd-scoreboard-body {
+  padding: 10px 15px;
+}
+
+.team-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #2a2a4a;
+}
+
+.team-row:last-child {
+  border-bottom: none;
+}
+
+.team-row.batting {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.team-indicator {
+  width: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #444;
+}
+
+.indicator-dot.active {
+  background: #00ff00;
+  box-shadow: 0 0 6px #00ff00;
+}
+
+.team-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.team-icon {
+  font-size: 16px;
+}
+
+.team-info .team-name {
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.batsmen-info {
+  color: #888;
+  font-size: 11px;
+  margin-left: 10px;
+}
+
+.team-scores {
+  display: flex;
+  gap: 25px;
+}
+
+.score-value {
+  color: #ccc;
+  font-size: 13px;
+  min-width: 45px;
+  text-align: center;
+}
+
+.score-value.highlight {
+  color: #ff6b6b;
+  font-weight: 700;
+}
+
+.gd-scoreboard-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 15px;
+  background: #16213e;
+  border-top: 1px solid #0f3460;
+}
+
+.live-dots {
+  display: flex;
+  gap: 5px;
+}
+
+.live-dots .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #444;
+}
+
+.live-dots .dot.active {
+  background: #00d9ff;
+}
+
+.over-info {
+  color: #888;
+  font-size: 12px;
+}
+
+/* ==================== MARKET SECTIONS ==================== */
+.gd-market-section {
+  background: white;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Market Header */
+.gd-market-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 15px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+}
+
+.gd-market-header.match-odds {
+  background: #2c7873;
+}
+
+.gd-market-header.bookmaker {
+  background: #6c5b7b;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.market-title {
+  background: #1a1a2e;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 3px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.info-icon {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  padding: 3px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.cash-out-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cash-out-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffc107;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.matched-text {
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Market Table */
+.gd-market-table {
+  overflow-x: auto;
+}
+
+.gd-market-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.gd-market-table thead th {
+  padding: 10px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.th-team {
+  width: 30%;
+  text-align: left;
+  padding-left: 15px;
+}
+
+.th-back {
+  background: #72bbef;
+  color: #000;
+  width: 80px;
+}
+
+.th-lay {
+  background: #faa9ba;
+  color: #000;
+  width: 80px;
+}
+
+.th-minmax {
+  background: #f5f5f5;
+  text-align: right;
+  padding-right: 15px;
+  min-width: 120px;
+}
+
+.th-team-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #555;
+  display: block;
+}
+
+.th-minmax-mobile {
+  display: none;
+  font-size: 11px;
+  font-weight: 600;
+  color: #333;
+}
+
+.gd-header-mobile {
+  display: none;
+}
+
+.gd-header-desktop {
+  display: table-row;
+}
+
+.minmax-label {
+  display: block;
+  font-size: 10px;
+  color: #666;
+}
+
+.minmax-value {
+  display: block;
+  font-size: 11px;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Table Body */
+.gd-market-table tbody tr {
+  border-bottom: 1px solid #eee;
+}
+
+.gd-market-table tbody tr:hover {
+  background: #f9f9f9;
+}
+
+.gd-market-table tbody tr.suspended {
+  opacity: 0.7;
+}
+
+.td-team {
+  padding: 12px 15px;
+  text-align: left;
+  width: 40%;
+}
+
+.td-team .team-name {
+  font-weight: 700;
+  color: #222;
+  font-size: 13px;
+}
+
+.profit-loss-label {
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.profit-loss-label.profit-text {
+  color: #20c997;
+}
+
+.profit-loss-label.loss-text {
+  color: #dc3545;
+}
+
+.td-odds {
+  padding: 8px 5px;
+  text-align: center;
+  cursor: pointer;
+  min-width: 60px;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.td-odds.back {
+  background: #b3d4fc;
+}
+
+.td-odds.back:hover {
+  background: #9ec5fc;
+}
+
+.td-odds.back.best {
+  background: #72bbef;
+}
+
+.td-odds.lay {
+  background: #f9d0d6;
+}
+
+.td-odds.lay:hover {
+  background: #f5bdc6;
+}
+
+.td-odds.lay.best {
+  background: #faa9ba;
+}
+
+.td-odds .odds {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+}
+
+.td-odds .size {
+  display: block;
+  font-size: 10px;
+  color: #666;
+}
+
+.td-odds .no-odds {
+  color: #999;
+}
+
+.td-odds .suspended-label {
+  background: #d32f2f;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.td-minmax {
+  padding: 12px 15px;
+}
+
+/* ==================== FANCY BET SECTION ==================== */
+.fancy-section {
+  background: #f5f5f5;
+}
+
+.gd-fancy-tabs {
+  padding: 10px 15px;
+  background: white;
+  border-bottom: 1px solid #ddd;
+}
+
+.fancy-tab-group {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.fancy-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #2c7873;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.fancy-tab.orange {
+  background: #f47c20;
+}
+
+.fancy-tab svg {
+  font-size: 12px;
+}
+
+.fancy-filter-tabs {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.filter-tab {
+  padding: 6px 14px;
+  background: #e0e0e0;
+  color: #333;
+  border: none;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-tab:hover {
+  background: #ccc;
+}
+
+.filter-tab.active {
+  background: #1a1a2e;
+  color: white;
+}
+
+/* Fancy Table */
+.gd-fancy-table {
+  background: white;
+  overflow-x: auto;
+}
+
+.gd-fancy-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.gd-fancy-table thead th {
+  padding: 10px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  background: #f5f5f5;
+}
+
+.th-fancy-name {
+  width: 40%;
+  text-align: left;
+  padding-left: 15px;
+}
+
+.th-book {
+  width: 80px;
+}
+
+.th-no {
+  background: #faa9ba;
+  color: #000;
+  min-width: 80px;
+}
+
+.th-yes {
+  background: #72bbef;
+  color: #000;
+  min-width: 80px;
+}
+
+.gd-fancy-table tbody tr {
+  border-bottom: 1px solid #eee;
+}
+
+.gd-fancy-table tbody tr:hover {
+  background: #f9f9f9;
+}
+
+.td-fancy-name {
+  padding: 12px 15px;
+  font-weight: 600;
+  color: #333;
+  font-size: 13px;
+}
+
+.td-book {
+  position: relative;
+  padding: 8px;
+  text-align: center;
+}
+
+/* Desktop: show Book, hide (i). Mobile: opposite via media query below */
+.fancy-info-btn.fancy-info-mobile {
+  display: none;
+}
+
+.fancy-info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: #e0e0e0;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.fancy-info-btn:hover {
+  background: #d0d0d0;
+  color: #1a1a2e;
+}
+
+.fancy-minmax-popover {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%) translateY(-6px);
+  padding: 8px 12px;
+  background: #1a1a2e;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.fancy-minmax-popover::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #1a1a2e;
+}
+
+.book-btn {
+  padding: 6px 16px;
+  background: #ddd;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Fancy: desktop show Book, mobile hide it */
+.gd-fancy-table .book-btn.fancy-book-desktop {
+  display: inline-block;
+}
+
+.book-btn:hover {
+  background: #ccc;
+}
+
+.td-odds.no {
+  background: #faa9ba;
+}
+
+.td-odds.no:hover {
+  background: #f5a0b0;
+}
+
+.td-odds.yes {
+  background: #72bbef;
+}
+
+.td-odds.yes:hover {
+  background: #5aacec;
+}
+
+.td-minmax-fancy {
+  padding: 12px 15px;
+  text-align: right;
+  font-size: 12px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 992px) {
+  .score-stats,
+  .team-scores {
+    gap: 15px;
+  }
+
+  .stat-label,
+  .score-value {
+    min-width: 35px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Fancy bet table: hide Min/Max column on mobile; use (i) icon popover instead */
+  .gd-fancy-table .th-minmax,
+  .gd-fancy-table .td-minmax-fancy.fancy-minmax-desktop {
+    display: none !important;
+  }
+
+  /* Fancy: on mobile show (i) icon, hide Book button */
+  .gd-fancy-table .book-btn.fancy-book-desktop {
+    display: none !important;
+  }
+
+  .gd-fancy-table .fancy-info-btn.fancy-info-mobile {
+    display: inline-flex !important;
+  }
+
+  .gd-container {
+    padding: 5px;
+  }
+
+  .gd-scoreboard-header {
+    /* Keep header items horizontal on mobile as well */
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .score-stats {
+    display: none;
+  }
+
+  .team-scores {
+    display: none;
+  }
+
+  .gd-market-header {
+    /* Show title and matched info in a horizontal row on mobile */
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .td-odds {
+    min-width: 50px;
+    padding: 6px 3px;
+  }
+
+  .td-odds .odds {
+    font-size: 12px;
+  }
+
+  .td-odds .size {
+    font-size: 9px;
+  }
+
+  .fancy-filter-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 5px;
+  }
+
+  .filter-tab {
+    white-space: nowrap;
+  }
+
+  /* Mobile: move Min/Max into team header box and keep only one Back/Lay column */
+  .gd-header-desktop {
+    display: none;
+  }
+
+  .gd-header-mobile {
+    display: table-row;
+  }
+
+  .th-minmax {
+    display: none;
+  }
+
+  .th-minmax-mobile {
+    display: block;
+  }
+
+  /* Show only Back last (3rd) and Lay first (1st) for each row on mobile */
+  .gd-market-table tbody tr td:nth-child(2),
+  .gd-market-table tbody tr td:nth-child(3),
+  .gd-market-table tbody tr td:nth-child(6),
+  .gd-market-table tbody tr td:nth-child(7) {
+    display: none;
+  }
+
+  /* Team cell width 60% on mobile */
+  .td-team {
+    width: 60%;
+  }
+}
+
+/* ==================== BET SLIP ==================== */
+.td-odds.clickable {
+  cursor: pointer;
+}
+
+.gd-market-table tbody tr.selected {
+  background: #e3f2fd;
+}
+
+.bet-slip-row {
+  background: transparent !important;
+}
+
+.bet-slip-row td {
+  padding: 0 !important;
+  border: none !important;
+}
+
+.bet-slip {
+  background: #e8f4fc;
+  border: 2px solid #72bbef;
+  border-radius: 4px;
+  margin: 5px 10px 10px;
+  overflow: hidden;
+}
+
+.bet-slip.lay {
+  background: #fce8ec;
+  border-color: #faa9ba;
+}
+
+.bet-slip-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 15px;
+  background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+  border-top: 1px solid #dee2e6;
+  width: 100%;
+}
+
+.cancel-btn {
+  height: 42px;
+  padding: 0 20px;
+  background: #ffffff;
+  color: #495057;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cancel-btn:hover {
+  background: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.cancel-btn:active {
+  background: #e9ecef;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  height: 42px;
+  background: white;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  flex: 1;
+}
+
+.input-group input {
+  flex: 1;
+  height: 100%;
+  padding: 0 8px;
+  border: none;
+  border-left: 1px solid #e9ecef;
+  border-right: 1px solid #e9ecef;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: #212529;
+  background: #fff;
+  min-width: 60px;
+}
+
+.input-group input:focus {
+  outline: none;
+  background: #f8f9fa;
+}
+
+/* Remove number input arrows */
+.input-group input[type='number']::-webkit-inner-spin-button,
+.input-group input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input-group input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.input-btn {
+  width: 36px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border: none;
+  cursor: pointer;
+  color: #0d6efd;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.input-btn:hover {
+  background: #e9ecef;
+  color: #0a58ca;
+}
+
+.input-btn:active {
+  background: #dee2e6;
+}
+
+.input-btn.minus {
+  border-right: 1px solid #e9ecef;
+}
+
+.input-btn.plus {
+  border-left: 1px solid #e9ecef;
+}
+
+.place-bet-btn {
+  height: 42px;
+  padding: 0 25px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.place-bet-btn:hover:not(:disabled) {
+  background: #1aa179;
+}
+
+.place-bet-btn:active:not(:disabled) {
+  background: #158765;
+}
+
+.place-bet-btn.back {
+  background: #20c997;
+}
+
+.place-bet-btn.back:hover:not(:disabled) {
+  background: #1aa179;
+}
+
+.place-bet-btn.lay {
+  background: #dc3545;
+}
+
+.place-bet-btn.lay:hover:not(:disabled) {
+  background: #c82333;
+}
+
+.place-bet-btn.lay:active:not(:disabled) {
+  background: #bd2130;
+}
+
+.place-bet-btn:disabled {
+  background: #adb5bd;
+  cursor: not-allowed;
+}
+
+/* Quick Stakes */
+.quick-stakes {
+  display: flex;
+  gap: 6px;
+  padding: 10px 15px 12px;
+  background: #e9ecef;
+  border-top: 1px solid #ced4da;
+}
+
+.quick-stake-btn {
+  flex: 1;
+  min-width: 55px;
+  padding: 10px 4px;
+  background: #ffffff;
+  color: #495057;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.quick-stake-btn:hover {
+  background: #e7f5ff;
+  border-color: #74c0fc;
+  color: #1971c2;
+}
+
+.quick-stake-btn:active {
+  background: #d0ebff;
+}
+
+/* Mobile actions row (cancel / place) below quick stakes */
+.bet-slip-actions-mobile {
+  display: none;
+}
+
+/* Responsive Bet Slip */
+@media (max-width: 992px) {
+  .cancel-btn,
+  .place-bet-btn {
+    padding: 0 15px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bet-slip-form {
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 10px;
+  }
+
+  .cancel-btn {
+    height: 38px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .input-group {
+    flex: 1;
+    min-width: 90px;
+    height: 38px;
+  }
+
+  .input-group input {
+    font-size: 13px;
+    min-width: 40px;
+  }
+
+  .input-btn {
+    width: 30px;
+    font-size: 14px;
+  }
+
+  .place-bet-btn {
+    height: 38px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .quick-stakes {
+    gap: 4px;
+    padding: 8px 10px 10px;
+    flex-wrap: wrap;
+  }
+
+  .quick-stake-btn {
+    flex: 0 0 calc(25% - 3px);
+    min-width: 40px;
+    padding: 8px 2px;
+    font-size: 11px;
+  }
+
+  .bet-slip-info {
+    padding: 10px;
+  }
+
+  .bet-info-row {
+    font-size: 12px;
+    padding: 5px 0;
+  }
+
+  /* Hide inline cancel/place buttons in the form on mobile */
+  .bet-slip-form .cancel-btn,
+  .bet-slip-form .place-bet-btn {
+    display: none;
+  }
+
+  /* Show stacked actions row below quick stakes on mobile */
+  .bet-slip-actions-mobile {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px 12px;
+    background: #e9ecef;
+    border-top: 1px solid #ced4da;
+  }
+
+  /* Make Cancel / Place Bet buttons equal width on mobile */
+  .bet-slip-actions-mobile .cancel-btn,
+  .bet-slip-actions-mobile .place-bet-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+/* ==================== BLINK ANIMATION FOR ODDS CHANGES ==================== */
+@keyframes oddsBlink {
+  0% {
+    background-color: rgba(255, 193, 7, 0.4) !important;
+    box-shadow: inset 0 0 15px rgba(255, 193, 7, 0.3);
+  }
+
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+/* Whole box blink - both back and lay use yellow */
+.td-odds:has(.back.blink),
+.td-odds:has(.lay.blink) {
+  animation: oddsBlink 0.6s ease-out !important;
+}
+
+/* Additional: make td with back/lay class blink when contains .blink */
+.td-odds.back:has(.blink),
+.td-odds.lay:has(.blink) {
+  animation: oddsBlink 0.6s ease-out !important;
+}
+
+/* Fallback: make the span overlay the cell */
+.td-odds .back.blink,
+.td-odds .lay.blink {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  background: rgba(255, 193, 7, 0.4) !important;
+  animation: oddsBlink 0.6s ease-out;
+}
+
+/* ==================== CARD STYLE MARKET ==================== */
+.gd-card-market {
+  background: #ffffff;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.gd-card-market-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #1a2a3a 0%, #0d1a26 100%);
+  border-radius: 8px 8px 0 0;
+}
+
+.card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-market-title {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.card-info-icon {
+  color: #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.card-info-icon:hover {
+  opacity: 1;
+}
+
+.card-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.card-matched-text {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.gd-card-market-content {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  background: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 100%);
+  min-height: 120px;
+}
+
+.card-team-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.card-team-box:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.card-team-box:active {
+  transform: translateY(0);
+}
+
+.card-team-name {
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.card-betting-box {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.card-team-box:hover .card-betting-box {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.card-team-box.selected .card-betting-box {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 2px rgba(20, 128, 94, 0.4), 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.gd-card-betslip {
+  padding: 10px 16px 16px;
+  background: #ffffff;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.card-odds {
+  color: #2e7d32;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.card-matched {
+  color: #2e7d32;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .gd-card-market-content {
+    gap: 12px;
+    padding: 5px;
+  }
+
+  .card-team-box {
+    width: 100%;
+  }
+
+  .card-betting-box {
+    padding: 5px;
+  }
+
+  .card-odds {
+    font-size: 20px;
+  }
+
+  .card-market-title {
+    font-size: 13px;
+  }
+
+  .card-matched-text {
+    font-size: 11px;
+  }
+}
+
+/* Fancy / Sportsbook section – sportbook inline tables */
+.gd-sportbook-tables {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gd-market-table.sportbook-inline {
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.gd-market-header.sportbook-inline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--header-bg, #f5f5f5);
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
+.gd-market-header.sportbook-inline-header .market-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.gd-market-header.sportbook-inline-header .minmax-value {
+  font-size: 12px;
+  color: var(--text-muted, #666);
+}
+
+.gd-inline-betslip {
+  padding: 12px;
+  border-top: 1px solid var(--border-color, #e0e0e0);
+  background: var(--betslip-bg, #fafafa);
+}
+
+/* ==================== BOOK MODAL ==================== */
+.book-modal-container {
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+}
+
+.book-modal-body {
+  padding: 0;
+  max-height: calc(80vh - 60px);
+  overflow-y: auto;
+}
+
+.book-table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.book-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.book-table thead {
+  background: #f5f5f5;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.book-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #ddd;
+}
+
+.book-table th:first-child {
+  width: 40%;
+}
+
+.book-table th:last-child {
+  width: 60%;
+  text-align: right;
+}
+
+.book-table tbody tr {
+  border-bottom: 1px solid #eee;
+}
+
+.book-table tbody tr:hover {
+  background: #f9f9f9;
+}
+
+.book-table tbody td {
+  padding: 10px 16px;
+  color: #333;
+}
+
+.book-table tbody td:last-child {
+  text-align: right;
+  font-weight: 600;
+}
+
+.book-table tbody tr.book-profit {
+  /* exact-style solid blue like screenshot */
+  background: #72bbef;
+}
+
+.book-table tbody tr.book-loss {
+  /* exact-style solid pink like screenshot */
+  background: #faa9ba;
+}
+
+.book-table .amount-profit {
+  color: #000;
+}
+
+.book-table .amount-loss {
+  color: #000;
+}
+
+/* Keep text readable on solid row colors */
+.book-table tbody tr.book-profit td,
+.book-table tbody tr.book-loss td {
+  color: #000;
+}
+
