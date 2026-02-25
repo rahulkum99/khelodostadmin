@@ -154,6 +154,13 @@ export const authApi = createApi({
       }),
       providesTags: ['Wallet'],
     }),
+    getBankingAdmins: builder.query({
+      query: () => ({
+        url: '/wallet/banking/admins',
+        method: 'GET',
+      }),
+      providesTags: ['Wallet'],
+    }),
     walletBulkAction: builder.mutation({
       query: (body) => ({
         url: '/wallet/bulk/action',
@@ -249,6 +256,7 @@ export const {
   useGetWalletTransactionsByUserIdQuery,
   useAddAmountToWalletMutation,
   useGetBankingUsersQuery,
+  useGetBankingAdminsQuery,
   useWalletBulkActionMutation,
   useGetAdminBetListQuery,
   useGetUserBetsQuery,

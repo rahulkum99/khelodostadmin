@@ -28,6 +28,7 @@ import UserProfitLossEventsScreen from "./screen/UserProfitLossEventsScreen";
 import UserProfitLossMarketsScreen from "./screen/UserProfitLossMarketsScreen";
 import UserProfitLossEventDetailsScreen from "./screen/UserProfitLossEventDetailsScreen";
 import MarketAnalysisScreen from "./screen/MarketAnalysisScreen";
+import MarketDetailsScreen from "./screen/MarketDetailsScreen";
 import BetlistScreen from "./screen/BetlistScreen";
 import WalletHistoryScreen from "./screen/WalletHistoryScreen";
 
@@ -60,6 +61,7 @@ function App() {
     { path: "/user-detail/:userId/profit-loss/:sportName/event/:eventId", component: <UserProfitLossMarketsScreen/> },
     { path: "/user-detail/:userId/profit-loss/:sportName/event/:eventId/market/:marketId", component: <UserProfitLossEventDetailsScreen/> },
     { path: "/market-analysis", component: <MarketAnalysisScreen/> },
+    { path: "/market-details", component: <MarketDetailsScreen/> },
     { path: "/betlist", component: <BetlistScreen/> },
   ];
 

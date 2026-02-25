@@ -1,0 +1,51 @@
+.market-analysis-page {
+  min-height: 100vh;
+  background-color: #dcdcdc;
+}
+
+.market-analysis-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.market-group {
+  background-color: #dcdcdc;
+  border: 1px solid #a9a9a9;
+  margin-bottom: 12px;
+}
+
+.market-group-header {
+  background-color: #214968;
+  color: #ffffff;
+  padding: 6px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.market-group-body {
+  background-color: #f2f2f2;
+  padding: 4px 0;
+}
+
+.market-row {
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+.market-link-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #005ea6;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.market-link-button:hover {
+  text-decoration: underline;
+}
+
