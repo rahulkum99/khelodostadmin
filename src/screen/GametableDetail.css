@@ -225,6 +225,45 @@
   }
 }
 
+/* Market List modal styling (Master/User Book) */
+.gd-marketlist-modal {
+  max-width: 700px;
+  width: 90%;
+}
+
+.gd-marketlist-header {
+  background: linear-gradient(#0c304f, #08223a);
+  color: #ffffff;
+  border-bottom: none;
+}
+
+.gd-marketlist-body {
+  padding: 0;
+}
+
+.gd-marketlist-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.gd-marketlist-item {
+  padding: 10px 16px;
+  border-bottom: 1px solid #d0d4da;
+  font-size: 13px;
+  font-weight: 600;
+  background: #ffffff;
+}
+
+.gd-marketlist-item:first-child {
+  background: #e6e9ef;
+}
+
+.gd-marketlist-empty {
+  font-weight: 400;
+  color: #666;
+}
+
 /* Loading & Error States */
 .gd-loading,
 .gd-error,
