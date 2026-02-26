@@ -995,67 +995,9 @@ function GametableDetail({ event: eventProp }) {
 
   return (
     <div className="gd-container">
-      {/* Scoreboard Section */}
-      <div className="gd-scoreboard">
-        <div className="gd-scoreboard-header">
-          <span className="powered-by">{event?.matchName}</span>
-          <div className="score-stats">
-            <span className="stat-label">SCORE</span>
-            <span className="stat-label">OVS</span>
-            <span className="stat-label">RR</span>
-            <span className="stat-label">4S</span>
-            <span className="stat-label">6S</span>
-            <span className="stat-label">WIDES</span>
-          </div>
-        </div>
-        <div className="gd-scoreboard-body">
-          <div className="team-row">
-            <div className="team-indicator">
-              <span className="indicator-dot" />
-            </div>
-            <div className="team-info">
-              <span className="team-icon">🏏</span>
-              <span className="team-name">{teams[0] || 'Team 1'}</span>
-            </div>
-            <div className="team-scores">
-              <span className="score-value">--</span>
-              <span className="score-value">--</span>
-              <span className="score-value">--</span>
-              <span className="score-value">--</span>
-              <span className="score-value">--</span>
-              <span className="score-value">--</span>
-            </div>
-          </div>
-          <div className="team-row batting">
-            <div className="team-indicator">
-              <span className="indicator-dot active" />
-            </div>
-            <div className="team-info">
-              <span className="team-icon">🏏</span>
-              <span className="team-name">{teams[1] || 'Team 2'}</span>
-              <span className="batsmen-info">R.Chase 8*, D.Brevis 9</span>
-            </div>
-            <div className="team-scores">
-              <span className="score-value highlight">69/4</span>
-              <span className="score-value">9.1/20</span>
-              <span className="score-value">7.5</span>
-              <span className="score-value">3</span>
-              <span className="score-value">4</span>
-              <span className="score-value">5</span>
-            </div>
-          </div>
-        </div>
-        <div className="gd-scoreboard-footer">
-          <span className="live-dots">
-            <span className="dot" />
-            <span className="dot" />
-            <span className="dot active" />
-          </span>
-          <span className="over-info">1 | 1</span>
-        </div>
-      </div>
-
-      {/* Match Odds Section */}
+      <div className="gd-layout">
+        <div className="gd-main">
+          {/* Match Odds Section */}
       {matchOdds.map((market) => (
         <div key={market.mid} className="gd-market-section">
           <div className="gd-market-header match-odds">
@@ -1303,8 +1245,8 @@ function GametableDetail({ event: eventProp }) {
         </div>
       ))}
 
-      {/* Bookmakers Section */}
-      {bookmakers.map((market) => (
+          {/* Bookmakers Section */}
+          {bookmakers.map((market) => (
         <div key={market.mid} className="gd-market-section">
           <div className="gd-market-header bookmaker">
             <div className="header-left">
@@ -1546,8 +1488,8 @@ function GametableDetail({ event: eventProp }) {
         </div>
       ))}
 
-      {/* Card Style Market Section - For Toss and Similar Markets with 2 Options */}
-      {eventData
+          {/* Card Style Market Section - For Toss and Similar Markets with 2 Options */}
+          {eventData
         .filter((market) => {
           const sections = market.section || [];
           const mname = (market.mname || '').toLowerCase();
@@ -1860,8 +1802,8 @@ function GametableDetail({ event: eventProp }) {
           );
         })}
 
-      {/* Fancy Bet / Sportsbook Section */}
-      {(fancyBets.length > 0 || sportbookMarkets.length > 0) && (
+          {/* Fancy Bet / Sportsbook Section */}
+          {(fancyBets.length > 0 || sportbookMarkets.length > 0) && (
         <div className="gd-market-section fancy-section">
           <div className="gd-fancy-tabs">
             <div className="fancy-tab-group">
@@ -2309,9 +2251,141 @@ function GametableDetail({ event: eventProp }) {
         </div>
       )}
 
-      {eventData.length === 0 && (
+          {eventData.length === 0 && (
         <div className="gd-no-data">No market data available</div>
       )}
+        </div>
+
+        <div className="gd-side">
+          {/* Scoreboard Section */}
+          <div className="gd-scoreboard">
+            <div className="gd-scoreboard-header">
+              <span className="powered-by">{event?.matchName}</span>
+              <div className="score-stats">
+                <span className="stat-label">SCORE</span>
+                <span className="stat-label">OVS</span>
+                <span className="stat-label">RR</span>
+                <span className="stat-label">4S</span>
+                <span className="stat-label">6S</span>
+                <span className="stat-label">WIDES</span>
+              </div>
+            </div>
+            <div className="gd-scoreboard-body">
+              <div className="team-row">
+                <div className="team-indicator">
+                  <span className="indicator-dot" />
+                </div>
+                <div className="team-info">
+                  <span className="team-icon">🏏</span>
+                  <span className="team-name">{teams[0] || 'Team 1'}</span>
+                </div>
+                <div className="team-scores">
+                  <span className="score-value">--</span>
+                  <span className="score-value">--</span>
+                  <span className="score-value">--</span>
+                  <span className="score-value">--</span>
+                  <span className="score-value">--</span>
+                  <span className="score-value">--</span>
+                </div>
+              </div>
+              <div className="team-row batting">
+                <div className="team-indicator">
+                  <span className="indicator-dot active" />
+                </div>
+                <div className="team-info">
+                  <span className="team-icon">🏏</span>
+                  <span className="team-name">{teams[1] || 'Team 2'}</span>
+                  <span className="batsmen-info">R.Chase 8*, D.Brevis 9</span>
+                </div>
+                <div className="team-scores">
+                  <span className="score-value highlight">69/4</span>
+                  <span className="score-value">9.1/20</span>
+                  <span className="score-value">7.5</span>
+                  <span className="score-value">3</span>
+                  <span className="score-value">4</span>
+                  <span className="score-value">5</span>
+                </div>
+              </div>
+            </div>
+            <div className="gd-scoreboard-footer">
+              <span className="live-dots">
+                <span className="dot" />
+                <span className="dot" />
+                <span className="dot active" />
+              </span>
+              <span className="over-info">1 | 1</span>
+            </div>
+          </div>
+
+          {/* Book panel below scoreboard */}
+          <div className="gd-book-panel">
+            <div className="gd-book-header">
+              <span className="gd-book-title">Book</span>
+            </div>
+
+            <div className="gd-book-tabs">
+              <button type="button" className="gd-book-tab active">
+                Master Book
+              </button>
+              <button type="button" className="gd-book-tab">
+                User Book
+              </button>
+            </div>
+
+            <div className="gd-book-toolbar">
+              <div className="gd-book-toggle-group">
+                <span className="gd-book-toggle-label">Live Bet</span>
+                <label className="gd-toggle">
+                  <input type="checkbox" defaultChecked />
+                  <span className="gd-toggle-slider" />
+                </label>
+                <span className="gd-book-toggle-label">Partnership Book</span>
+                <label className="gd-toggle">
+                  <input type="checkbox" defaultChecked />
+                  <span className="gd-toggle-slider" />
+                </label>
+              </div>
+              <button type="button" className="gd-book-view-more">
+                View More
+              </button>
+            </div>
+
+            <div className="gd-book-table-wrapper">
+              <table className="gd-book-table">
+                <thead>
+                  <tr>
+                    <th>Market Name</th>
+                    <th>Odds</th>
+                    <th>Stake</th>
+                    <th>Username</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="gd-book-time-row">
+                    <td colSpan={4}>
+                      Time: Feb 18, 2026, 8:31:19 PM
+                    </td>
+                  </tr>
+                  <tr className="gd-book-row gd-book-row-back">
+                    <td>
+                      <div className="gd-book-market-name">
+                        <span className="gd-book-bet-type">BACK</span>
+                        <div className="gd-book-market-text">
+                          <span className="gd-book-selection">India</span>
+                          <span className="gd-book-market-sub">Match Odds</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>1.06</td>
+                    <td>100</td>
+                    <td className="gd-book-username">demo2026</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Book Modal */}
       {bookModal && (

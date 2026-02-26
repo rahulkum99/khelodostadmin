@@ -1,7 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import { useCreateUserMutation } from '../redux/api/authApi'
 import { toast } from 'react-toastify'
 import './AddUserModal.css'
+import { userSelector } from '../redux/slices/authReducer'
 
 const ROLES = {
   AGENT: 'agent',
@@ -10,7 +12,22 @@ const ROLES = {
   ADMIN: 'admin'
 };
 
+const ROLE_HIERARCHY = {
+  [ROLES.AGENT]: 2,
+  [ROLES.MASTER]: 3,
+  [ROLES.SUPER_MASTER]: 4,
+  [ROLES.ADMIN]: 5
+};
+
+const ROLE_OPTIONS = [
+  { value: ROLES.AGENT, label: 'Agent' },
+  { value: ROLES.MASTER, label: 'Master' },
+  { value: ROLES.SUPER_MASTER, label: 'Super Master' },
+  { value: ROLES.ADMIN, label: 'Admin' }
+];
+
 function AddMasterModal({ isOpen, onClose, onSubmit }) {
+  const user = useSelector(userSelector);
   const [createUser, { isLoading }] = useCreateUserMutation();
   const [formData, setFormData] = useState({
     username: '',
@@ -31,6 +48,40 @@ function AddMasterModal({ isOpen, onClose, onSubmit }) {
     confirmPassword: false,
     masterPassword: false
   });
+
+  const getRoleLevel = (role) => ROLE_HIERARCHY[role] || 0;
+
+  // Map current logged-in user's role to hierarchy level
+  const currentUserRoleKey = (() => {
+    const role = (user?.role || '').toLowerCase();
+    if (role === 'agent') return ROLES.AGENT;
+    if (role === 'master') return ROLES.MASTER;
+    if (role === 'super_master') return ROLES.SUPER_MASTER;
+    if (role === 'admin') return ROLES.ADMIN;
+    return null;
+  })();
+
+  const currentUserLevel =
+    currentUserRoleKey != null ? getRoleLevel(currentUserRoleKey) : Number.POSITIVE_INFINITY;
+
+  // Only allow creating accounts strictly below the current user's hierarchy level
+  const allowedRoleValues = ROLE_OPTIONS
+    .map((opt) => opt.value)
+    .filter((role) => {
+      const level = getRoleLevel(role);
+      return level > 0 && level < currentUserLevel;
+    });
+
+  // Ensure the selected role is always within the allowed options
+  useEffect(() => {
+    if (!allowedRoleValues.length) return;
+    if (!allowedRoleValues.includes(formData.role)) {
+      setFormData((prev) => ({
+        ...prev,
+        role: allowedRoleValues[0]
+      }));
+    }
+  }, [allowedRoleValues, formData.role]);
 
   const togglePasswordVisibility = (field) => {
     setPasswordVisible(prev => ({
@@ -176,10 +227,15 @@ function AddMasterModal({ isOpen, onClose, onSubmit }) {
                 value={formData.role}
                 onChange={handleInputChange}
               >
-                <option value={ROLES.AGENT}>Agent</option>
-                <option value={ROLES.MASTER}>Master</option>
-                <option value={ROLES.SUPER_MASTER}>Super Master</option>
-                <option value={ROLES.ADMIN}>Admin</option>
+                {allowedRoleValues.map((role) => {
+                  const option = ROLE_OPTIONS.find((opt) => opt.value === role);
+                  if (!option) return null;
+                  return (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  );
+                })}
               </select>
             </div>
           </div>

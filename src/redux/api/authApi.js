@@ -238,6 +238,21 @@ export const authApi = createApi({
       }),
       providesTags: ['Bets'],
     }),
+    getTodayInplayPlacedBets: builder.query({
+      query: () => ({
+        // Full URL: <VITE_API_BASE_URL>/api/bets/today-inplay-placed-bets
+        url: '/bets/today-inplay-placed-bets',
+        method: 'GET',
+      }),
+      transformResponse: (response) => {
+        // Expecting { success: boolean, data: [...] }
+        if (response && Array.isArray(response.data)) {
+          return response.data;
+        }
+        return [];
+      },
+      providesTags: ['Bets'],
+    }),
   }),
 });
 
@@ -264,6 +279,7 @@ export const {
   useGetUserEventProfitLossQuery,
   useGetHierarchyProfitLossQuery,
   useGetHierarchySettledBetsQuery,
+  useGetTodayInplayPlacedBetsQuery,
 } = authApi;
 
 
