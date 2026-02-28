@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useEventDetailWebSocket } from '../redux/hooks/useEventDetailWebSocket';
+import { useGetMarketAnalysisQuery } from '../redux/api/authApi';
 import { toast } from 'react-toastify';
 import './GametableDetail.css';
 import OddsCell from './OddsCell';
@@ -61,6 +62,11 @@ function GametableDetail({ event: eventProp }) {
   })();
 
   const sport = event?.sport || 'cricket';
+
+  // Market analysis (aggregated profit/loss per market/selection) for this event
+  const { data: marketAnalysis = [] } = useGetMarketAnalysisQuery(eventIdString, {
+    skip: !eventIdString,
+  });
 
   // WebSocket data for event detail only
   const {
@@ -138,6 +144,73 @@ function GametableDetail({ event: eventProp }) {
 
     return Array.from(seen);
   }, [matchOdds, bookmakers, fancyBets]);
+
+  // Map of server-side PL metrics by marketType + selectionId
+  const selectionPLMap = useMemo(() => {
+    const map = new Map();
+    (marketAnalysis || []).forEach((row) => {
+      const key = `${row.marketType}|${String(row.selectionId)}`;
+      map.set(key, {
+        profitLoss: row.profitLoss ?? 0,
+        totalPossibleProfit: row.totalPossibleProfit ?? 0,
+        totalPossibleLoss: row.totalPossibleLoss ?? 0,
+        totalExposure: row.totalExposure ?? 0,
+        unsettledExposure: row.unsettledExposure ?? 0,
+      });
+    });
+    return map;
+  }, [marketAnalysis]);
+
+  const getServerPL = (marketType, selectionId) => {
+    if (!marketType || selectionId == null) {
+      return {
+        profitLoss: 0,
+        totalPossibleProfit: 0,
+        totalPossibleLoss: 0,
+        totalExposure: 0,
+        unsettledExposure: 0,
+      };
+    }
+    const key = `${marketType}|${String(selectionId)}`;
+    const value = selectionPLMap.get(key);
+    if (!value) {
+      return {
+        profitLoss: 0,
+        totalPossibleProfit: 0,
+        totalPossibleLoss: 0,
+        totalExposure: 0,
+        unsettledExposure: 0,
+      };
+    }
+    return value;
+  };
+
+  // Scenario net P/L if a given selection wins within a market
+  const getScenarioNetPL = (marketId, marketType, winnerSelectionId) => {
+    if (!marketAnalysis || !marketId || winnerSelectionId == null || !marketType) {
+      return 0;
+    }
+    let net = 0;
+    marketAnalysis.forEach((row) => {
+      if (
+        String(row.marketId) !== String(marketId) ||
+        String(row.marketType) !== String(marketType)
+      ) {
+        return;
+      }
+
+      const isWinner = String(row.selectionId) === String(winnerSelectionId);
+      const tp = row.totalPossibleProfit ?? 0;
+      const tl = row.totalPossibleLoss ?? 0;
+
+      if (isWinner) {
+        net += tp;
+      } else {
+        net -= tl;
+      }
+    });
+    return net;
+  };
 
   // Filter fancy bets by active fancy tab (based on gtype)
   const filteredFancyBets = useMemo(() => {
@@ -1019,7 +1092,14 @@ function GametableDetail({ event: eventProp }) {
         <div className="gd-layout">
           <div className="gd-main">
             {/* Match Odds Section */}
-            {matchOdds.map((market) => (
+            {matchOdds.map((market) => {
+              const mnameLower = (market.mname || '').toLowerCase();
+              const marketTypeKey =
+                mnameLower.includes('tied') || mnameLower.includes('tied_match')
+                  ? 'tied_match'
+                  : 'match_odds';
+
+              return (
               <div key={market.mid} className="gd-market-section">
                 <div className="gd-market-header match-odds">
                   <div className="header-left">
@@ -1150,8 +1230,49 @@ function GametableDetail({ event: eventProp }) {
                           }
                         }
 
-                        // Get total profit/loss for this selection from today's bets (scoped by market mid)
-                        const { netProfitLoss } = getSelectionTotalProfitLoss(section.sid, market.mid);
+                        // Scenario net P/L if THIS selection wins (winner profit - other side losses)
+                        const scenarioNetPL = getScenarioNetPL(
+                          market.mid,
+                          marketTypeKey,
+                          section.sid,
+                        );
+
+                        // For tied_match, also show profit (this side) and loss (other side) explicitly.
+                        const thisPL = getServerPL(marketTypeKey, section.sid);
+                        const emptyPL = {
+                          profitLoss: 0,
+                          totalPossibleProfit: 0,
+                          totalPossibleLoss: 0,
+                          totalExposure: 0,
+                          unsettledExposure: 0,
+                        };
+                        const otherSelectionId = (market.section || []).find(
+                          (s) => String(s?.sid) !== String(section.sid),
+                        )?.sid;
+                        const otherPL =
+                          otherSelectionId != null
+                            ? getServerPL(marketTypeKey, otherSelectionId)
+                            : emptyPL;
+
+                        const thisProfit = Number(thisPL?.totalPossibleProfit || 0);
+                        const otherLossFromApi = Number(otherPL?.totalPossibleLoss || 0);
+                        const otherLoss =
+                          otherLossFromApi !== 0
+                            ? otherLossFromApi
+                            : Math.abs(Number(otherPL?.profitLoss || 0)) ||
+                              Number(otherPL?.unsettledExposure || 0) ||
+                              Number(otherPL?.totalExposure || 0) ||
+                              0;
+
+                        // Display net value:
+                        // - Prefer computed scenario net (works when API has both sides)
+                        // - Fallback to API profitLoss if scenario net is 0 but API has a non-zero PL
+                        const displayPL =
+                          marketTypeKey === 'tied_match'
+                            ? Number(thisPL?.profitLoss || 0)
+                            : scenarioNetPL !== 0
+                            ? scenarioNetPL
+                            : Number(thisPL?.profitLoss || 0);
 
                         return (
                           <React.Fragment key={section.sid}>
@@ -1163,16 +1284,29 @@ function GametableDetail({ event: eventProp }) {
                                 <span className="team-name">
                                   {section.nat}
 
-                                  {/* Show total profit/loss from today's bets */}
-                                  {isAuthenticated && netProfitLoss !== 0 && (
-                                    <span
-                                      className={`profit-loss-label ${netProfitLoss > 0 ? 'profit-text' : 'loss-text'
-                                        }`}
-                                    >
-                                      {netProfitLoss > 0
-                                        ? ` +${netProfitLoss.toLocaleString()}`
-                                        : ` ${netProfitLoss.toLocaleString()}`}
-                                    </span>
+                                  {/* Show net profit/loss if this selection wins */}
+                                  <span
+                                    className={`profit-loss-label ${
+                                      displayPL > 0 ? 'profit-text' : 'loss-text'
+                                    }`}
+                                  >
+                                    {displayPL > 0
+                                      ? ` +${displayPL.toLocaleString()}`
+                                      : ` ${Number(displayPL || 0).toFixed(2)}`}
+                                  </span>
+
+                                  {/* Tied Match: show profit (this side) and loss (other side) */}
+                                  {marketTypeKey === 'tied_match' && (
+                                    <>
+                                      <span className="profit-loss-label profit-text">
+                                        {' '}
+                                        (+{thisProfit.toLocaleString()})
+                                      </span>
+                                      <span className="profit-loss-label loss-text">
+                                        {' '}
+                                        (-{Number(otherLoss || 0).toLocaleString()})
+                                      </span>
+                                    </>
                                   )}
 
                                   {/* Show potential profit/loss for current bet selection */}
@@ -1259,11 +1393,14 @@ function GametableDetail({ event: eventProp }) {
                     </tbody>
                   </table>
                 </div>
-              </div>
-            ))}
+        </div>
+      )})}
 
             {/* Bookmakers Section */}
-            {bookmakers.map((market) => (
+            {bookmakers.map((market) => {
+              const marketTypeKey = 'bookmakers_fancy';
+
+              return (
               <div key={market.mid} className="gd-market-section">
                 <div className="gd-market-header bookmaker">
                   <div className="header-left">
@@ -1387,11 +1524,30 @@ function GametableDetail({ event: eventProp }) {
                           }
                         }
 
-                        // Get total profit/loss for this selection from today's bookmaker bets
-                        const { netProfitLoss: bookmakerNetPL } = getBookmakerSelectionProfitLoss(
-                          market.mid,
-                          section.sid,
-                        );
+                        // Market analysis (bookmakers): net if THIS selection wins
+                        // net = this totalPossibleProfit − other totalPossibleLoss
+                        const bookmakerPL = getServerPL(marketTypeKey, section.sid);
+                        const thisPossibleProfit = Number(bookmakerPL?.totalPossibleProfit ?? 0);
+                        const thisPossibleLoss = Number(bookmakerPL?.totalPossibleLoss ?? 0);
+
+                        const otherSelectionId = (market.section || []).find(
+                          (s) => String(s?.sid) !== String(section.sid),
+                        )?.sid;
+                        const otherPL =
+                          otherSelectionId != null
+                            ? getServerPL(marketTypeKey, otherSelectionId)
+                            : {
+                                profitLoss: 0,
+                                totalPossibleProfit: 0,
+                                totalPossibleLoss: 0,
+                                totalExposure: 0,
+                                unsettledExposure: 0,
+                              };
+                        const otherPossibleLoss = Number(otherPL?.totalPossibleLoss ?? 0);
+
+                        const netIfWin = thisPossibleProfit - otherPossibleLoss;
+                        const bookmakerNetPL = Number(bookmakerPL?.profitLoss ?? 0);
+                        const showNetIfWin = thisPossibleProfit !== 0 || otherPossibleLoss !== 0;
 
                         return (
                           <React.Fragment key={section.sid}>
@@ -1403,15 +1559,27 @@ function GametableDetail({ event: eventProp }) {
                                 <span className="team-name">
                                   {section.nat}
 
-                                  {/* Show total profit/loss from today's bookmaker bets */}
-                                  {isAuthenticated && bookmakerNetPL !== 0 && (
+                                  {/* Show net if THIS selection wins (Bookmakers) */}
+                                  {showNetIfWin ? (
                                     <span
-                                      className={`profit-loss-label ${bookmakerNetPL > 0 ? 'profit-text' : 'loss-text'
-                                        }`}
+                                      className={`profit-loss-label ${
+                                        netIfWin >= 0 ? 'profit-text' : 'loss-text'
+                                      }`}
+                                    >
+                                      {' '}
+                                      {netIfWin >= 0
+                                        ? `+${netIfWin.toLocaleString()}`
+                                        : netIfWin.toLocaleString()}
+                                    </span>
+                                  ) : (
+                                    <span
+                                      className={`profit-loss-label ${
+                                        bookmakerNetPL > 0 ? 'profit-text' : 'loss-text'
+                                      }`}
                                     >
                                       {bookmakerNetPL > 0
                                         ? ` +${bookmakerNetPL.toLocaleString()}`
-                                        : ` ${bookmakerNetPL.toLocaleString()}`}
+                                        : ` ${Number(bookmakerNetPL || 0).toFixed(2)}`}
                                     </span>
                                   )}
 
@@ -1498,8 +1666,8 @@ function GametableDetail({ event: eventProp }) {
                     </tbody>
                   </table>
                 </div>
-              </div>
-            ))}
+        </div>
+      )})}
 
             {/* Card Style Market Section - For Toss and Similar Markets with 2 Options */}
             {eventData
@@ -1675,15 +1843,19 @@ function GametableDetail({ event: eventProp }) {
                   }
                 }
 
-                // Include today's P/L for toss selections, same as Match Odds table
-                const { netProfitLoss: section1NetPL } = getSelectionTotalProfitLoss(
-                  section1.sid,
-                  market.mid,
-                );
-                const { netProfitLoss: section2NetPL } = getSelectionTotalProfitLoss(
-                  section2.sid,
-                  market.mid,
-                );
+                // P/L for toss: net if this side wins = this side possible profit − other side possible loss
+                // e.g. SL wins: net = 196 − 100; PAK wins: net = 98 − 200
+                const tossMarketType = 'tos_market';
+                const section1ServerPL = getServerPL(tossMarketType, section1.sid);
+                const section2ServerPL = getServerPL(tossMarketType, section2.sid);
+                const section1PossibleProfit = Number(section1ServerPL.totalPossibleProfit ?? 0);
+                const section1PossibleLoss = Number(section1ServerPL.totalPossibleLoss ?? 0);
+                const section2PossibleProfit = Number(section2ServerPL.totalPossibleProfit ?? 0);
+                const section2PossibleLoss = Number(section2ServerPL.totalPossibleLoss ?? 0);
+                const section1NetIfWin = section1PossibleProfit - section2PossibleLoss; // e.g. 196 - 100
+                const section2NetIfWin = section2PossibleProfit - section1PossibleLoss; // e.g. 98 - 200
+                const hasSection1PL = section1NetIfWin !== 0;
+                const hasSection2PL = section2NetIfWin !== 0;
 
                 return (
                   <div key={market.mid} className="gd-card-market">
@@ -1717,14 +1889,14 @@ function GametableDetail({ event: eventProp }) {
                       >
                         <div className="card-team-name">
                           {getTeamName(section1.nat)}
-                          {isAuthenticated && section1NetPL !== 0 && (
+                          {hasSection1PL && (
                             <span
-                              className={`profit-loss-label ${section1NetPL > 0 ? 'profit-text' : 'loss-text'
-                                }`}
+                              className={`profit-loss-label ${section1NetIfWin >= 0 ? 'profit-text' : 'loss-text'}`}
                             >
-                              {section1NetPL > 0
-                                ? ` +${section1NetPL.toLocaleString()}`
-                                : ` ${section1NetPL.toLocaleString()}`}
+                              {' '}
+                              {section1NetIfWin >= 0
+                                ? `+${section1NetIfWin.toLocaleString()}`
+                                : section1NetIfWin.toLocaleString()}
                             </span>
                           )}
                           {section1Profit > 0 && (
@@ -1768,14 +1940,14 @@ function GametableDetail({ event: eventProp }) {
                       >
                         <div className="card-team-name">
                           {getTeamName(section2.nat)}
-                          {isAuthenticated && section2NetPL !== 0 && (
+                          {hasSection2PL && (
                             <span
-                              className={`profit-loss-label ${section2NetPL > 0 ? 'profit-text' : 'loss-text'
-                                }`}
+                              className={`profit-loss-label ${section2NetIfWin >= 0 ? 'profit-text' : 'loss-text'}`}
                             >
-                              {section2NetPL > 0
-                                ? ` +${section2NetPL.toLocaleString()}`
-                                : ` ${section2NetPL.toLocaleString()}`}
+                              {' '}
+                              {section2NetIfWin >= 0
+                                ? `+${section2NetIfWin.toLocaleString()}`
+                                : section2NetIfWin.toLocaleString()}
                             </span>
                           )}
                           {section2Profit > 0 && (
@@ -1961,6 +2133,22 @@ function GametableDetail({ event: eventProp }) {
                         <tbody>
                           {filteredFancyBets.flatMap((market) => {
                             const sections = market.section || [];
+                            const gtype = (market.gtype || '').toLowerCase();
+                            const mname = (market.mname || '').toLowerCase();
+
+                            // Map WS gtype/mname to admin market-analysis marketType
+                            const marketTypeKey = (() => {
+                              if (gtype === 'fancy2') return 'line_market';
+                              if (gtype === 'fancy') {
+                                if (mname.includes('over by over')) return 'over_by_over';
+                                return 'fancy';
+                              }
+                              if (gtype === 'meter') return 'meter_market';
+                              if (gtype === 'khado') return 'kado_market';
+                              if (gtype) return gtype.replace(/-/g, '_');
+                              return 'fancy';
+                            })();
+
                             return sections.map((section) => {
                               const noOdd = section?.odds?.find(
                                 (o) => o.otype === 'back' || o.otype === 'no',
@@ -1979,23 +2167,20 @@ function GametableDetail({ event: eventProp }) {
                               const displayName = section?.nat?.trim()
                                 ? section.nat
                                 : market.mname || '';
-                              const fancyNetPL = isAuthenticated
-                                ? getFancySelectionNetPL(market, section)
-                                : 0;
+                              const fancyPL = getServerPL(marketTypeKey, section?.sid);
+                              const fancyPossibleProfit = Number(
+                                fancyPL?.totalPossibleProfit ?? 0,
+                              );
 
                               return (
                                 <React.Fragment key={`${market.mid}-${section.sid}`}>
                                   <tr className={isSuspended ? 'suspended' : ''}>
                                     <td className="td-fancy-name">
                                       {displayName}
-                                      {isAuthenticated && fancyNetPL !== 0 && (
-                                        <span
-                                          className={`profit-loss-label ${fancyNetPL > 0 ? 'profit-text' : 'loss-text'
-                                            }`}
-                                        >
-                                          {fancyNetPL > 0
-                                            ? ` +${fancyNetPL.toLocaleString()}`
-                                            : ` ${fancyNetPL.toLocaleString()}`}
+                                      {fancyPossibleProfit > 0 && (
+                                        <span className="profit-loss-label profit-text">
+                                          {' '}
+                                          +{fancyPossibleProfit.toLocaleString()}
                                         </span>
                                       )}
                                     </td>
@@ -2152,9 +2337,8 @@ function GametableDetail({ event: eventProp }) {
                               const isSelected =
                                 selectedBet?.sectionId === section.sid &&
                                 selectedBet?.marketId === market.mid;
-                              const { netProfitLoss: sportbookNetPL } = isAuthenticated
-                                ? getSelectionTotalProfitLoss(section.sid, market.mid)
-                                : { netProfitLoss: 0 };
+                              const { netProfitLoss: sportbookNetPL } =
+                                getSelectionTotalProfitLoss(section.sid, market.mid);
 
                               return (
                                 <React.Fragment key={section.sid}>
@@ -2164,16 +2348,15 @@ function GametableDetail({ event: eventProp }) {
                                   >
                                     <td className="td-team">
                                       {section.nat}
-                                      {isAuthenticated && sportbookNetPL !== 0 && (
-                                        <span
-                                          className={`profit-loss-label ${sportbookNetPL > 0 ? 'profit-text' : 'loss-text'
-                                            }`}
-                                        >
-                                          {sportbookNetPL > 0
-                                            ? ` +${sportbookNetPL.toLocaleString()}`
-                                            : ` ${sportbookNetPL.toLocaleString()}`}
-                                        </span>
-                                      )}
+                                      <span
+                                        className={`profit-loss-label ${
+                                          sportbookNetPL > 0 ? 'profit-text' : 'loss-text'
+                                        }`}
+                                      >
+                                        {sportbookNetPL > 0
+                                          ? ` +${sportbookNetPL.toLocaleString()}`
+                                          : ` ${Number(sportbookNetPL || 0).toFixed(2)}`}
+                                      </span>
                                     </td>
                                     <td
                                       className="td-odds back clickable"

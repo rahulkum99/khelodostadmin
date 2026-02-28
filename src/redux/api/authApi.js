@@ -253,6 +253,22 @@ export const authApi = createApi({
       },
       providesTags: ['Bets'],
     }),
+    getMarketAnalysis: builder.query({
+      query: (eventId) => ({
+        url: '/bets/admin/market-analysis',
+        method: 'GET',
+        params: { eventId },
+      }),
+      transformResponse: (response) => {
+        if (response && Array.isArray(response.data)) {
+          return response.data;
+        }
+        return [];
+      },
+      providesTags: (result, error, eventId) => [
+        { type: 'Bets', id: `market-analysis-${eventId}` },
+      ],
+    }),
   }),
 });
 
@@ -280,6 +296,7 @@ export const {
   useGetHierarchyProfitLossQuery,
   useGetHierarchySettledBetsQuery,
   useGetTodayInplayPlacedBetsQuery,
+  useGetMarketAnalysisQuery,
 } = authApi;
 
 
