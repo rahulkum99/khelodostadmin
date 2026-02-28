@@ -1,7 +1,11 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useEventDetailWebSocket } from '../redux/hooks/useEventDetailWebSocket';
-import { useGetMarketAnalysisQuery } from '../redux/api/authApi';
+import {
+  useGetMarketAnalysisQuery,
+  useGetHierarchyMarketBetsQuery,
+  useGetHierarchyUserMarketProfitLossQuery,
+} from '../redux/api/authApi';
 import { toast } from 'react-toastify';
 import './GametableDetail.css';
 import OddsCell from './OddsCell';
@@ -16,7 +20,8 @@ function GametableDetail({ event: eventProp }) {
   const [fancyInfoMarketId, setFancyInfoMarketId] = useState(null); // market.mid when (i) clicked to show min/max on mobile
   const fancyInfoRef = useRef(null);
   const [bookModal, setBookModal] = useState(null); // { market, section } when Book modal is open
-  const [bookListModal, setBookListModal] = useState(null); // { type: 'master' | 'user' } when Market List modal is open
+  const [bookListModal, setBookListModal] = useState(null); // { type: 'master' | 'user', selectedMarket: null | { marketId, marketName, marketType } }
+  const [isLiveBetEnabled, setIsLiveBetEnabled] = useState(true);
 
   // Close fancy min/max popover when clicking outside
   useEffect(() => {
@@ -62,6 +67,30 @@ function GametableDetail({ event: eventProp }) {
   })();
 
   const sport = event?.sport || 'cricket';
+
+  // Right sidebar live bets via RTK Query
+  const {
+    data: liveBets = [],
+    isLoading: liveBetsLoading,
+    isError: liveBetsIsError,
+  } = useGetHierarchyMarketBetsQuery(
+    { eventId: eventIdString, sport },
+    { skip: !eventIdString || !isLiveBetEnabled },
+  );
+
+  const selectedBookMarket = bookListModal?.selectedMarket;
+  const {
+    data: hierarchyBookData,
+    isLoading: hierarchyBookLoading,
+    isError: hierarchyBookError,
+  } = useGetHierarchyUserMarketProfitLossQuery(
+    {
+      eventId: eventIdString,
+      marketId: selectedBookMarket?.marketId,
+      marketType: selectedBookMarket?.marketType,
+    },
+    { skip: !selectedBookMarket || !eventIdString },
+  );
 
   // Market analysis (aggregated profit/loss per market/selection) for this event
   const { data: marketAnalysis = [] } = useGetMarketAnalysisQuery(eventIdString, {
@@ -143,6 +172,35 @@ function GametableDetail({ event: eventProp }) {
     fancyBets.forEach((m) => add(m.mname || 'Fancy'));
 
     return Array.from(seen);
+  }, [matchOdds, bookmakers, fancyBets]);
+
+  // Map gtype/mname to API marketType for hierarchy-user-market-profit-loss
+  const getMarketTypeForApi = (market) => {
+    const gtype = (market.gtype || '').toLowerCase();
+    const mname = (market.mname || '').toLowerCase();
+    if (gtype === 'match' || mname.includes('match_odds') || mname.includes('match odds')) return 'match_odds';
+    if (gtype === 'match1' || mname.includes('bookmaker')) return 'bookmakers_fancy';
+    return gtype || 'fancy';
+  };
+
+  // Markets with id/type for Master Book / User Book modal (click to open P/L table)
+  const marketListWithIds = useMemo(() => {
+    const out = [];
+    const seen = new Set();
+    const add = (m) => {
+      const id = m.mid;
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      out.push({
+        marketId: id,
+        marketName: m.mname || 'Market',
+        marketType: getMarketTypeForApi(m),
+      });
+    };
+    matchOdds.forEach(add);
+    bookmakers.forEach(add);
+    fancyBets.forEach(add);
+    return out;
   }, [matchOdds, bookmakers, fancyBets]);
 
   // Map of server-side PL metrics by marketType + selectionId
@@ -963,126 +1021,8 @@ function GametableDetail({ event: eventProp }) {
     event?.matchName?.split(' vs ') ||
     ['Team 1', 'Team 2'];
 
-  // Render bet slip inline
-  const renderBetSlip = () => {
-    if (!selectedBet) return null;
-
-    const { profit, liability, totalReturn } = getProfitLossDisplay();
-    const selectedMarket = eventData.find((m) => m.mid === selectedBet.marketId);
-    const isBookmakerMarket = (selectedMarket?.gtype || '').toLowerCase() === 'match1';
-    const minOdds = isBookmakerMarket ? 0.01 : 1.01;
-
-    return (
-      <div className={`bet-slip ${selectedBet.type}`}>
-        <div className="bet-slip-form">
-          <button
-            type="button"
-            className="cancel-btn"
-            onClick={handleCancelBet}
-          >
-            Cancel
-          </button>
-
-          <div className="input-group odds-input">
-            <button
-              type="button"
-              className="input-btn minus"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => handleOddsChange(-0.01)}
-            >
-              −
-            </button>
-            <input
-              type="number"
-              value={betOdds}
-              onChange={(e) => setBetOdds(parseFloat(e.target.value) || minOdds)}
-              step="0.01"
-              min={minOdds}
-            />
-            <button
-              type="button"
-              className="input-btn plus"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => handleOddsChange(0.01)}
-            >
-              +
-            </button>
-          </div>
-
-          <div className="input-group stake-input">
-            <button
-              type="button"
-              className="input-btn minus"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => handleStakeChange(-10)}
-            >
-              −
-            </button>
-            <input
-              type="number"
-              value={betStake}
-              onChange={(e) => setBetStake(parseInt(e.target.value, 10) || 0)}
-              min="0"
-            />
-            <button
-              type="button"
-              className="input-btn plus"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => handleStakeChange(10)}
-            >
-              +
-            </button>
-          </div>
-
-          <button
-            type="button"
-            className={`place-bet-btn ${selectedBet.type}`}
-            onClick={handlePlaceBet}
-            disabled={
-              betStake < selectedBet.min ||
-              betOdds
-              <= (selectedBet.marketName?.toLowerCase().includes('bookmaker') ? 0 : 1) ||
-              isPlacingBet
-            }
-          >
-            Place Bet
-          </button>
-        </div>
-
-        <div className="quick-stakes">
-          {quickStakes.map((stake) => (
-            <button
-              type="button"
-              key={stake}
-              className="quick-stake-btn"
-              onClick={() => handleQuickStake(stake)}
-            >
-              {stake >= 1000 ? `${stake / 1000}K` : stake}
-            </button>
-          ))}
-        </div>
-
-        {/* Mobile-only actions row (duplicated buttons) shown below quick stakes */}
-        <div className="bet-slip-actions-mobile">
-          <button
-            type="button"
-            className="cancel-btn"
-            onClick={handleCancelBet}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className={`place-bet-btn ${selectedBet.type}`}
-            onClick={handlePlaceBet}
-            disabled={betStake < selectedBet.min || betOdds <= 1 || isPlacingBet}
-          >
-            Place Bet
-          </button>
-        </div>
-      </div>
-    );
-  };
+  // Bet input/modal not required in admin view
+  const renderBetSlip = () => null;
 
   return (
     <>
@@ -2468,14 +2408,14 @@ function GametableDetail({ event: eventProp }) {
                 <button
                   type="button"
                   className="gd-book-tab active"
-                  onClick={() => setBookListModal({ type: 'master' })}
+                  onClick={() => setBookListModal({ type: 'master', selectedMarket: null })}
                 >
                   Master Book
                 </button>
                 <button
                   type="button"
                   className="gd-book-tab"
-                  onClick={() => setBookListModal({ type: 'user' })}
+                  onClick={() => setBookListModal({ type: 'user', selectedMarket: null })}
                 >
                   User Book
                 </button>
@@ -2485,7 +2425,11 @@ function GametableDetail({ event: eventProp }) {
                 <div className="gd-book-toggle-group">
                   <span className="gd-book-toggle-label">Live Bet</span>
                   <label className="gd-toggle">
-                    <input type="checkbox" defaultChecked />
+                    <input
+                      type="checkbox"
+                      checked={isLiveBetEnabled}
+                      onChange={(e) => setIsLiveBetEnabled(e.target.checked)}
+                    />
                     <span className="gd-toggle-slider" />
                   </label>
                   <span className="gd-book-toggle-label">Partnership Book</span>
@@ -2510,25 +2454,74 @@ function GametableDetail({ event: eventProp }) {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="gd-book-time-row">
-                      <td colSpan={4}>
-                        Time: Feb 18, 2026, 8:31:19 PM
-                      </td>
-                    </tr>
-                    <tr className="gd-book-row gd-book-row-back">
-                      <td>
-                        <div className="gd-book-market-name">
-                          <span className="gd-book-bet-type">BACK</span>
-                          <div className="gd-book-market-text">
-                            <span className="gd-book-selection">India</span>
-                            <span className="gd-book-market-sub">Match Odds</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td>1.06</td>
-                      <td>100</td>
-                      <td className="gd-book-username">demo2026</td>
-                    </tr>
+                    {isLiveBetEnabled && liveBetsLoading && (
+                      <tr>
+                        <td colSpan={4}>Loading live bets...</td>
+                      </tr>
+                    )}
+                    {isLiveBetEnabled && !liveBetsLoading && liveBetsIsError && (
+                      <tr>
+                        <td colSpan={4} className="gd-book-error">
+                          Failed to load live bets
+                        </td>
+                      </tr>
+                    )}
+                    {isLiveBetEnabled &&
+                      !liveBetsLoading &&
+                      !liveBetsIsError &&
+                      liveBets.length === 0 && (
+                        <tr>
+                          <td colSpan={4}>No live bets available.</td>
+                        </tr>
+                      )}
+                    {isLiveBetEnabled &&
+                      !liveBetsLoading &&
+                      !liveBetsIsError &&
+                      liveBets.length > 0 && (
+                        <>
+                          <tr className="gd-book-time-row">
+                            <td colSpan={4}>
+                              Time:{' '}
+                              {new Date(
+                                liveBets[0].createdAt,
+                              ).toLocaleString()}
+                            </td>
+                          </tr>
+                          {liveBets.map((bet) => (
+                            <tr
+                              key={`${bet.marketId}-${bet.selectionId}-${bet.createdAt}-${bet.username}`}
+                              className={
+                                bet.priceType === 'back'
+                                  ? 'gd-book-row gd-book-row-back'
+                                  : 'gd-book-row gd-book-row-lay'
+                              }
+                            >
+                              <td>
+                                <div className="gd-book-market-name">
+                                  <span className="gd-book-bet-type">
+                                    {(bet.betType || bet.priceType || '')
+                                      .toString()
+                                      .toUpperCase()}
+                                  </span>
+                                  <div className="gd-book-market-text">
+                                    <span className="gd-book-selection">
+                                      {bet.selectionName}
+                                    </span>
+                                    <span className="gd-book-market-sub">
+                                      {bet.marketName}
+                                    </span>
+                                  </div>
+                                </div>
+                              </td>
+                              <td>{bet.odds ?? bet.rate}</td>
+                              <td>{bet.stake}</td>
+                              <td className="gd-book-username">
+                                {bet.username}
+                              </td>
+                            </tr>
+                          ))}
+                        </>
+                      )}
                   </tbody>
                 </table>
               </div>
@@ -2606,7 +2599,7 @@ function GametableDetail({ event: eventProp }) {
           </div>
         )}
 
-      {/* Market List Modal for Master/User Book */}
+      {/* Market List / Book P/L Modal for Master Book & User Book */}
       {bookListModal && (
         <div
           className="custom-modal-backdrop"
@@ -2614,12 +2607,28 @@ function GametableDetail({ event: eventProp }) {
           role="presentation"
         >
           <div
-            className="custom-modal-container gd-marketlist-modal"
+            className="custom-modal-container gd-marketlist-modal gd-book-modal"
             onClick={(e) => e.stopPropagation()}
             role="presentation"
           >
-            <div className="custom-modal-header gd-marketlist-header">
-              <h5 className="custom-modal-title">Market List</h5>
+            <div className="custom-modal-header gd-marketlist-header gd-book-modal-header">
+              {selectedBookMarket ? (
+                <>
+                  <button
+                    type="button"
+                    className="gd-book-modal-back"
+                    onClick={() => setBookListModal((prev) => (prev ? { ...prev, selectedMarket: null } : null))}
+                    aria-label="Back"
+                  >
+                    ← Back
+                  </button>
+                  <h5 className="custom-modal-title">
+                    {bookListModal.type === 'master' ? 'MASTER Book' : 'USER Book'}
+                  </h5>
+                </>
+              ) : (
+                <h5 className="custom-modal-title">Market List</h5>
+              )}
               <button
                 type="button"
                 className="btn-close"
@@ -2629,22 +2638,84 @@ function GametableDetail({ event: eventProp }) {
                 ×
               </button>
             </div>
-            <div className="custom-modal-body gd-marketlist-body">
-              <ul className="gd-marketlist-list">
-                {marketList.map((name, index) => (
-                  <li
-                    key={name}
-                    className="gd-marketlist-item"
-                  >
-                    {name}
-                  </li>
-                ))}
-                {marketList.length === 0 && (
-                  <li className="gd-marketlist-item gd-marketlist-empty">
-                    No markets available.
-                  </li>
-                )}
-              </ul>
+            <div className="custom-modal-body gd-marketlist-body gd-book-modal-body">
+              {!selectedBookMarket ? (
+                <ul className="gd-marketlist-list">
+                  {marketListWithIds.map((market) => (
+                    <li
+                      key={market.marketId}
+                      className="gd-marketlist-item gd-marketlist-item-clickable"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setBookListModal((prev) => (prev ? { ...prev, selectedMarket: market } : null))}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setBookListModal((prev) => (prev ? { ...prev, selectedMarket: market } : null));
+                        }
+                      }}
+                    >
+                      {market.marketName}
+                    </li>
+                  ))}
+                  {marketListWithIds.length === 0 && (
+                    <li className="gd-marketlist-item gd-marketlist-empty">
+                      No markets available.
+                    </li>
+                  )}
+                </ul>
+              ) : (
+                <>
+                  {hierarchyBookLoading && (
+                    <div className="gd-book-loading">Loading...</div>
+                  )}
+                  {hierarchyBookError && (
+                    <div className="gd-book-error">Failed to load book data.</div>
+                  )}
+                  {!hierarchyBookLoading && !hierarchyBookError && hierarchyBookData && (
+                    <div className="gd-book-table-container">
+                      <table className="gd-book-pl-table">
+                        <thead>
+                          <tr>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Profit/Loss</th>
+                            <th>Possible Profit</th>
+                            <th>Possible Loss</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(hierarchyBookData.users || []).map((u) => (
+                            <tr key={u._id}>
+                              <td>{u.username}</td>
+                              <td>{(u.role || '').replace(/_/g, ' ')}</td>
+                              <td
+                                className={
+                                  (u.profitLoss ?? 0) >= 0
+                                    ? 'gd-book-pl-profit'
+                                    : 'gd-book-pl-loss'
+                                }
+                              >
+                                {(u.profitLoss ?? 0) >= 0 ? '+' : ''}
+                                {(u.profitLoss ?? 0).toFixed(2)}
+                              </td>
+                              <td className="gd-book-pl-profit">
+                                +{(u.possibleProfit ?? 0).toFixed(2)}
+                              </td>
+                              <td className="gd-book-pl-loss">
+                                -{(u.possibleLoss ?? 0).toFixed(2)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      {(hierarchyBookData.users || []).length === 0 && (
+                        <p className="gd-book-empty">No user data for this market.</p>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>

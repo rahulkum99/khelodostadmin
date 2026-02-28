@@ -269,6 +269,43 @@ export const authApi = createApi({
         { type: 'Bets', id: `market-analysis-${eventId}` },
       ],
     }),
+    getHierarchyMarketBets: builder.query({
+      query: ({ eventId, sport } = {}) => ({
+        url: '/bets/admin/hierarchy-market-bets',
+        method: 'GET',
+        params: {
+          ...(eventId ? { eventId } : {}),
+          ...(sport ? { sport } : {}),
+        },
+      }),
+      transformResponse: (response) => {
+        if (response && Array.isArray(response.data)) {
+          return response.data;
+        }
+        return [];
+      },
+      providesTags: (result, error, { eventId }) => [
+        { type: 'Bets', id: `market-bets-${eventId}` },
+      ],
+    }),
+    getHierarchyUserMarketProfitLoss: builder.query({
+      query: ({ eventId, marketId, marketType } = {}) => ({
+        url: '/bets/admin/hierarchy-user-market-profit-loss',
+        method: 'GET',
+        params: {
+          ...(eventId ? { eventId } : {}),
+          ...(marketId ? { marketId } : {}),
+          ...(marketType ? { marketType } : {}),
+        },
+      }),
+      transformResponse: (response) => {
+        if (response?.success && response?.data) return response.data;
+        return null;
+      },
+      providesTags: (result, error, { eventId, marketId }) => [
+        { type: 'Bets', id: `hierarchy-pl-${eventId}-${marketId}` },
+      ],
+    }),
   }),
 });
 
@@ -297,6 +334,8 @@ export const {
   useGetHierarchySettledBetsQuery,
   useGetTodayInplayPlacedBetsQuery,
   useGetMarketAnalysisQuery,
+  useGetHierarchyMarketBetsQuery,
+  useGetHierarchyUserMarketProfitLossQuery,
 } = authApi;
 
 

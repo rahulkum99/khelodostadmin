@@ -264,6 +264,70 @@
   color: #666;
 }
 
+.gd-marketlist-item-clickable {
+  cursor: pointer;
+}
+.gd-marketlist-item-clickable:hover {
+  background: #d8dce0 !important;
+}
+
+/* Master/User Book modal – back button & P/L table */
+.gd-book-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.gd-book-modal-back {
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: transparent;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.gd-book-modal-back:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+.gd-book-table-container {
+  overflow-x: auto;
+  padding: 12px;
+}
+.gd-book-pl-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.gd-book-pl-table th,
+.gd-book-pl-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+.gd-book-pl-table th {
+  background: #f3f6f9;
+  font-weight: 600;
+  color: #1f2b3a;
+}
+.gd-book-pl-profit {
+  color: #2e7d32;
+  font-weight: 600;
+}
+.gd-book-pl-loss {
+  color: #c62828;
+  font-weight: 600;
+}
+.gd-book-loading,
+.gd-book-error,
+.gd-book-empty {
+  padding: 24px;
+  text-align: center;
+  color: #666;
+}
+.gd-book-error {
+  color: #c62828;
+}
+
 /* Loading & Error States */
 .gd-loading,
 .gd-error,
