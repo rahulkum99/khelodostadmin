@@ -85,6 +85,13 @@ export const authApi = createApi({
       }),
       invalidatesTags: ['Users'],
     }),
+    deleteUser: builder.mutation({
+      query: (userId) => ({
+        url: `/user/${userId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Users'],
+    }),
     getPasswordChangeHistory: builder.query({
       query: ({ page = 1, limit = 20 } = {}) => ({
         url: '/auth/password-change-history',
@@ -372,6 +379,7 @@ export const {
   useCreateUserMutation,
   useGetUsersQuery,
   useUpdateUserStatusMutation,
+  useDeleteUserMutation,
   useGetPasswordChangeHistoryQuery,
   useChangePasswordMutation,
   useGetWalletBalanceQuery,

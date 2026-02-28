@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useGetUsersQuery } from '../redux/api/authApi'
+import { useGetUsersQuery, useDeleteUserMutation } from '../redux/api/authApi'
 import { toast } from 'react-toastify'
 import './UserListTable.css'
 import AddMasterModal from './AddMasterModal'
@@ -30,6 +30,7 @@ function MasterListTable({ title = "Master List" }) {
     page: currentPage,
     limit: entriesPerPage
   });
+  const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
 
   const users = data?.data?.users || [];
   const pagination = data?.data?.pagination || { page: 1, limit: 10, total: 0, pages: 1 };
@@ -157,6 +158,29 @@ function MasterListTable({ title = "Master List" }) {
       ...prev,
       [name]: enabled,
     }));
+  };
+
+  const handleDeleteUser = async (item) => {
+    const exposure = Number(item.exposure ?? 0);
+    const balance = Number(item.balance ?? 0);
+    if (exposure !== 0 || balance !== 0) {
+      toast.error(
+        'Cannot delete user: Exposure and Balance must both be zero. ' +
+        `Current Exposure: ${formatCurrency(exposure)}, Balance: ${formatCurrency(balance)}.`
+      );
+      return;
+    }
+    const confirmed = window.confirm(
+      `Are you sure you want to delete user "${item.username}"? This action cannot be undone.`
+    );
+    if (!confirmed) return;
+    try {
+      await deleteUser(item.id).unwrap();
+      toast.success('User deleted successfully');
+      refetch();
+    } catch (err) {
+      toast.error(err?.data?.message || 'Failed to delete user');
+    }
   };
 
   const formatCurrency = (value) => {
@@ -363,7 +387,14 @@ function MasterListTable({ title = "Master List" }) {
                         >
                           Ba
                         </button>
-                        <button className="action-icon-btn delete-btn" title="Delete">🗑️</button>
+                        <button
+                          className="action-icon-btn delete-btn"
+                          title="Delete"
+                          onClick={() => handleDeleteUser(item)}
+                          disabled={isDeleting}
+                        >
+                          🗑️
+                        </button>
                       </div>
                     </td>
                   </tr>

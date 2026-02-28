@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useGetUsersQuery } from '../redux/api/authApi'
+import { useGetUsersQuery, useDeleteUserMutation } from '../redux/api/authApi'
 import { toast } from 'react-toastify'
 import './UserListTable.css'
 import AddUserModal from './AddUserModal'
@@ -31,6 +31,7 @@ function UserListTable({ title = "User List" }) {
     page: currentPage, 
     limit: entriesPerPage 
   });
+  const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
 
   // Extract users and pagination from API response
   const users = data?.data?.users || [];
@@ -156,6 +157,29 @@ function UserListTable({ title = "User List" }) {
       ...prev,
       [name]: enabled,
     }));
+  };
+
+  const handleDeleteUser = async (item) => {
+    const exposure = Number(item.exposure ?? 0);
+    const balance = Number(item.balance ?? 0);
+    if (exposure !== 0 || balance !== 0) {
+      toast.error(
+        'Cannot delete user: Exposure and Balance must both be zero. ' +
+        `Current Exposure: ${formatCurrency(exposure)}, Balance: ${formatCurrency(balance)}.`
+      );
+      return;
+    }
+    const confirmed = window.confirm(
+      `Are you sure you want to delete user "${item.username}"? This action cannot be undone.`
+    );
+    if (!confirmed) return;
+    try {
+      await deleteUser(item.id).unwrap();
+      toast.success('User deleted successfully');
+      refetch();
+    } catch (err) {
+      toast.error(err?.data?.message || 'Failed to delete user');
+    }
   };
 
   const formatCurrency = (value) => {
@@ -386,8 +410,13 @@ function UserListTable({ title = "User List" }) {
                         >
                           <img src="/svg/settings.svg" width="18" height="18" alt="User" />
                         </button>
-                        <button className="action-icon-btn delete-btn" title="Delete">
-                        <img src="/svg/delete.svg" width="18" height="18" alt="User" />
+                        <button
+                          className="action-icon-btn delete-btn"
+                          title="Delete"
+                          onClick={() => handleDeleteUser(item)}
+                          disabled={isDeleting}
+                        >
+                          <img src="/svg/delete.svg" width="18" height="18" alt="Delete" />
                         </button>
                       </div>
                     </td>
