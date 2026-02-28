@@ -1,31 +1,33 @@
 import React, { useMemo, useState } from 'react'
 import Navbar from '../component/Navbar'
 import './ReportEventScreen.css'
+import { useGetUserHierarchyQuery } from '../redux/api/authApi'
 
-// Temporary mock data for design/demo purposes
-const MOCK_DOWNLINE_PL = [
-  {
-    id: 1,
-    userName: 'MARYAM1',
-    profitLoss: 0,
-    downlineProfitLoss: 0,
-    commission: 0,
-  },
-  {
-    id: 2,
-    userName: 'DEV2026',
-    profitLoss: 0,
-    downlineProfitLoss: 0,
-    commission: 0,
-  },
-  {
-    id: 3,
-    userName: 'DEMO2026',
-    profitLoss: 0,
-    downlineProfitLoss: 0,
-    commission: 0,
-  },
-]
+const flattenHierarchy = (nodes, level = 0, parentId = null) => {
+  if (!Array.isArray(nodes)) return []
+
+  const flat = []
+
+  nodes.forEach((node) => {
+    const { children, ...rest } = node
+    const currentId = node._id || node.id || null
+    const hasChildren = Array.isArray(children) && children.length > 0
+
+    flat.push({
+      ...rest,
+      level,
+      parentId,
+      id: currentId,
+      hasChildren,
+    })
+
+    if (hasChildren) {
+      flat.push(...flattenHierarchy(children, level + 1, currentId))
+    }
+  })
+
+  return flat
+}
 
 function ReportDownlineScreen() {
   const [dataSource, setDataSource] = useState('LIVE_DATA')
@@ -36,28 +38,80 @@ function ReportDownlineScreen() {
   const [entriesPerPage, setEntriesPerPage] = useState(10)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
+  const [expandedIds, setExpandedIds] = useState(() => new Set())
+
+  const buildDateTime = (date, time, isEnd) => {
+    if (!date) return undefined
+    if (!time) {
+      return isEnd ? `${date}T23:59:59Z` : `${date}T00:00:00Z`
+    }
+    const suffix = isEnd ? ':59Z' : ':00Z'
+    return `${date}T${time}${suffix}`
+  }
+
+  const fromIso = buildDateTime(fromDate, fromTime, false)
+  const toIso = buildDateTime(toDate, toTime, true)
+
+  const { data, isLoading, isError } = useGetUserHierarchyQuery(
+    {
+      from: fromIso,
+      to: toIso,
+    },
+    {
+      skip: !fromIso || !toIso,
+    }
+  )
+
+  const apiRows = useMemo(() => {
+    if (!Array.isArray(data?.data)) return []
+    return flattenHierarchy(data.data)
+  }, [data])
+
+  const rootProfitLoss = data?.meta?.rootProfitLoss ?? null
 
   const filteredRows = useMemo(() => {
     const q = searchTerm.trim().toLowerCase()
-    let rows = [...MOCK_DOWNLINE_PL]
+    let rows = [...apiRows]
 
     if (q) {
-      rows = rows.filter((row) =>
-        row.userName.toLowerCase().includes(q)
-      )
+      rows = rows.filter((row) => {
+        const name = (row.username || row.userName || '').toLowerCase()
+        return name.includes(q)
+      })
     }
 
     return rows
-  }, [searchTerm])
+  }, [apiRows, searchTerm])
 
-  const totalEntries = filteredRows.length
+  const visibleRows = useMemo(() => {
+    if (!filteredRows.length) return []
+
+    const byId = new Map(filteredRows.map((row) => [row.id, row]))
+
+    const isVisible = (row) => {
+      if (!row.parentId) return true
+
+      let parentId = row.parentId
+      while (parentId) {
+        if (!expandedIds.has(parentId)) return false
+        const parent = byId.get(parentId)
+        parentId = parent?.parentId || null
+      }
+
+      return true
+    }
+
+    return filteredRows.filter(isVisible)
+  }, [filteredRows, expandedIds])
+
+  const totalEntries = visibleRows.length
   const totalPages = Math.max(1, Math.ceil(totalEntries / entriesPerPage))
 
   const paginatedRows = useMemo(() => {
     const start = (currentPage - 1) * entriesPerPage
     const end = start + entriesPerPage
-    return filteredRows.slice(start, end)
-  }, [filteredRows, currentPage, entriesPerPage])
+    return visibleRows.slice(start, end)
+  }, [visibleRows, currentPage, entriesPerPage])
 
   const totals = useMemo(() => {
     return filteredRows.reduce(
@@ -70,6 +124,19 @@ function ReportDownlineScreen() {
       { pl: 0, downline: 0, commission: 0 }
     )
   }, [filteredRows])
+
+  const toggleExpand = (id, hasChildren) => {
+    if (!id || !hasChildren) return
+    setExpandedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
 
   const showingFrom = totalEntries > 0 ? (currentPage - 1) * entriesPerPage + 1 : 0
   const showingTo = Math.min(currentPage * entriesPerPage, totalEntries)
@@ -162,6 +229,19 @@ function ReportDownlineScreen() {
         <div className="report-table-section">
           <div className="report-table-header">
             <div className="report-title">Profit Loss</div>
+            {rootProfitLoss != null && (
+              <div
+                className={
+                  Number(rootProfitLoss) >= 0 ? 'pl-positive' : 'pl-negative'
+                }
+              >
+                Root P&amp;L:{' '}
+                {Number(rootProfitLoss).toLocaleString('en-IN', {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 2,
+                })}
+              </div>
+            )}
             <button className="download-btn">
               Download XLS
             </button>
@@ -220,29 +300,54 @@ function ReportDownlineScreen() {
                     </tr>
                   ) : (
                     <>
-                      {paginatedRows.map((row) => (
-                        <tr key={row.id}>
-                          <td className="sport-link">{row.userName}</td>
-                          <td className={row.profitLoss >= 0 ? 'pl-positive' : 'pl-negative'}>
-                            {row.profitLoss.toLocaleString('en-IN', {
-                              minimumFractionDigits: 0,
-                              maximumFractionDigits: 2,
-                            })}
-                          </td>
-                          <td className={row.downlineProfitLoss >= 0 ? 'pl-positive' : 'pl-negative'}>
-                            {row.downlineProfitLoss.toLocaleString('en-IN', {
-                              minimumFractionDigits: 0,
-                              maximumFractionDigits: 2,
-                            })}
-                          </td>
-                          <td>
-                            {row.commission.toLocaleString('en-IN', {
-                              minimumFractionDigits: 0,
-                              maximumFractionDigits: 2,
-                            })}
-                          </td>
-                        </tr>
-                      ))}
+                      {paginatedRows.map((row) => {
+                        const profit = Number(row.profitLoss ?? 0)
+                        const downline = Number(row.downlineProfitLoss ?? 0)
+                        const commission = Number(row.commission ?? 0)
+
+                        return (
+                          <tr key={row._id || row.id}>
+                            <td
+                              className="sport-link"
+                              onClick={() => toggleExpand(row.id, row.hasChildren)}
+                              style={{ paddingLeft: `${16 * (row.level || 0)}px`, cursor: row.hasChildren ? 'pointer' : 'default' }}
+                            >
+                              {row.hasChildren && (
+                                <span style={{ marginRight: 8 }}>
+                                  {expandedIds.has(row.id) ? '-' : '+'}
+                                </span>
+                              )}
+                              {row.username || row.userName}
+                            </td>
+                            <td
+                              className={
+                                profit >= 0 ? 'pl-positive' : 'pl-negative'
+                              }
+                            >
+                              {profit.toLocaleString('en-IN', {
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 2,
+                              })}
+                            </td>
+                            <td
+                              className={
+                                downline >= 0 ? 'pl-positive' : 'pl-negative'
+                              }
+                            >
+                              {downline.toLocaleString('en-IN', {
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 2,
+                              })}
+                            </td>
+                            <td>
+                              {commission.toLocaleString('en-IN', {
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 2,
+                              })}
+                            </td>
+                          </tr>
+                        )
+                      })}
 
                       {/* Total row */}
                       <tr className="total-row">

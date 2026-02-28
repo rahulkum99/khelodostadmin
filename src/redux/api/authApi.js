@@ -225,6 +225,19 @@ export const authApi = createApi({
       }),
       providesTags: ['Bets'],
     }),
+    getUserHierarchy: builder.query({
+      query: ({ userId, from, to, sport } = {}) => ({
+        url: '/user/hierarchy',
+        method: 'GET',
+        params: {
+          ...(userId ? { userId } : {}),
+          ...(from ? { from } : {}),
+          ...(to ? { to } : {}),
+          ...(sport ? { sport } : {}),
+        },
+      }),
+      providesTags: ['Bets'],
+    }),
     getHierarchySettledBets: builder.query({
       query: ({ sport, from, to, marketName } = {}) => ({
         url: '/bets/admin/hierarchy-settled-bets',
@@ -331,6 +344,7 @@ export const {
   useGetUserProfitLossQuery,
   useGetUserEventProfitLossQuery,
   useGetHierarchyProfitLossQuery,
+  useGetUserHierarchyQuery,
   useGetHierarchySettledBetsQuery,
   useGetTodayInplayPlacedBetsQuery,
   useGetMarketAnalysisQuery,
