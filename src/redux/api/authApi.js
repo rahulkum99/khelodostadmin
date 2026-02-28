@@ -77,6 +77,14 @@ export const authApi = createApi({
       }),
       providesTags: ['Users'],
     }),
+    updateUserStatus: builder.mutation({
+      query: ({ userId, status, adminPassword }) => ({
+        url: `/user/${userId}/status`,
+        method: 'PATCH',
+        body: { status, adminPassword },
+      }),
+      invalidatesTags: ['Users'],
+    }),
     getPasswordChangeHistory: builder.query({
       query: ({ page = 1, limit = 20 } = {}) => ({
         url: '/auth/password-change-history',
@@ -172,6 +180,32 @@ export const authApi = createApi({
       }),
       invalidatesTags: ['Wallet'],
     }),
+    walletHierarchyDeposit: builder.mutation({
+      query: (body) => ({
+        url: '/wallet/hierarchy/deposit',
+        method: 'POST',
+        body: {
+          userId: body.userId,
+          amount: body.amount,
+          description: body.description || '',
+          adminPassword: body.adminPassword,
+        },
+      }),
+      invalidatesTags: ['Wallet', 'Users'],
+    }),
+    walletHierarchyWithdraw: builder.mutation({
+      query: (body) => ({
+        url: '/wallet/hierarchy/withdraw',
+        method: 'POST',
+        body: {
+          userId: body.userId,
+          amount: body.amount,
+          description: body.description || '',
+          adminPassword: body.adminPassword,
+        },
+      }),
+      invalidatesTags: ['Wallet', 'Users'],
+    }),
     getAdminBetList: builder.query({
       query: ({ page = 1, limit = 10 } = {}) => ({
         url: '/bets/admin/bet-list',
@@ -237,6 +271,14 @@ export const authApi = createApi({
         },
       }),
       providesTags: ['Bets'],
+    }),
+    getHierarchyUsersByStatus: builder.query({
+      query: ({ status = 'suspended,locked' } = {}) => ({
+        url: '/user/hierarchy',
+        method: 'GET',
+        params: { status },
+      }),
+      providesTags: ['Users'],
     }),
     getHierarchySettledBets: builder.query({
       query: ({ sport, from, to, marketName } = {}) => ({
@@ -329,6 +371,7 @@ export const {
   useGetUserActivityLogsQuery,
   useCreateUserMutation,
   useGetUsersQuery,
+  useUpdateUserStatusMutation,
   useGetPasswordChangeHistoryQuery,
   useChangePasswordMutation,
   useGetWalletBalanceQuery,
@@ -339,12 +382,15 @@ export const {
   useGetBankingUsersQuery,
   useGetBankingAdminsQuery,
   useWalletBulkActionMutation,
+  useWalletHierarchyDepositMutation,
+  useWalletHierarchyWithdrawMutation,
   useGetAdminBetListQuery,
   useGetUserBetsQuery,
   useGetUserProfitLossQuery,
   useGetUserEventProfitLossQuery,
   useGetHierarchyProfitLossQuery,
   useGetUserHierarchyQuery,
+  useGetHierarchyUsersByStatusQuery,
   useGetHierarchySettledBetsQuery,
   useGetTodayInplayPlacedBetsQuery,
   useGetMarketAnalysisQuery,

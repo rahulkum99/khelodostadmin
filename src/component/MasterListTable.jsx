@@ -20,6 +20,7 @@ function MasterListTable({ title = "Master List" }) {
   const [selectedStatusUser, setSelectedStatusUser] = useState(null);
   const [isSportsModalOpen, setIsSportsModalOpen] = useState(false);
   const [sportsState, setSportsState] = useState({});
+  const [balanceOverrides, setBalanceOverrides] = useState({}); // optimistic balance updates
 
   // Fetch all downline roles in one request: admin, master, agent, super_master
   const rolesQuery = 'admin,master,agent,super_master';
@@ -44,9 +45,15 @@ function MasterListTable({ title = "Master List" }) {
     );
   });
 
+  // Clear balance overrides when fresh data arrives from refetch
+  useEffect(() => {
+    if (data) setBalanceOverrides({});
+  }, [data]);
+
   // Map API users to table format using latest response shape
   const tableData = filteredUsers.map(user => {
-    const balance = Number(user.balance ?? 0);
+    const uid = user._id || user.id;
+    const balance = balanceOverrides[uid] ?? Number(user.balance ?? 0);
     const exposure = Number(user.exposer ?? 0);
     const exposureLimit = Number(user.exposureLimit ?? 0);
     const availBal = balance - exposure;
@@ -97,6 +104,11 @@ function MasterListTable({ title = "Master List" }) {
     refetch();
   }, [currentPage, entriesPerPage, refetch]);
 
+  // Never allow search to be "superadmin" (e.g. from browser autocomplete)
+  useEffect(() => {
+    if ((searchTerm || '').toLowerCase() === 'superadmin') setSearchTerm('');
+  }, [searchTerm]);
+
   const handleMasterCreated = () => {
     refetch();
     toast.success('Master created successfully');
@@ -108,9 +120,19 @@ function MasterListTable({ title = "Master List" }) {
   };
 
   const handleSubmitBanking = (payload) => {
-    console.log('Banking submit:', payload);
     setIsBankingModalOpen(false);
     setSelectedBankingUser(null);
+    // Optimistic update: show new balance immediately from API response
+    if (payload?.response && payload?.user?.id) {
+      const { toBalanceAfter, fromBalanceAfter } = payload.response;
+      const newBalance = payload.action === 'deposit' ? toBalanceAfter : fromBalanceAfter;
+      if (typeof newBalance === 'number') {
+        setBalanceOverrides(prev => ({ ...prev, [payload.user.id]: newBalance }));
+      }
+    }
+    refetch();
+    const msg = payload?.response?.message || (payload?.action === 'deposit' ? 'Deposit successful' : 'Withdraw successful');
+    toast.success(msg);
   };
 
   const handleOpenStatus = (userRow) => {
@@ -119,9 +141,11 @@ function MasterListTable({ title = "Master List" }) {
   };
 
   const handleSubmitStatus = (payload) => {
-    console.log('Status change submit:', payload);
     setIsStatusModalOpen(false);
     setSelectedStatusUser(null);
+    refetch();
+    const msg = payload?.response?.message || 'Status updated successfully';
+    toast.success(msg);
   };
 
   const handleOpenSports = () => {
@@ -205,7 +229,8 @@ function MasterListTable({ title = "Master List" }) {
               className="search-input"
               value={searchTerm}
               onChange={(e) => {
-                setSearchTerm(e.target.value);
+                const v = e.target.value;
+                setSearchTerm((v || '').toLowerCase() === 'superadmin' ? '' : v);
               }}
               placeholder="Search by username, name, or status..."
               disabled={isLoading}
@@ -303,7 +328,7 @@ function MasterListTable({ title = "Master List" }) {
                             })
                           }
                         >
-                          💰
+                          <img src="/svg/banking.svg" width="20" height="20" alt="Banking" />
                         </button>
                        
                         <button

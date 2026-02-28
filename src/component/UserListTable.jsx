@@ -20,6 +20,7 @@ function UserListTable({ title = "User List" }) {
   const [selectedStatusUser, setSelectedStatusUser] = useState(null);
   const [isSportsModalOpen, setIsSportsModalOpen] = useState(false);
   const [sportsState, setSportsState] = useState({}); // per-user sports config later
+  const [balanceOverrides, setBalanceOverrides] = useState({}); // optimistic balance updates
 
   // Determine role based on title
   const role = title.toLowerCase().includes('master') ? 'master' : 'user';
@@ -47,9 +48,20 @@ function UserListTable({ title = "User List" }) {
     );
   });
 
+  // Clear balance overrides when fresh data arrives from refetch
+  useEffect(() => {
+    if (data) setBalanceOverrides({});
+  }, [data]);
+
+  // Never allow search to be "superadmin" (e.g. from browser autocomplete)
+  useEffect(() => {
+    if ((searchTerm || '').toLowerCase() === 'superadmin') setSearchTerm('');
+  }, [searchTerm]);
+
   // Map API users to table format using latest response shape
   const tableData = filteredUsers.map(user => {
-    const balance = Number(user.balance ?? 0);
+    const uid = user._id || user.id;
+    const balance = balanceOverrides[uid] ?? Number(user.balance ?? 0);
     const exposure = Number(user.exposer ?? 0);
     const exposureLimit = Number(user.exposureLimit ?? 0);
     const availBal = balance - exposure;
@@ -107,10 +119,19 @@ function UserListTable({ title = "User List" }) {
   };
 
   const handleSubmitBanking = (payload) => {
-    // TODO: wire to actual banking API
-    console.log('Banking submit:', payload);
     setIsBankingModalOpen(false);
     setSelectedBankingUser(null);
+    // Optimistic update: show new balance immediately from API response
+    if (payload?.response && payload?.user?.id) {
+      const { toBalanceAfter, fromBalanceAfter } = payload.response;
+      const newBalance = payload.action === 'deposit' ? toBalanceAfter : fromBalanceAfter;
+      if (typeof newBalance === 'number') {
+        setBalanceOverrides(prev => ({ ...prev, [payload.user.id]: newBalance }));
+      }
+    }
+    refetch();
+    const msg = payload?.response?.message || (payload?.action === 'deposit' ? 'Deposit successful' : 'Withdraw successful');
+    toast.success(msg);
   };
 
   const handleOpenStatus = (userRow) => {
@@ -119,10 +140,11 @@ function UserListTable({ title = "User List" }) {
   };
 
   const handleSubmitStatus = (payload) => {
-    // TODO: wire to actual status-change API
-    console.log('Status change submit:', payload);
     setIsStatusModalOpen(false);
     setSelectedStatusUser(null);
+    refetch();
+    const msg = payload?.response?.message || 'Status updated successfully';
+    toast.success(msg);
   };
 
   const handleOpenSports = () => {
@@ -209,8 +231,8 @@ function UserListTable({ title = "User List" }) {
                   className="search-input"
                   value={searchTerm}
                   onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    // Don't reset page on search, just filter client-side
+                    const v = e.target.value;
+                    setSearchTerm((v || '').toLowerCase() === 'superadmin' ? '' : v);
                   }}
                   placeholder="Search by username, name, or status..."
                   disabled={isLoading}
@@ -308,10 +330,30 @@ function UserListTable({ title = "User List" }) {
                             })
                           }
                         >
-                          💰
+                          <img src="/svg/banking.svg" width="20" height="20" alt="Banking" />
                         </button>
-                        <button className="action-icon-btn" title="Transfer">↕️</button>
-                        <button className="action-icon-btn" title="More">☰</button>
+                        <button
+                          className="action-icon-btn"
+                          title="Profit/Loss"
+                          onClick={() =>
+                            navigate(`/user-detail/${item.id}?tab=profit-loss`, {
+                              state: { user: item.userData },
+                            })
+                          }
+                        >
+                          <img src="/svg/arrow.svg" width="18" height="18" alt="Profit/Loss" />
+                        </button>
+                        <button
+                          className="action-icon-btn"
+                          title="History"
+                          onClick={() =>
+                            navigate(`/user-detail/${item.id}?tab=bet-history`, {
+                              state: { user: item.userData },
+                            })
+                          }
+                        >
+                          <img src="/svg/history.svg" width="18" height="18" alt="Bet History" />
+                        </button>
                         <button
                           className="action-icon-btn"
                           title="Settings"
@@ -324,7 +366,7 @@ function UserListTable({ title = "User List" }) {
                             })
                           }
                         >
-                          ⚙️
+                          <img src="/svg/setting.svg" width="18" height="18" alt="More" />
                         </button>
                         <button
                           className="action-icon-btn"
@@ -335,16 +377,18 @@ function UserListTable({ title = "User List" }) {
                             })
                           }
                         >
-                          👤
+                          <img src="/svg/user.svg" width="18" height="18" alt="User" />
                         </button>
                         <button
                           className="action-icon-btn"
                           title="Balance"
                           onClick={handleOpenSports}
                         >
-                          Ba
+                          <img src="/svg/settings.svg" width="18" height="18" alt="User" />
                         </button>
-                        <button className="action-icon-btn delete-btn" title="Delete">🗑️</button>
+                        <button className="action-icon-btn delete-btn" title="Delete">
+                        <img src="/svg/delete.svg" width="18" height="18" alt="User" />
+                        </button>
                       </div>
                     </td>
                   </tr>

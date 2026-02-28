@@ -1,39 +1,65 @@
 import React, { useState, useEffect } from 'react'
+import { useWalletHierarchyDepositMutation, useWalletHierarchyWithdrawMutation } from '../redux/api/authApi'
 import './BankingModal.css'
 
 function BankingModal({ isOpen, onClose, user, masterBalance = 0, onSubmit }) {
   const [amount, setAmount] = useState('')
   const [remark, setRemark] = useState('')
   const [password, setPassword] = useState('')
-  const [action, setAction] = useState('deposit') // 'deposit' | 'withdraw'
+  const [error, setError] = useState('')
+
+  const [deposit, { isLoading: isDepositing }] = useWalletHierarchyDepositMutation()
+  const [withdraw, { isLoading: isWithdrawing }] = useWalletHierarchyWithdrawMutation()
+
+  const isSubmitting = isDepositing || isWithdrawing
 
   useEffect(() => {
     if (isOpen) {
       setAmount('')
       setPassword('')
       setRemark('')
-      setAction('deposit')
+      setError('')
     }
   }, [isOpen])
 
   if (!isOpen || !user) return null
 
-  const handleSubmit = (type) => {
-    const chosenAction = type || action
+  const handleSubmit = async (type) => {
+    setError('')
     if (!amount || Number(amount) <= 0) {
-      // basic guard, actual validation can be enhanced
+      setError('Please enter a valid amount.')
       return
     }
     if (!password) {
+      setError('Please enter your password.')
       return
     }
-    onSubmit?.({
-      user,
+    const userId = user.id
+    const payload = {
+      userId,
       amount: Number(amount),
-      remark,
-      password,
-      action: chosenAction,
-    })
+      description: remark || '',
+      adminPassword: password,
+    }
+    try {
+      let response
+      if (type === 'deposit') {
+        response = await deposit(payload).unwrap()
+      } else {
+        response = await withdraw(payload).unwrap()
+      }
+      onSubmit?.({
+        user,
+        amount: Number(amount),
+        remark,
+        password,
+        action: type,
+        response,
+      })
+      onClose?.()
+    } catch (err) {
+      setError(err?.data?.message || err?.message || 'Operation failed.')
+    }
   }
 
   const formattedMasterBal = masterBalance?.toLocaleString('en-IN', {
@@ -69,6 +95,9 @@ function BankingModal({ isOpen, onClose, user, masterBalance = 0, onSubmit }) {
           </div>
         </div>
 
+        {error && (
+          <div className="banking-modal-error">{error}</div>
+        )}
         <div className="banking-modal-body">
           <div className="banking-form-group">
             <label>Balance</label>
@@ -108,14 +137,16 @@ function BankingModal({ isOpen, onClose, user, masterBalance = 0, onSubmit }) {
           <button
             className="banking-action-btn deposit"
             onClick={() => handleSubmit('deposit')}
+            disabled={isSubmitting}
           >
-            Deposite
+            {isDepositing ? 'Depositing...' : 'Deposit'}
           </button>
           <button
             className="banking-action-btn withdraw"
             onClick={() => handleSubmit('withdraw')}
+            disabled={isSubmitting}
           >
-            Withdraw
+            {isWithdrawing ? 'Withdrawing...' : 'Withdraw'}
           </button>
         </div>
       </div>

@@ -86,6 +86,14 @@
   color: #c5221f;
 }
 
+.status-modal-error {
+  background-color: #fee;
+  color: #c00;
+  padding: 8px 14px;
+  font-size: 13px;
+  border-bottom: 1px solid #fcc;
+}
+
 .status-options-row {
   display: flex;
   justify-content: space-between;
@@ -103,6 +111,26 @@
   flex-direction: column;
   align-items: center;
   cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+}
+
+.status-option-tick {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #28a745;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .status-option-card.active {
@@ -119,6 +147,21 @@
 
 .status-option-card.selected {
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+.status-option-card:not(.disabled):hover {
+  filter: brightness(0.97);
+}
+
+.status-option-card:not(.disabled):active {
+  transform: scale(0.97);
+  filter: brightness(0.93);
+}
+
+.status-option-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .status-option-icon {
@@ -195,8 +238,13 @@
   cursor: pointer;
 }
 
-.status-change-btn:hover {
+.status-change-btn:hover:not(:disabled) {
   filter: brightness(0.95);
+}
+
+.status-change-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 @media (max-width: 480px) {
