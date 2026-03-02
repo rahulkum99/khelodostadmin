@@ -21,6 +21,10 @@ function MasterListTable({ title = "Master List" }) {
   const [isSportsModalOpen, setIsSportsModalOpen] = useState(false);
   const [sportsState, setSportsState] = useState({});
   const [balanceOverrides, setBalanceOverrides] = useState({}); // optimistic balance updates
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteTargetUser, setDeleteTargetUser] = useState(null);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteError, setDeleteError] = useState('');
 
   // Fetch all downline roles in one request: admin, master, agent, super_master
   const rolesQuery = 'admin,master,agent,super_master';
@@ -160,26 +164,34 @@ function MasterListTable({ title = "Master List" }) {
     }));
   };
 
-  const handleDeleteUser = async (item) => {
-    const exposure = Number(item.exposure ?? 0);
-    const balance = Number(item.balance ?? 0);
-    if (exposure !== 0 || balance !== 0) {
-      toast.error(
-        'Cannot delete user: Exposure and Balance must both be zero. ' +
-        `Current Exposure: ${formatCurrency(exposure)}, Balance: ${formatCurrency(balance)}.`
-      );
+  const handleOpenDeleteModal = (item) => {
+    setDeleteTargetUser(item);
+    setDeletePassword('');
+    setDeleteError('');
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setDeleteTargetUser(null);
+    setDeletePassword('');
+    setDeleteError('');
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetUser) return;
+    if (!deletePassword) {
+      setDeleteError('Password is required to delete user');
       return;
     }
-    const confirmed = window.confirm(
-      `Are you sure you want to delete user "${item.username}"? This action cannot be undone.`
-    );
-    if (!confirmed) return;
+
     try {
-      await deleteUser(item.id).unwrap();
+      await deleteUser({ userId: deleteTargetUser.id, adminPassword: deletePassword }).unwrap();
       toast.success('User deleted successfully');
+      handleCloseDeleteModal();
       refetch();
     } catch (err) {
-      toast.error(err?.data?.message || 'Failed to delete user');
+      setDeleteError(err?.data?.message || err?.message || 'Failed to delete user');
     }
   };
 
@@ -367,33 +379,33 @@ function MasterListTable({ title = "Master List" }) {
                             })
                           }
                         >
-                          ⚙️
+                      <img src="/svg/setting.svg" width="18" height="18" alt="User" />
                         </button>
                         <button
                           className="action-icon-btn"
-                          title="User"
+                          title="Profile"
                           onClick={() =>
                             navigate(`/user-detail/${item.id}`, {
                               state: { user: item.userData },
                             })
                           }
                         >
-                          👤
+                           <img src="/svg/user.svg" width="18" height="18" alt="User" />
                         </button>
                         <button
                           className="action-icon-btn"
-                          title="Balance"
+                          title="Sport Settings"
                           onClick={handleOpenSports}
                         >
-                          Ba
+                          <img src="/svg/settings.svg" width="18" height="18" alt="User" />
                         </button>
                         <button
                           className="action-icon-btn delete-btn"
                           title="Delete"
-                          onClick={() => handleDeleteUser(item)}
+                          onClick={() => handleOpenDeleteModal(item)}
                           disabled={isDeleting}
                         >
-                          🗑️
+                          <img src="/svg/delete.svg" width="18" height="18" alt="Delete" />
                         </button>
                       </div>
                     </td>
@@ -450,6 +462,115 @@ function MasterListTable({ title = "Master List" }) {
           </div>
         </div>
       </div>
+
+      {isDeleteModalOpen && deleteTargetUser && (
+        <div
+          className="status-modal-overlay"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.35)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+        >
+          <div
+            className="status-modal"
+            style={{
+              width: '360px',
+              background: '#fff',
+              borderRadius: '6px',
+              padding: '20px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '12px',
+              }}
+            >
+              <strong>Delete User</strong>
+              <button
+                type="button"
+                onClick={handleCloseDeleteModal}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <p style={{ fontSize: '13px', color: '#555', marginBottom: '12px' }}>
+              Are you sure you want to delete{' '}
+              <strong>{deleteTargetUser.username}</strong>? This action cannot be undone.
+            </p>
+            {deleteError && (
+              <div
+                style={{
+                  background: '#fee',
+                  color: '#c00',
+                  padding: '8px',
+                  fontSize: '13px',
+                  marginBottom: '10px',
+                  borderRadius: '4px',
+                }}
+              >
+                {deleteError}
+              </div>
+            )}
+            <input
+              type="password"
+              placeholder="Your password"
+              value={deletePassword}
+              onChange={(e) => {
+                setDeletePassword(e.target.value);
+                if (deleteError) setDeleteError('');
+              }}
+              style={{
+                width: '100%',
+                padding: '8px 10px',
+                marginBottom: '12px',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+                boxSizing: 'border-box',
+              }}
+              autoComplete="off"
+            />
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                className="report-get-btn"
+                onClick={handleCloseDeleteModal}
+                style={{ padding: '6px 14px' }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="report-get-btn"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                style={{
+                  padding: '6px 14px',
+                  backgroundColor: '#dc3545',
+                  color: '#fff',
+                  border: 'none',
+                }}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <AddMasterModal
         isOpen={isAddMasterModalOpen}
