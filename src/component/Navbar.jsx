@@ -34,6 +34,13 @@ function Navbar() {
     }))
   }
 
+  const handleDropdownClick = (dropdownName) => {
+    setOpenDropdowns(prev => ({
+      ...prev,
+      [dropdownName]: !prev[dropdownName]
+    }))
+  }
+
   const handleRefresh = () => {
     refetchWallet()
   }
@@ -99,7 +106,7 @@ function Navbar() {
   return (
     <>
       {/* Top bar - dark green, logo left / user info right */}
-      <nav className="navbar-top">
+      <nav className="navbar-top py-2">
         <Link className="navbar-brand" to="/dashboard">
           {!logoImageError ? (
             <img src="/images/logo.png" alt="Logo" width={150} height={50} onError={() => setLogoImageError(true)} />
@@ -108,42 +115,49 @@ function Navbar() {
           )}
         </Link>
         <div className="navbar-user-section">
-          <span className="user-pill">{roleLabel}</span>
-          <span className="user-username">{displayUsername}</span>
-          <span className="user-balance">{displayBalance}</span>
-          {isSuperAdmin && (
+          <div className="navbar-user-row navbar-user-row-1">
+            <span className="user-pill">{roleLabel}</span>
+            <span className="user-username">{displayUsername}</span>
+          </div>
+          <div className="navbar-user-row navbar-user-row-2">
+            <span className="user-balance">{displayBalance}</span>
+            {isSuperAdmin && (
+              <button
+                type="button"
+                className="user-add-balance-btn"
+                onClick={openAddBalanceModal}
+                title="Add balance"
+                aria-label="Add balance"
+              >
+                <span className="user-add-balance-text">Add balance</span>
+                <span className="user-add-balance-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </span>
+              </button>
+            )}
             <button
               type="button"
-              className="user-add-balance-btn"
-              onClick={openAddBalanceModal}
-              title="Add balance"
+              className="user-refresh-btn"
+              onClick={handleRefresh}
+              title="Refresh"
+              aria-label="Refresh"
             >
-              Add balance
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M23 4v6h-6M1 20v-6h6" />
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+              </svg>
             </button>
-          )}
-          <button
-            type="button"
-            className="user-refresh-btn"
-            onClick={handleRefresh}
-            title="Refresh"
-            aria-label="Refresh"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M23 4v6h-6M1 20v-6h6" />
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-            </svg>
-          </button>
+          </div>
         </div>
       </nav>
 
-      {/* Links bar */}
-      <nav className="navbar navbar-expand-lg navbarlink py-0 px-3">
-        <div className="container-fluid">
-          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+      {/* Links bar - horizontally scrollable on mobile */}
+      <nav className="navbar navbarlink py-0 px-3">
+        <div className="navbarlink-scroll container-fluid">
+          <ul className="navbar-nav me-auto mb-0 flex-nowrap">
               <li className="nav-item">
                 <Link className="nav-link active" to="/dashboard">Dashboard</Link>
               </li>
@@ -152,7 +166,12 @@ function Navbar() {
                 onMouseEnter={() => handleDropdownToggle('downlineList', true)}
                 onMouseLeave={() => handleDropdownToggle('downlineList', false)}
               >
-                <span className="nav-link dropdown-toggle" role="button" aria-expanded={openDropdowns.downlineList}>
+                <span
+                  className="nav-link dropdown-toggle"
+                  role="button"
+                  aria-expanded={openDropdowns.downlineList}
+                  onClick={(e) => { e.preventDefault(); handleDropdownClick('downlineList') }}
+                >
                   Downline List
                 </span>
                 <ul className={`dropdown-menu ${openDropdowns.downlineList ? 'show' : ''}`}>
@@ -168,7 +187,12 @@ function Navbar() {
                 onMouseEnter={() => handleDropdownToggle('myReports', true)}
                 onMouseLeave={() => handleDropdownToggle('myReports', false)}
               >
-                <span className="nav-link dropdown-toggle" role="button" aria-expanded={openDropdowns.myReports}>
+                <span
+                  className="nav-link dropdown-toggle"
+                  role="button"
+                  aria-expanded={openDropdowns.myReports}
+                  onClick={(e) => { e.preventDefault(); handleDropdownClick('myReports') }}
+                >
                   My Reports
                 </span>
                 <ul className={`dropdown-menu ${openDropdowns.myReports ? 'show' : ''}`}>
@@ -187,7 +211,12 @@ function Navbar() {
                 onMouseEnter={() => handleDropdownToggle('banking', true)}
                 onMouseLeave={() => handleDropdownToggle('banking', false)}
               >
-                <span className="nav-link dropdown-toggle" role="button" aria-expanded={openDropdowns.banking}>
+                <span
+                  className="nav-link dropdown-toggle"
+                  role="button"
+                  aria-expanded={openDropdowns.banking}
+                  onClick={(e) => { e.preventDefault(); handleDropdownClick('banking') }}
+                >
                   Banking
                 </span>
                 <ul className={`dropdown-menu ${openDropdowns.banking ? 'show' : ''}`}>
@@ -200,7 +229,12 @@ function Navbar() {
                 onMouseEnter={() => handleDropdownToggle('commission', true)}
                 onMouseLeave={() => handleDropdownToggle('commission', false)}
               >
-                <span className="nav-link dropdown-toggle" role="button" aria-expanded={openDropdowns.commission}>
+                <span
+                  className="nav-link dropdown-toggle"
+                  role="button"
+                  aria-expanded={openDropdowns.commission}
+                  onClick={(e) => { e.preventDefault(); handleDropdownClick('commission') }}
+                >
                   Commission
                 </span>
                 <ul className={`dropdown-menu ${openDropdowns.commission ? 'show' : ''}`}>
@@ -218,14 +252,13 @@ function Navbar() {
                 <Link className="nav-link" to="/restore-user">Restore User</Link>
               </li>
             </ul>
-            <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+            <ul className="navbar-nav ms-auto mb-0 flex-nowrap navbarlink-logout">
               <li className="nav-item">
                 <Link className="nav-link" to="/" onClick={handleLogout}>
                   Logout
                 </Link>
               </li>
             </ul>
-          </div>
         </div>
       </nav>
 
