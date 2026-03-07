@@ -7,6 +7,13 @@ import AddMasterModal from './AddMasterModal'
 import BankingModal from './BankingModal'
 import StatusModal from './StatusModal'
 import SportsSettingsModal from './SportsSettingsModal'
+import {
+  BankingIcon,
+  ProfileIcon,
+  SettingsIcon,
+  SportSettingIcon,
+  DeleteIcon,
+} from '../icon'
 
 function MasterListTable({ title = "Master List" }) {
   const navigate = useNavigate();
@@ -364,9 +371,9 @@ function MasterListTable({ title = "Master List" }) {
                             })
                           }
                         >
-                          <img src="/svg/banking.svg" width="20" height="20" alt="Banking" />
+                          <BankingIcon size={20} />
                         </button>
-                       
+
                         <button
                           className="action-icon-btn"
                           title="Settings"
@@ -379,7 +386,7 @@ function MasterListTable({ title = "Master List" }) {
                             })
                           }
                         >
-                      <img src="/svg/setting.svg" width="18" height="18" alt="User" />
+                          <SettingsIcon size={18} />
                         </button>
                         <button
                           className="action-icon-btn"
@@ -390,14 +397,14 @@ function MasterListTable({ title = "Master List" }) {
                             })
                           }
                         >
-                           <img src="/svg/user.svg" width="18" height="18" alt="User" />
+                          <ProfileIcon size={18} />
                         </button>
                         <button
                           className="action-icon-btn"
                           title="Sport Settings"
                           onClick={handleOpenSports}
                         >
-                          <img src="/svg/settings.svg" width="18" height="18" alt="User" />
+                          <SportSettingIcon size={18} />
                         </button>
                         <button
                           className="action-icon-btn delete-btn"
@@ -405,7 +412,7 @@ function MasterListTable({ title = "Master List" }) {
                           onClick={() => handleOpenDeleteModal(item)}
                           disabled={isDeleting}
                         >
-                          <img src="/svg/delete.svg" width="18" height="18" alt="Delete" />
+                          <DeleteIcon size={18} />
                         </button>
                       </div>
                     </td>

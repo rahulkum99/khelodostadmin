@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Tahoma';
+  src: url('./assets/fonts/tahomabold.TTF') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+  font-style: normal;
+}
+
 :root {
   --header-background-color: linear-gradient(-180deg, #14805e 0, #184438 100%) !important;
 }
@@ -5,7 +13,11 @@
 body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  font-family: 'Tahoma',sans-serif!important;
+  font-weight: 500;
+  color: black;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
 }
 
 .navbar {

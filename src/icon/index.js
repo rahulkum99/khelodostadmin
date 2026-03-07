@@ -1,0 +1,7 @@
+export { default as BankingIcon } from './BankingIcon'
+export { default as BetHistoryIcon } from './BetHistoryIcon'
+export { default as ProfileIcon } from './ProfileIcon'
+export { default as ProfitLossIcon } from './ProfitLossIcon'
+export { default as SettingsIcon } from './SettingsIcon'
+export { default as SportSettingIcon } from './SportSettingIcon'
+export { default as DeleteIcon } from './DeleteIcon'
