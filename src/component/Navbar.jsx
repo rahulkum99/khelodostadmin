@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 import { userSelector, clearCredentials } from '../redux/slices/authReducer'
@@ -22,6 +22,34 @@ function Navbar() {
     banking: false,
     commission: false
   })
+
+  const dropdownTriggerRefs = useRef({})
+  const dropdownMenuRefs = useRef({})
+
+  const dropdownNames = ['downlineList', 'myReports', 'banking', 'commission']
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      dropdownNames.forEach((name) => {
+        const trigger = dropdownTriggerRefs.current[name]
+        const menu = dropdownMenuRefs.current[name]
+        if (!menu) return
+        if (openDropdowns[name] && trigger) {
+          const rect = trigger.getBoundingClientRect()
+          menu.style.position = 'fixed'
+          menu.style.top = `${rect.bottom}px`
+          menu.style.left = `${rect.left}px`
+          menu.style.minWidth = `${rect.width}px`
+        } else {
+          menu.style.position = ''
+          menu.style.top = ''
+          menu.style.left = ''
+          menu.style.minWidth = ''
+        }
+      })
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [openDropdowns])
 
   const { data: walletData, refetch: refetchWallet } = useGetWalletBalanceQuery(undefined, { skip: !user })
   const walletBalance = walletData?.data?.balance
@@ -155,7 +183,7 @@ function Navbar() {
       </nav>
 
       {/* Links bar - horizontally scrollable on mobile */}
-      <nav className="navbar navbarlink py-0 px-3">
+      <nav className="navbar navbarlink py-0 ">
         <div className="navbarlink-scroll container-fluid">
           <ul className="navbar-nav me-auto mb-0 flex-nowrap">
               <li className="nav-item">
@@ -167,6 +195,7 @@ function Navbar() {
                 onMouseLeave={() => handleDropdownToggle('downlineList', false)}
               >
                 <span
+                  ref={(el) => { dropdownTriggerRefs.current.downlineList = el }}
                   className="nav-link dropdown-toggle"
                   role="button"
                   aria-expanded={openDropdowns.downlineList}
@@ -174,7 +203,10 @@ function Navbar() {
                 >
                   Downline List
                 </span>
-                <ul className={`dropdown-menu ${openDropdowns.downlineList ? 'show' : ''}`}>
+                <ul
+                  ref={(el) => { dropdownMenuRefs.current.downlineList = el }}
+                  className={`dropdown-menu ${openDropdowns.downlineList ? 'show' : ''}`}
+                >
                   <li><Link className="dropdown-item" to="/downline-userlist">User Downline List</Link></li>
                   <li><Link className="dropdown-item" to="/downline-masterlist">Master Downline List</Link></li>
                 </ul>
@@ -188,6 +220,7 @@ function Navbar() {
                 onMouseLeave={() => handleDropdownToggle('myReports', false)}
               >
                 <span
+                  ref={(el) => { dropdownTriggerRefs.current.myReports = el }}
                   className="nav-link dropdown-toggle"
                   role="button"
                   aria-expanded={openDropdowns.myReports}
@@ -195,7 +228,10 @@ function Navbar() {
                 >
                   My Reports
                 </span>
-                <ul className={`dropdown-menu ${openDropdowns.myReports ? 'show' : ''}`}>
+                <ul
+                  ref={(el) => { dropdownMenuRefs.current.myReports = el }}
+                  className={`dropdown-menu ${openDropdowns.myReports ? 'show' : ''}`}
+                >
                   <li><Link className="dropdown-item" to="/report-event">User Profit/Loss Report</Link></li>
                   <li><Link className="dropdown-item" to="/report-downline">Downline Profit/Loss Report</Link></li>
                 </ul>
@@ -212,6 +248,7 @@ function Navbar() {
                 onMouseLeave={() => handleDropdownToggle('banking', false)}
               >
                 <span
+                  ref={(el) => { dropdownTriggerRefs.current.banking = el }}
                   className="nav-link dropdown-toggle"
                   role="button"
                   aria-expanded={openDropdowns.banking}
@@ -219,7 +256,10 @@ function Navbar() {
                 >
                   Banking
                 </span>
-                <ul className={`dropdown-menu ${openDropdowns.banking ? 'show' : ''}`}>
+                <ul
+                  ref={(el) => { dropdownMenuRefs.current.banking = el }}
+                  className={`dropdown-menu ${openDropdowns.banking ? 'show' : ''}`}
+                >
                   <li><Link className="dropdown-item" to="/banking-user">User banking</Link></li>
                   <li><Link className="dropdown-item" to="/banking-master">Master Banking</Link></li>
                 </ul>
@@ -230,6 +270,7 @@ function Navbar() {
                 onMouseLeave={() => handleDropdownToggle('commission', false)}
               >
                 <span
+                  ref={(el) => { dropdownTriggerRefs.current.commission = el }}
                   className="nav-link dropdown-toggle"
                   role="button"
                   aria-expanded={openDropdowns.commission}
@@ -237,7 +278,10 @@ function Navbar() {
                 >
                   Commission
                 </span>
-                <ul className={`dropdown-menu ${openDropdowns.commission ? 'show' : ''}`}>
+                <ul
+                  ref={(el) => { dropdownMenuRefs.current.commission = el }}
+                  className={`dropdown-menu ${openDropdowns.commission ? 'show' : ''}`}
+                >
                   <li><Link className="dropdown-item" to="/commission-user">User Commission</Link></li>
                   <li><Link className="dropdown-item" to="/commission-agent">Agent Commission</Link></li>
                 </ul>
