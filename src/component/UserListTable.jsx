@@ -7,6 +7,9 @@ import AddUserModal from './AddUserModal'
 import BankingModal from './BankingModal'
 import StatusModal from './StatusModal'
 import SportsSettingsModal from './SportsSettingsModal'
+import { IoIosRefresh } from "react-icons/io";
+import { HiUserAdd } from "react-icons/hi";
+
 import {
   BankingIcon,
   BetHistoryIcon,
@@ -39,10 +42,10 @@ function UserListTable({ title = "User List" }) {
   const role = title.toLowerCase().includes('master') ? 'master' : 'user';
 
   // Fetch users from API
-  const { data, isLoading, error, refetch } = useGetUsersQuery({ 
-    role, 
-    page: currentPage, 
-    limit: entriesPerPage 
+  const { data, isLoading, error, refetch } = useGetUsersQuery({
+    role,
+    page: currentPage,
+    limit: entriesPerPage
   });
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
 
@@ -211,12 +214,15 @@ function UserListTable({ title = "User List" }) {
     <div className="user-list-container">
       {/* Top Actions */}
       <div className="user-list-header-actions">
-        <button className="refresh-btn" title="Refresh" onClick={() => refetch()}>
-          <span>🔄</span>
-        </button>
+
         <button className="add-user-btn" onClick={() => setIsAddUserModalOpen(true)}>
-          <span>👤</span>
+          <span className="mx-1">
+            <HiUserAdd size={20} />
+          </span>
           <span>Add User</span>
+        </button>
+        <button className="refresh-btn" title="Refresh" onClick={() => refetch()}>
+          <IoIosRefresh size={20} />
         </button>
       </div>
 
@@ -253,15 +259,15 @@ function UserListTable({ title = "User List" }) {
         <div className="table-controls">
           <div className="entries-control">
             <label>Show</label>
-              <select 
-                className="entries-select"
-                value={entriesPerPage}
-                onChange={(e) => {
-                  setEntriesPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                disabled={isLoading}
-              >
+            <select
+              className="entries-select"
+              value={entriesPerPage}
+              onChange={(e) => {
+                setEntriesPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              disabled={isLoading}
+            >
               <option value={10}>10</option>
               <option value={25}>25</option>
               <option value={50}>50</option>
@@ -271,17 +277,17 @@ function UserListTable({ title = "User List" }) {
           </div>
           <div className="search-control">
             <label>Search:</label>
-                <input
-                  type="text"
-                  className="search-input"
-                  value={searchTerm}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    setSearchTerm((v || '').toLowerCase() === 'superadmin' ? '' : v);
-                  }}
-                  placeholder="Search by username, name, or status..."
-                  disabled={isLoading}
-                />
+            <input
+              type="text"
+              className="search-input"
+              value={searchTerm}
+              onChange={(e) => {
+                const v = e.target.value;
+                setSearchTerm((v || '').toLowerCase() === 'superadmin' ? '' : v);
+              }}
+              placeholder="Search by username, name, or status..."
+              disabled={isLoading}
+            />
           </div>
         </div>
 
@@ -453,14 +459,14 @@ function UserListTable({ title = "User List" }) {
             Showing {showingFrom} to {showingTo} of {totalEntries} entries
           </div>
           <div className="pagination-controls">
-            <button 
+            <button
               className="pagination-btn"
               disabled={currentPage === 1 || isLoading}
               onClick={() => setCurrentPage(1)}
             >
               First
             </button>
-            <button 
+            <button
               className="pagination-btn"
               disabled={currentPage === 1 || isLoading}
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
@@ -477,14 +483,14 @@ function UserListTable({ title = "User List" }) {
                 {page}
               </button>
             ))}
-            <button 
+            <button
               className="pagination-btn"
               disabled={currentPage === totalPages || totalPages === 0 || isLoading}
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
             >
               Next
             </button>
-            <button 
+            <button
               className="pagination-btn"
               disabled={currentPage === totalPages || totalPages === 0 || isLoading}
               onClick={() => setCurrentPage(totalPages)}

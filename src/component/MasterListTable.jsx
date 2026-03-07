@@ -7,6 +7,8 @@ import AddMasterModal from './AddMasterModal'
 import BankingModal from './BankingModal'
 import StatusModal from './StatusModal'
 import SportsSettingsModal from './SportsSettingsModal'
+import { IoIosRefresh } from "react-icons/io";
+import { HiUserAdd } from "react-icons/hi";
 import {
   BankingIcon,
   ProfileIcon,
@@ -209,12 +211,15 @@ function MasterListTable({ title = "Master List" }) {
   return (
     <div className="user-list-container">
       <div className="user-list-header-actions">
-        <button className="refresh-btn" title="Refresh" onClick={() => refetch()}>
-          <span>🔄</span>
-        </button>
+       
         <button className="add-user-btn" onClick={() => setIsAddMasterModalOpen(true)}>
-          <span>👤</span>
+          <span className="mx-1">
+            <HiUserAdd size={20} />
+          </span>
           <span>Add Master</span>
+        </button>
+        <button className="refresh-btn" title="Refresh" onClick={() => refetch()}>
+          <IoIosRefresh size={20} />
         </button>
       </div>
 
