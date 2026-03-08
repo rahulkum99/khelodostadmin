@@ -40,3 +40,10 @@
 .read-the-docs {
   color: #888;
 }
+
+
+/* tbody, td, tfoot, th, thead, tr {
+  border-color: #dee2e6;
+  border-style: solid;
+  border-width: 0;
+} */

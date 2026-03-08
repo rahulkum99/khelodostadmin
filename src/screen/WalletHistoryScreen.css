@@ -282,6 +282,13 @@
   .wallet-history-content {
     padding: 15px;
   }
+  .search-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+  }
 
   .wallet-history-controls {
     flex-direction: column;
@@ -289,7 +296,7 @@
   }
 
   .search-input {
-    width: 100%;
+    width: 50%;
     min-width: auto;
   }
 

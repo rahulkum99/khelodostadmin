@@ -9,6 +9,8 @@ import StatusModal from './StatusModal'
 import SportsSettingsModal from './SportsSettingsModal'
 import { IoIosRefresh } from "react-icons/io";
 import { HiUserAdd } from "react-icons/hi";
+import { FaRegEdit } from "react-icons/fa";
+import { FaEye } from "react-icons/fa";
 import {
   BankingIcon,
   ProfileIcon,
@@ -290,16 +292,66 @@ function MasterListTable({ title = "Master List" }) {
           <table className="user-list-table">
             <thead>
               <tr>
-                <th>Username <span className="sort-arrows">▲▼</span></th>
-                <th>Credit Ref. <span className="sort-arrows">▲▼</span></th>
-                <th>Balance <span className="sort-arrows">▲▼</span></th>
-                <th>Exposure <span className="sort-arrows">▲▼</span></th>
-                <th>Exposure Limit <span className="sort-arrows">▲▼</span></th>
-                <th>Avail.Bal. <span className="sort-arrows">▲▼</span></th>
-                <th>Ref. P/L <span className="sort-arrows">▲▼</span></th>
-                <th>Partnership <span className="sort-arrows">▲▼</span></th>
-                <th>Status <span className="sort-arrows">▲▼</span></th>
-                <th>Actions <span className="sort-arrows">▲▼</span></th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Username</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Credit Ref.</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Balance</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Exposure</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Exposure Limit</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Avail.Bal.</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Ref. P/L</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Partnership</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Status</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Actions</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -336,14 +388,22 @@ function MasterListTable({ title = "Master List" }) {
                 tableData.map((item) => (
                   <tr key={item.id}>
                     <td>
-                      <span className="user-badge">{item.userType}</span>
-                      <span className="username-text">{item.username}</span>
+                      <span className="td-content-inline">
+                        <span className="user-badge">{item.userType}</span>
+                        <span className="username-text">{item.username}</span>
+                      </span>
                     </td>
                     <td>
-                      <span>{formatCurrency(item.creditRef)}</span>
-                      <span className="action-icons">
-                        <button className="icon-btn" title="Edit">✏️</button>
-                        <button className="icon-btn" title="View">👁️</button>
+                      <span className="td-content-inline">
+                        <span>{formatCurrency(item.creditRef)}</span>
+                        <span className="action-icons">
+                          <button className="icon-btn" title="Edit">
+                            <FaRegEdit size={16} />
+                          </button>
+                          <button className="icon-btn" title="View">
+                            <FaEye size={16} />
+                          </button>
+                        </span>
                       </span>
                     </td>
                     <td>{formatCurrency(item.balance)}</td>
@@ -351,8 +411,12 @@ function MasterListTable({ title = "Master List" }) {
                       ({formatCurrency(item.exposure)})
                     </td>
                     <td>
-                      <span>{formatCurrency(item.exposureLimit)}</span>
-                      <button className="icon-btn" title="Edit">✏️</button>
+                      <span className="td-content-inline">
+                        <span>{formatCurrency(item.exposureLimit)}</span>
+                        <button className="icon-btn" title="Edit">
+                          <FaRegEdit size={16} />
+                        </button>
+                      </span>
                     </td>
                     <td>{formatCurrency(item.availBal)}</td>
                     <td>({formatCurrency(item.refPL)})</td>
