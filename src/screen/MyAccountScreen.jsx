@@ -7,6 +7,9 @@ import AccountStatement from '../component/AccountStatement'
 import ActivityLog from '../component/ActivityLog'
 import { useChangePasswordMutation } from '../redux/api/authApi'
 import { toast } from 'react-toastify'
+import { FaRegEdit } from "react-icons/fa";
+import { FaEye } from "react-icons/fa";
+import { FaEyeSlash } from "react-icons/fa";
 
 function MyAccountScreen() {
   const [activeTab, setActiveTab] = useState('profile');
@@ -110,8 +113,12 @@ function MyAccountScreen() {
                 <span className="detail-value">
                   {formatRollingCommission(user?.rollingCommission)}
                   <span className="detail-icons">
-                    <button className="icon-btn" title="Edit">✏️</button>
-                    <button className="icon-btn" title="View">👁️</button>
+                    <button className="icon-btn" title="Edit">
+                      <FaRegEdit size={16} />
+                    </button>
+                    <button className="icon-btn" title="View">
+                      <FaEye size={16} />
+                    </button>
                   </span>
                 </span>
               </div>
@@ -120,7 +127,9 @@ function MyAccountScreen() {
                 <span className="detail-value">
                   {formatRollingCommission(user?.agentRollingCommission)}
                   <span className="detail-icons">
-                    <button className="icon-btn" title="View">👁️</button>
+                    <button className="icon-btn" title="View">
+                      <FaEye size={16} />
+                    </button>
                   </span>
                 </span>
               </div>
@@ -146,7 +155,7 @@ function MyAccountScreen() {
                       title="Change Password"
                       onClick={() => setShowPasswordModal(true)}
                     >
-                      ✏️
+                      <FaRegEdit size={16} />
                     </button>
                   </span>
                 </span>
@@ -236,7 +245,7 @@ function MyAccountScreen() {
                     className="password-toggle-btn"
                     onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
                   >
-                    {showPasswords.current ? '👁️' : '👁️‍🗨️'}
+                    {showPasswords.current ? <FaEye size={16} /> : <FaEyeSlash size={16} />}
                   </button>
                 </div>
               </div>
@@ -258,7 +267,7 @@ function MyAccountScreen() {
                     className="password-toggle-btn"
                     onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
                   >
-                    {showPasswords.new ? '👁️' : '👁️‍🗨️'}
+                    {showPasswords.new ? <FaEye size={16} /> : <FaEyeSlash size={16} />}
                   </button>
                 </div>
               </div>
@@ -280,7 +289,7 @@ function MyAccountScreen() {
                     className="password-toggle-btn"
                     onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
                   >
-                    {showPasswords.confirm ? '👁️' : '👁️‍🗨️'}
+                    {showPasswords.confirm ? <FaEye size={16} /> : <FaEyeSlash size={16} />}
                   </button>
                 </div>
               </div>

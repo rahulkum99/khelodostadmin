@@ -152,17 +152,72 @@ function UserBetHistory({ userId, username }) {
           <table className="betlist-table">
             <thead>
               <tr>
-                <th>Sport</th>
-                <th>Event</th>
-                <th>Market</th>
-                <th>Selection</th>
-                <th>Type</th>
-                <th>Odds</th>
-                <th>Stake</th>
-                <th>Exposure</th>
-                <th>Status</th>
-                <th>Place Time</th>
-                <th>Settle Time</th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Sport</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Event</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Market</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Selection</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Type</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Odds</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Stake</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Exposure</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Status</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Place Time</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Settle Time</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
               </tr>
             </thead>
             <tbody>

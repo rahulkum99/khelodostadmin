@@ -3,6 +3,7 @@ import { toast } from 'react-toastify'
 import './BankingTable.css'
 import BankingModal from './BankingModal'
 import { useWalletBulkActionMutation, useGetBankingUsersQuery } from '../redux/api/authApi'
+import { FaRegEdit } from "react-icons/fa";
 
 function toArray(data) {
   if (Array.isArray(data)) return data
@@ -251,15 +252,60 @@ function BankingTable({ title = "Banking", data: externalData, isLoading, error,
           <table className="banking-table">
             <thead>
               <tr>
-                <th>UID <span className="sort-arrows">▲▼</span></th>
-                <th>Balance <span className="sort-arrows">▲▼</span></th>
-                <th>Available D / W <span className="sort-arrows">▲▼</span></th>
-                <th>Exposure <span className="sort-arrows">▲▼</span></th>
-                <th>Credit Reference <span className="sort-arrows">▲▼</span></th>
-                <th>Reference P/L <span className="sort-arrows">▲▼</span></th>
-                <th>Deposit/Withdraw <span className="sort-arrows">▲▼</span></th>
-                <th>Full <span className="sort-arrows">▲▼</span></th>
-                <th>Remark <span className="sort-arrows">▲▼</span></th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>UID</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Balance</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Available D / W</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Exposure</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Credit Reference</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Reference P/L</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Deposit/Withdraw</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Full</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
+                <th>
+                  <span className="th-title-with-icon">
+                    <span>Remark</span>
+                    <span className="sort-arrows">▲▼</span>
+                  </span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -295,8 +341,12 @@ function BankingTable({ title = "Banking", data: externalData, isLoading, error,
                       ({formatCurrency(item.exposure)})
                     </td>
                     <td onClick={(e) => e.stopPropagation()}>
-                      <span>{formatCurrency(item.creditRef)}</span>
-                      <button className="icon-btn" title="Edit">✏️</button>
+                      <span className="td-content-inline">
+                        <span>{formatCurrency(item.creditRef)}</span>
+                        <button className="icon-btn" title="Edit">
+                          <FaRegEdit size={16} />
+                        </button>
+                      </span>
                     </td>
                     <td className="ref-pl-positive">{formatCurrency(item.refPL)}</td>
                     <td onClick={(e) => e.stopPropagation()}>

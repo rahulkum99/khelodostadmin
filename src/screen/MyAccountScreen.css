@@ -28,12 +28,11 @@
 }
 
 .sidebar-header {
-  background: linear-gradient(-180deg, #14805e 0, #184438 100%);
-  color: white;
-  padding: 15px 20px;
-  font-size: 18px;
-  font-weight: 600;
-  text-align: center;
+  background: linear-gradient(-180deg, #2E4B5E 0%, #243A48 82%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 5px 10px;
 }
 
 .sidebar-nav {
@@ -74,13 +73,11 @@
 }
 
 .account-details-header {
-  background: linear-gradient(-180deg, #14805e 0, #184438 100%);
-  color: white;
-  padding: 15px 20px;
-  font-size: 18px;
-  font-weight: 600;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(-180deg, #2E4B5E 0%, #243A48 82%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 5px 10px;
 }
 
 .account-details-panel {

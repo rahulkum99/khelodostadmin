@@ -140,13 +140,48 @@ function RestoreUserScreen() {
               <table className="report-table">
                 <thead>
                   <tr>
-                    <th>Username</th>
-                    <th>Name</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Active</th>
-                    <th>Locked</th>
-                    <th>Actions</th>
+                    <th>
+                      <span className="th-title-with-icon">
+                        <span>Username</span>
+                        <span className="sort-arrows">▲▼</span>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="th-title-with-icon">
+                        <span>Name</span>
+                        <span className="sort-arrows">▲▼</span>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="th-title-with-icon">
+                        <span>Role</span>
+                        <span className="sort-arrows">▲▼</span>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="th-title-with-icon">
+                        <span>Status</span>
+                        <span className="sort-arrows">▲▼</span>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="th-title-with-icon">
+                        <span>Active</span>
+                        <span className="sort-arrows">▲▼</span>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="th-title-with-icon">
+                        <span>Locked</span>
+                        <span className="sort-arrows">▲▼</span>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="th-title-with-icon">
+                        <span>Actions</span>
+                        <span className="sort-arrows">▲▼</span>
+                      </span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>

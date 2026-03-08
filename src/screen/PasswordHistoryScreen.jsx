@@ -154,14 +154,54 @@ function PasswordHistoryScreen() {
               <table className="password-history-table">
                 <thead>
                   <tr>
-                    <th>Username <span className="sort-arrows">▲▼</span></th>
-                    <th>Remarks <span className="sort-arrows">▲▼</span></th>
-                    <th>Date & Time <span className="sort-arrows">▲▼</span></th>
-                    <th>IP Address</th>
-                    <th>Device</th>
-                    <th>Browser</th>
-                    <th>OS</th>
-                    <th>Details</th>
+                    <th>
+                      <span className="th-title-with-icon">
+                        <span>Username</span>
+                        <span className="sort-arrows">▲▼</span>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="th-title-with-icon">
+                        <span>Remarks</span>
+                        <span className="sort-arrows">▲▼</span>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="th-title-with-icon">
+                        <span>Date &amp; Time</span>
+                        <span className="sort-arrows">▲▼</span>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="th-title-with-icon">
+                        <span>IP Address</span>
+                        <span className="sort-arrows">▲▼</span>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="th-title-with-icon">
+                        <span>Device</span>
+                        <span className="sort-arrows">▲▼</span>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="th-title-with-icon">
+                        <span>Browser</span>
+                        <span className="sort-arrows">▲▼</span>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="th-title-with-icon">
+                        <span>OS</span>
+                        <span className="sort-arrows">▲▼</span>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="th-title-with-icon">
+                        <span>Details</span>
+                        <span className="sort-arrows">▲▼</span>
+                      </span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>

@@ -70,11 +70,11 @@
 }
 
 .betlist-header-bar {
-  background-color: #003b5c;
+  background: linear-gradient(-180deg, #2E4B5E 0%, #243A48 82%);
   color: #ffffff;
-  padding: 10px 16px;
+  font-weight: 700;
   font-size: 15px;
-  font-weight: 600;
+  padding: 5px 10px;
 }
 
 .betlist-table-container {
@@ -131,6 +131,19 @@
 
 .betlist-table thead {
   background-color: #e5e5e5;
+}
+
+.th-title-with-icon {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.sort-arrows {
+  font-size: 10px;
+  color: #adb5bd;
+  margin-left: 6px;
+  font-weight: normal;
 }
 
 .betlist-table th,

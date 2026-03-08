@@ -184,12 +184,42 @@ function AccountStatement({ userId = null }) {
             <table className="statement-table">
               <thead>
                 <tr>
-                  <th>Date/Time <span className="sort-arrows">▲▼</span></th>
-                  <th>Deposit <span className="sort-arrows">▲▼</span></th>
-                  <th>Withdraw <span className="sort-arrows">▲▼</span></th>
-                  <th>Balance <span className="sort-arrows">▲▼</span></th>
-                  <th>Remark <span className="sort-arrows">▲▼</span></th>
-                  <th>From/To <span className="sort-arrows">▲▼</span></th>
+                  <th>
+                    <span className="th-title-with-icon">
+                      <span>Date/Time</span>
+                      <span className="sort-arrows">▲▼</span>
+                    </span>
+                  </th>
+                  <th>
+                    <span className="th-title-with-icon">
+                      <span>Deposit</span>
+                      <span className="sort-arrows">▲▼</span>
+                    </span>
+                  </th>
+                  <th>
+                    <span className="th-title-with-icon">
+                      <span>Withdraw</span>
+                      <span className="sort-arrows">▲▼</span>
+                    </span>
+                  </th>
+                  <th>
+                    <span className="th-title-with-icon">
+                      <span>Balance</span>
+                      <span className="sort-arrows">▲▼</span>
+                    </span>
+                  </th>
+                  <th>
+                    <span className="th-title-with-icon">
+                      <span>Remark</span>
+                      <span className="sort-arrows">▲▼</span>
+                    </span>
+                  </th>
+                  <th>
+                    <span className="th-title-with-icon">
+                      <span>From/To</span>
+                      <span className="sort-arrows">▲▼</span>
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody>

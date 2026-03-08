@@ -232,15 +232,60 @@ function WalletHistoryScreen() {
                             <table className="wallet-history-table">
                                 <thead>
                                     <tr>
-                                        <th>Date &amp; Time</th>
-                                        <th>Type</th>
-                                        <th>Amount</th>
-                                        <th>Balance Before</th>
-                                        <th>Balance After</th>
-                                        <th>Description</th>
-                                        <th>Performed By</th>
-                                        <th>Reference ID</th>
-                                        <th>Status</th>
+                                        <th>
+                                            <span className="th-title-with-icon">
+                                                <span>Date &amp; Time</span>
+                                                <span className="sort-arrows">▲▼</span>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span className="th-title-with-icon">
+                                                <span>Type</span>
+                                                <span className="sort-arrows">▲▼</span>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span className="th-title-with-icon">
+                                                <span>Amount</span>
+                                                <span className="sort-arrows">▲▼</span>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span className="th-title-with-icon">
+                                                <span>Balance Before</span>
+                                                <span className="sort-arrows">▲▼</span>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span className="th-title-with-icon">
+                                                <span>Balance After</span>
+                                                <span className="sort-arrows">▲▼</span>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span className="th-title-with-icon">
+                                                <span>Description</span>
+                                                <span className="sort-arrows">▲▼</span>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span className="th-title-with-icon">
+                                                <span>Performed By</span>
+                                                <span className="sort-arrows">▲▼</span>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span className="th-title-with-icon">
+                                                <span>Reference ID</span>
+                                                <span className="sort-arrows">▲▼</span>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span className="th-title-with-icon">
+                                                <span>Status</span>
+                                                <span className="sort-arrows">▲▼</span>
+                                            </span>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
