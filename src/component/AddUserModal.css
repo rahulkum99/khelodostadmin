@@ -253,4 +253,17 @@
   .modal-form {
     padding: 15px;
   }
+
+  /* On mobile: label above input */
+  .form-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-label {
+    min-width: unset;
+    margin-right: 0;
+    margin-bottom: 6px;
+    text-align: center;
+  }
 }

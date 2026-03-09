@@ -91,9 +91,9 @@ function RestoreUserScreen() {
           <div className="report-table-header">
             <div className="report-title">Restore User</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '13px', color: '#666' }}>
+              {/* <span style={{ fontSize: '13px', color: '#666' }}>
                 Total: {totalFromApi} · Filter: {Array.isArray(meta.filter) ? meta.filter.join(', ') : 'suspended, locked'}
-              </span>
+              </span> */}
               <button className="download-btn" onClick={() => refetch()} disabled={isLoading}>
                 {isLoading ? 'Loading...' : 'Refresh'}
               </button>
