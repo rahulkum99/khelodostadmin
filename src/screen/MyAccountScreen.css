@@ -42,20 +42,23 @@
 }
 
 .sidebar-nav-item {
-  padding: 15px 20px;
+  display: block;
   cursor: pointer;
-  border-bottom: 1px solid #e9ecef;
-  transition: background-color 0.2s ease;
-  color: #333;
-  font-size: 15px;
+  color: #1e1e1e;
+  border-bottom: 1px solid #ccc;
+  padding: 5px 10px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+  
 }
 
-.sidebar-nav-item:hover {
-  background-color: #f8f9fa;
-}
+
 
 .sidebar-nav-item.active {
-  background-color: #e8f5e9;
+  background-color: #d1ddef;
   color: #14805e;
   font-weight: 600;
 }
@@ -167,6 +170,7 @@
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -355,4 +359,3 @@
     width: 100%;
   }
 }
-
