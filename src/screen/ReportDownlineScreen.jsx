@@ -174,7 +174,8 @@ function ReportDownlineScreen() {
                   onChange={(e) => setDataSource(e.target.value)}
                 >
                   <option value="LIVE_DATA">LIVE DATA</option>
-                  <option value="SETTLED_DATA">SETTLED DATA</option>
+                  <option value="BACKUP_DATA">BACKUP DATA</option>
+                  <option value="OLD_DATA">OLD DATA</option>
                 </select>
                 <span className="select-arrow">▼</span>
               </div>

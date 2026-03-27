@@ -166,24 +166,13 @@
 }
 
 .search-input {
-  padding: 10px 16px;
-  border: 2px solid #e0e6ed;
-  border-radius: 8px;
-  font-size: 14px;
-  min-width: 250px;
-  transition: all 0.2s ease;
-  background: white;
+  border: 1px solid #e4e4e4;
+  border-radius: 5px;
+  line-height: 20px;
+  padding-left: 10px;
+  background-color: transparent;
 }
 
-.search-input:focus {
-  outline: none;
-  border-color: #14805e;
-  box-shadow: 0 0 0 3px rgba(20, 128, 94, 0.1);
-}
-
-.search-input::placeholder {
-  color: #adb5bd;
-}
 
 .table-wrapper {
   overflow-x: auto;
@@ -258,6 +247,7 @@
   font-weight: 700;
   font-size: 13px;
   line-height: 1.5;
+  white-space: nowrap;
 }
 
 .th-title-with-icon {
@@ -365,6 +355,112 @@
 .exposure-zero {
   color: #dc3545;
   font-weight: 600;
+}
+
+.exposure-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: #d50000;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.exposure-link-btn.disabled {
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.exposure-market-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #0078b4;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.exposure-market-link-btn:hover {
+  color: #005f8e;
+}
+
+.exposure-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 1100;
+  padding: 48px 16px;
+}
+
+.exposure-modal {
+  width: min(1000px, 100%);
+  max-height: calc(100vh - 96px);
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.exposure-modal-header {
+  background: linear-gradient(-180deg, #315195 0%, #14213D 100%);
+  color: #fff;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.exposure-modal-title { 
+  margin-bottom: 0;
+  line-height: 1.5;
+  font-size: 15px;
+}
+
+.exposure-modal-close {
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.exposure-modal-body {
+  padding: 14px;
+  overflow: auto;
+}
+
+.exposure-table-wrapper {
+  margin: 0;
+  padding: 0;
+}
+
+.exposure-details-table {
+  min-width: 760px;
+}
+
+.market-bets-modal {
+  width: min(1300px, 100%);
+}
+
+.market-bets-table {
+  min-width: 1250px;
+}
+
+.market-bets-table tbody tr.market-row-lay td {
+  background-color: #faa9ba;
+}
+
+.market-bets-table tbody tr.market-row-back td {
+  background-color: #72bbef;
 }
 
 .status-badge {

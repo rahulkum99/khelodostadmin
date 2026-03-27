@@ -48,7 +48,7 @@
   border-bottom: 1px solid #ccc;
   padding: 5px 10px;
   text-decoration: none;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 400;
   line-height: 1.5;
   text-align: left;
@@ -72,7 +72,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  min-width: 0;
 }
 
 .account-details-header {
@@ -86,14 +86,12 @@
 .account-details-panel {
   background-color: white;
   border-radius: 4px;
-  padding: 25px;
+  padding: 0 25px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .detail-row {
   display: flex;
-  padding: 12px 0;
-  border-bottom: 1px solid #e9ecef;
   align-items: center;
 }
 
@@ -102,18 +100,24 @@
 }
 
 .detail-label {
-  font-weight: 600;
+  font-weight: 400;
   color: #333;
   min-width: 200px;
-  font-size: 15px;
+  font-size: 12.5px;
+  border-bottom: 1px solid #ccc;
+  width: 100%;
+  padding: 15px 0;
 }
 
 .detail-value {
   color: #666;
-  font-size: 15px;
+  font-size: 12.5px;
   display: flex;
   align-items: center;
   gap: 10px;
+  border-bottom: 1px solid #ccc;
+  width: 100%;
+ padding: 15px 0;
 }
 
 .detail-icons {
@@ -357,5 +361,8 @@
   .password-modal-cancel,
   .password-modal-submit {
     width: 100%;
+  }
+  .sidebar-nav-item{
+    text-align: center;
   }
 }

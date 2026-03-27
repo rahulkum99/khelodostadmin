@@ -10,8 +10,8 @@
 }
 
 .betlist-filter-section {
-  background-color: #f5f5f5;
-  border: 1px solid #d3d3d3;
+  background-color: #e0e6e6;
+  border: 1px solid #000501;
   border-radius: 4px;
   padding: 14px 20px;
   margin-bottom: 18px;
@@ -24,11 +24,11 @@
   flex-wrap: wrap;
 }
 
-.filter-group {
+/* .filter-group {
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
+} */
 
 .filter-label {
   font-size: 13px;
@@ -47,15 +47,16 @@
 }
 
 .betlist-get-btn {
-  background-color: #006699;
-  color: #ffffff;
-  border: 1px solid #004d73;
   padding: 8px 18px;
   border-radius: 3px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   margin-left: auto;
+  color: white;
+  background: linear-gradient(-180deg, #2E4B5E 0%, #243A48 82%);
+  border-color: #cccccc;
+  border: unset;
 }
 
 .betlist-get-btn:hover {
@@ -120,11 +121,15 @@
 }
 
 .betlist-table-wrapper {
+  width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .betlist-table {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
   font-size: 13px;
 }
@@ -149,8 +154,10 @@
 .betlist-table th,
 .betlist-table td {
   padding: 8px 10px;
-  border: 1px solid #d4d4d4;
+  border: 1px solid #c8ced3;
   text-align: left;
+  white-space: nowrap;
+
 }
 
 .betlist-table tbody tr:nth-child(even) {

@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useGetUsersQuery, useDeleteUserMutation } from '../redux/api/authApi'
+import {
+  useGetUsersQuery,
+  useDeleteUserMutation,
+  useLazyGetUserExposureGameListQuery,
+  useLazyGetUserMarketExposureBetsQuery,
+} from '../redux/api/authApi'
 import { toast } from 'react-toastify'
 import './UserListTable.css'
 import AddUserModal from './AddUserModal'
@@ -38,6 +43,16 @@ function UserListTable({ title = "User List" }) {
   const [deleteTargetUser, setDeleteTargetUser] = useState(null);
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteError, setDeleteError] = useState('');
+  const [isExposureModalOpen, setIsExposureModalOpen] = useState(false);
+  const [selectedExposureUser, setSelectedExposureUser] = useState(null);
+  const [selectedExposureRows, setSelectedExposureRows] = useState([]);
+  const [isMarketBetsModalOpen, setIsMarketBetsModalOpen] = useState(false);
+  const [selectedMarketBetsRows, setSelectedMarketBetsRows] = useState([]);
+  const [selectedMarketTitle, setSelectedMarketTitle] = useState('');
+  const [fetchUserExposureGameList, { isFetching: isExposureLoading }] =
+    useLazyGetUserExposureGameListQuery();
+  const [fetchUserMarketExposureBets, { isFetching: isMarketBetsLoading }] =
+    useLazyGetUserMarketExposureBetsQuery();
 
   // Determine role based on title
   const role = title.toLowerCase().includes('master') ? 'master' : 'user';
@@ -183,6 +198,87 @@ function UserListTable({ title = "User List" }) {
     setIsDeleteModalOpen(true);
   };
 
+  const normalizeExposureRows = (sourceRows = []) => {
+    return (Array.isArray(sourceRows) ? sourceRows : []).map((row, index) => ({
+      id: row._id || row.id || `${index}`,
+      sportName: row.sportName || row.sport || '-',
+      eventName: row.eventName || row.event || '-',
+      marketName: row.marketName || row.market || row.marketType || '-',
+      eventId: row.eventId || '',
+      marketId: row.marketId || '',
+      betCount: Number(row.betCount ?? row.count ?? row.totalBets ?? 0),
+    }));
+  };
+
+  const normalizeMarketBetsRows = (sourceRows = []) => {
+    return (Array.isArray(sourceRows) ? sourceRows : []).map((row, index) => ({
+      id: row.betId || row._id || row.id || `${index}`,
+      sportName: row.sport || '-',
+      eventName: row.eventName || '-',
+      marketName: row.marketName || '-',
+      runnerName: row.runnerName || '-',
+      betType: row.betType || '-',
+      userPrice: row.userPrice ?? '-',
+      rate: row.rate ?? '-',
+      amount: row.amount ?? row.stake ?? '-',
+      placeDate: row.placeDate || row.createdAt || null,
+      matchDate: row.matchDate || row.updatedAt || null,
+    }));
+  };
+
+  const handleOpenExposureModal = async (item) => {
+    if (!item || Number(item.exposure || 0) === 0) return;
+    setSelectedExposureUser(item);
+    setSelectedExposureRows([]);
+    setIsExposureModalOpen(true);
+    try {
+      const response = await fetchUserExposureGameList({ userId: item.id }).unwrap();
+      setSelectedExposureRows(normalizeExposureRows(response));
+    } catch (err) {
+      setSelectedExposureRows([]);
+      toast.error(err?.data?.message || err?.message || 'Failed to load exposure details');
+    }
+  };
+
+  const getExposureModalTitle = () => {
+    const username =
+      selectedExposureUser?.username ||
+      selectedExposureUser?.userData?.username ||
+      selectedExposureUser?.userData?.name ||
+      'User';
+    return `Exposure Details- ${username}`;
+  };
+
+  const handleCloseExposureModal = () => {
+    setIsExposureModalOpen(false);
+    setSelectedExposureUser(null);
+    setSelectedExposureRows([]);
+  };
+
+  const handleOpenMarketBetsModal = async (row) => {
+    if (!selectedExposureUser?.id || !row?.marketId || !row?.eventId) return;
+    setSelectedMarketBetsRows([]);
+    setSelectedMarketTitle(row.marketName || 'Market Exposure');
+    setIsMarketBetsModalOpen(true);
+    try {
+      const response = await fetchUserMarketExposureBets({
+        userId: selectedExposureUser.id,
+        marketId: row.marketId,
+        eventId: row.eventId,
+      }).unwrap();
+      setSelectedMarketBetsRows(normalizeMarketBetsRows(response));
+    } catch (err) {
+      setSelectedMarketBetsRows([]);
+      toast.error(err?.data?.message || err?.message || 'Failed to load market exposure bets');
+    }
+  };
+
+  const handleCloseMarketBetsModal = () => {
+    setIsMarketBetsModalOpen(false);
+    setSelectedMarketBetsRows([]);
+    setSelectedMarketTitle('');
+  };
+
   const handleCloseDeleteModal = () => {
     setIsDeleteModalOpen(false);
     setDeleteTargetUser(null);
@@ -209,6 +305,21 @@ function UserListTable({ title = "User List" }) {
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-IN').format(value);
+  };
+
+  const formatDateTime = (dateValue) => {
+    if (!dateValue) return '-';
+    const parsed = new Date(dateValue);
+    if (Number.isNaN(parsed.getTime())) return '-';
+    return parsed.toLocaleString('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+    });
   };
 
   return (
@@ -412,7 +523,15 @@ function UserListTable({ title = "User List" }) {
                     </td>
                     <td>{formatCurrency(item.balance)}</td>
                     <td className={item.exposure === 0 ? 'exposure-zero' : ''}>
-                      ({formatCurrency(item.exposure)})
+                      <button
+                        type="button"
+                        className={`exposure-link-btn ${item.exposure === 0 ? 'disabled' : ''}`}
+                        disabled={item.exposure === 0}
+                        onClick={() => handleOpenExposureModal(item)}
+                        title={item.exposure === 0 ? 'No exposure available' : 'View exposure details'}
+                      >
+                        ({formatCurrency(item.exposure)})
+                      </button>
                     </td>
                     <td>
                       <span className="td-content-inline">
@@ -668,6 +787,138 @@ function UserListTable({ title = "User List" }) {
               >
                 {isDeleting ? 'Deleting...' : 'Delete'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isExposureModalOpen && selectedExposureUser && (
+        <div className="exposure-modal-overlay" onClick={handleCloseExposureModal}>
+          <div className="exposure-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="exposure-modal-header">
+              <h3 className="exposure-modal-title">{getExposureModalTitle()}</h3>
+              <button
+                type="button"
+                className="exposure-modal-close"
+                onClick={handleCloseExposureModal}
+                aria-label="Close exposure details"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="exposure-modal-body">
+              {isExposureLoading ? (
+                <div className="no-data">Loading exposure details...</div>
+              ) : selectedExposureRows.length === 0 ? (
+                <div className="no-data">No exposure details available.</div>
+              ) : (
+                <div className="table-wrapper exposure-table-wrapper">
+                  <table className="user-list-table exposure-details-table">
+                    <thead>
+                      <tr>
+                        <th>Sport Name</th>
+                        <th>Event Name</th>
+                        <th>Market Name</th>
+                        <th>Bet Count</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedExposureRows.map((row) => (
+                        <tr key={row.id}>
+                          <td>{row.sportName}</td>
+                          <td>{row.eventName}</td>
+                          <td>
+                            <button
+                              type="button"
+                              className="exposure-market-link-btn"
+                              onClick={() => handleOpenMarketBetsModal(row)}
+                              title="View market exposure bets"
+                            >
+                              {row.marketName === 'Match_Odds'
+                                ? 'Match Odds'
+                                : row.marketName === 'fancy1'
+                                  ? 'Toss Market'
+                                  : row.marketName}
+                            </button>
+                          </td>
+                          <td>{row.betCount}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isMarketBetsModalOpen && (
+        <div className="exposure-modal-overlay" onClick={handleCloseMarketBetsModal}>
+          <div className="exposure-modal market-bets-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="exposure-modal-header">
+              <h3 className="exposure-modal-title"> Market Exposure</h3>
+              <button
+                type="button"
+                className="exposure-modal-close"
+                onClick={handleCloseMarketBetsModal}
+                aria-label="Close market exposure bets"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="exposure-modal-body">
+              {isMarketBetsLoading ? (
+                <div className="no-data">Loading market exposure bets...</div>
+              ) : selectedMarketBetsRows.length === 0 ? (
+                <div className="no-data">No market exposure bets available.</div>
+              ) : (
+                <div className="table-wrapper exposure-table-wrapper">
+                  <table className="user-list-table exposure-details-table market-bets-table">
+                    <thead>
+                      <tr>
+                        <th>Sport Name</th>
+                        <th>Event Name</th>
+                        <th>Market Name</th>
+                        <th>Runner Name</th>
+                        <th>Bet Type</th>
+                        <th>User Price</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                        <th>Place Date</th>
+                        <th>Match Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedMarketBetsRows.map((row) => (
+                        <tr
+                          key={row.id}
+                          className={
+                            row.betType?.toString().toLowerCase() === 'lay'
+                              ? 'market-row-lay'
+                              : row.betType?.toString().toLowerCase() === 'back'
+                                ? 'market-row-back'
+                                : ''
+                          }
+                        >
+                          <td>{row.sportName}</td>
+                          <td>{row.eventName}</td>
+                          <td>{row.runnerName}</td>
+                          <td>{row.runnerName}</td>
+                          <td>{row.betType}</td>
+                          <td>{row.userPrice}</td>
+                          <td>{row.rate}</td>
+                          <td>{row.amount}</td>
+                          <td>{formatDateTime(row.placeDate)}</td>
+                          <td>{formatDateTime(row.matchDate)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         </div>

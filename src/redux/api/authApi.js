@@ -215,10 +215,32 @@ export const authApi = createApi({
       invalidatesTags: ['Wallet', 'Users'],
     }),
     getAdminBetList: builder.query({
-      query: ({ page = 1, limit = 10 } = {}) => ({
+      query: ({
+        page = 1,
+        limit = 10,
+        userId,
+        marketType,
+        status,
+        sport,
+        settlement,
+        settlementResult,
+        from,
+        to,
+      } = {}) => ({
         url: '/bets/admin/bet-list',
         method: 'GET',
-        params: { page, limit },
+        params: {
+          page,
+          limit,
+          ...(userId ? { userId } : {}),
+          ...(marketType ? { marketType } : {}),
+          ...(status ? { status } : {}),
+          ...(sport ? { sport } : {}),
+          ...(settlement ? { settlement } : {}),
+          ...(settlementResult ? { settlementResult } : {}),
+          ...(from ? { from } : {}),
+          ...(to ? { to } : {}),
+        },
       }),
       providesTags: ['Bets'],
     }),
@@ -229,6 +251,36 @@ export const authApi = createApi({
         params: { page, limit },
       }),
       providesTags: (result, error, { userId }) => [{ type: 'Bets', id: userId }],
+    }),
+    getUserExposureGameList: builder.query({
+      query: ({ userId } = {}) => ({
+        url: '/bets/admin/user-exposure-game-list',
+        method: 'GET',
+        params: { userId },
+      }),
+      transformResponse: (response) => {
+        if (response && Array.isArray(response.data)) {
+          return response.data;
+        }
+        return [];
+      },
+      providesTags: (result, error, { userId }) => [{ type: 'Bets', id: `exposure-${userId}` }],
+    }),
+    getUserMarketExposureBets: builder.query({
+      query: ({ userId, marketId, eventId } = {}) => ({
+        url: '/bets/admin/user-market-exposure-bets',
+        method: 'GET',
+        params: { userId, marketId, eventId },
+      }),
+      transformResponse: (response) => {
+        if (response && Array.isArray(response.data)) {
+          return response.data;
+        }
+        return [];
+      },
+      providesTags: (result, error, { userId, marketId, eventId }) => [
+        { type: 'Bets', id: `market-exposure-${userId}-${eventId}-${marketId}` },
+      ],
     }),
     getUserProfitLoss: builder.query({
       query: ({ userId, sport } = {}) => ({
@@ -395,6 +447,8 @@ export const {
   useWalletHierarchyWithdrawMutation,
   useGetAdminBetListQuery,
   useGetUserBetsQuery,
+  useLazyGetUserExposureGameListQuery,
+  useLazyGetUserMarketExposureBetsQuery,
   useGetUserProfitLossQuery,
   useGetUserEventProfitLossQuery,
   useGetHierarchyProfitLossQuery,

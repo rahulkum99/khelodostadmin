@@ -104,11 +104,11 @@ function MyAccountScreen() {
                 <span className="detail-label">Name:</span>
                 <span className="detail-value">{user?.name || user?.username || '-'}</span>
               </div>
-              <div className="detail-row">
+              {/* <div className="detail-row">
                 <span className="detail-label">Commission:</span>
                 <span className="detail-value">{user?.commission ?? 0}</span>
-              </div>
-              <div className="detail-row">
+              </div> */}
+              {/* <div className="detail-row">
                 <span className="detail-label">Rolling Commission:</span>
                 <span className="detail-value">
                   {formatRollingCommission(user?.rollingCommission)}
@@ -121,8 +121,8 @@ function MyAccountScreen() {
                     </button>
                   </span>
                 </span>
-              </div>
-              <div className="detail-row">
+              </div> */}
+              {/* <div className="detail-row">
                 <span className="detail-label">Agent Rolling Commission:</span>
                 <span className="detail-value">
                   {formatRollingCommission(user?.agentRollingCommission)}
@@ -132,7 +132,7 @@ function MyAccountScreen() {
                     </button>
                   </span>
                 </span>
-              </div>
+              </div> */}
               <div className="detail-row">
                 <span className="detail-label">Currency:</span>
                 <span className="detail-value">{user?.currency || '-'}</span>

@@ -4,17 +4,78 @@ import Navbar from '../component/Navbar'
 import './ReportEventScreen.css'
 import { useGetHierarchyProfitLossQuery } from '../redux/api/authApi'
 
+function toDateInputValue(date) {
+  const year = date.getFullYear()
+  const month = `${date.getMonth() + 1}`.padStart(2, '0')
+  const day = `${date.getDate()}`.padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function getRangeForSource(source) {
+  const now = new Date()
+  const start = new Date(now)
+  const end = new Date(now)
+
+  if (source === 'LIVE_DATA') {
+    start.setHours(0, 0, 0, 0)
+    end.setHours(23, 59, 59, 999)
+    return {
+      fromDate: toDateInputValue(start),
+      fromTime: '00:00',
+      toDate: toDateInputValue(end),
+      toTime: '23:59',
+    }
+  }
+
+  if (source === 'BACKUP_DATA') {
+    start.setDate(start.getDate() - 6)
+    start.setHours(0, 0, 0, 0)
+    end.setHours(23, 59, 59, 999)
+    return {
+      fromDate: toDateInputValue(start),
+      fromTime: '00:00',
+      toDate: toDateInputValue(end),
+      toTime: '23:59',
+    }
+  }
+
+  if (source === 'OLD_DATA') {
+    start.setDate(start.getDate() - 29)
+    start.setHours(0, 0, 0, 0)
+    end.setHours(23, 59, 59, 999)
+    return {
+      fromDate: toDateInputValue(start),
+      fromTime: '00:00',
+      toDate: toDateInputValue(end),
+      toTime: '23:59',
+    }
+  }
+
+  return null
+}
+
 function ReportEventScreen() {
   const navigate = useNavigate()
   const location = useLocation()
+  const today = new Date()
+  const oneWeekAgo = new Date(today)
+  oneWeekAgo.setDate(today.getDate() - 7)
+  const formatDate = (d) => d.toISOString().split('T')[0]
+
   const [dataSource, setDataSource] = useState('LIVE_DATA')
-  const [fromDate, setFromDate] = useState('2025-02-01')
+  const [fromDate, setFromDate] = useState(() => formatDate(oneWeekAgo))
   const [fromTime, setFromTime] = useState('00:00')
-  const [toDate, setToDate] = useState('2026-02-09')
+  const [toDate, setToDate] = useState(() => formatDate(today))
   const [toTime, setToTime] = useState('23:59')
   const [entriesPerPage, setEntriesPerPage] = useState(10)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
+  const [appliedFilters, setAppliedFilters] = useState(() => ({
+    fromDate: formatDate(oneWeekAgo),
+    fromTime: '00:00',
+    toDate: formatDate(today),
+    toTime: '23:59',
+  }))
 
   const buildDateTime = (date, time, isEnd) => {
     if (!date) return undefined
@@ -25,13 +86,13 @@ function ReportEventScreen() {
     return `${date}T${time}${suffix}`
   }
 
-  const fromIso = buildDateTime(fromDate, fromTime, false)
-  const toIso = buildDateTime(toDate, toTime, true)
+  const fromIso = buildDateTime(appliedFilters.fromDate, appliedFilters.fromTime, false)
+  const toIso = buildDateTime(appliedFilters.toDate, appliedFilters.toTime, true)
 
   const { data, isLoading, isError } = useGetHierarchyProfitLossQuery(
     {
       // Explicitly request cricket to match backend example
-      sport: 'cricket',
+      sport: "",
       from: fromIso,
       to: toIso,
     },
@@ -141,6 +202,21 @@ function ReportEventScreen() {
     URL.revokeObjectURL(url)
   }
   const handleGetPL = () => {
+    const presetRange = getRangeForSource(dataSource)
+    if (presetRange) {
+      setFromDate(presetRange.fromDate)
+      setFromTime(presetRange.fromTime)
+      setToDate(presetRange.toDate)
+      setToTime(presetRange.toTime)
+      setAppliedFilters(presetRange)
+    } else {
+      setAppliedFilters({
+        fromDate,
+        fromTime,
+        toDate,
+        toTime,
+      })
+    }
     setCurrentPage(1)
   }
 
@@ -169,10 +245,23 @@ function ReportEventScreen() {
                 <select
                   className="filter-select"
                   value={dataSource}
-                  onChange={(e) => setDataSource(e.target.value)}
+                  onChange={(e) => {
+                    const nextSource = e.target.value
+                    setDataSource(nextSource)
+                    const presetRange = getRangeForSource(nextSource)
+                    if (presetRange) {
+                      setFromDate(presetRange.fromDate)
+                      setFromTime(presetRange.fromTime)
+                      setToDate(presetRange.toDate)
+                      setToTime(presetRange.toTime)
+                      setAppliedFilters(presetRange)
+                      setCurrentPage(1)
+                    }
+                  }}
                 >
                   <option value="LIVE_DATA">LIVE DATA</option>
-                  <option value="SETTLED_DATA">SETTLED DATA</option>
+                  <option value="BACKUP_DATA">BACKUP DATA</option>
+                  <option value="OLD_DATA">OLD DATA</option>
                 </select>
                 <span className="select-arrow">▼</span>
               </div>
@@ -302,7 +391,7 @@ function ReportEventScreen() {
                               maximumFractionDigits: 2,
                             })}
                           </td>
-                          <td>
+                          <td className={row.commission >= 0 ? 'pl-positive' : 'pl-negative'}>
                             {row.commission.toLocaleString('en-IN', {
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2,
@@ -326,7 +415,7 @@ function ReportEventScreen() {
                             maximumFractionDigits: 2,
                           })}
                         </td>
-                        <td>
+                        <td className={totals.commission >= 0 ? 'pl-positive' : 'pl-negative'}>
                           {totals.commission.toLocaleString('en-IN', {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,

@@ -313,7 +313,7 @@ function UserDetailScreen() {
   const HIDE_PL_ROLES = ['agent', 'master', 'super_master', 'admin']
   const shouldHidePLTabs = HIDE_PL_ROLES.includes((user?.role || '').toLowerCase())
   const visibleTabs = shouldHidePLTabs
-    ? SIDE_MENU_TABS.filter((t) => t.id !== 'bet-history' && t.id !== 'profit-loss')
+    ? SIDE_MENU_TABS.filter((t) => t.id !== 'profit-loss')
     : SIDE_MENU_TABS
   const [activeTab, setActiveTab] = useState('profile')
 
@@ -346,13 +346,13 @@ function UserDetailScreen() {
               <p style={{ color: '#666', marginBottom: '16px' }}>
                 No user data available. You may have arrived here directly without selecting a user.
               </p>
-              <button
+              {/* <button
                 type="button"
                 className="password-modal-submit"
                 onClick={() => navigate('/downline-userlist')}
               >
                 Back to User List
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
@@ -364,26 +364,26 @@ function UserDetailScreen() {
     <>
       <div className="account-details-header">Account Details</div>
       <div className="account-details-panel">
-        <div className="detail-row">
+        {/* <div className="detail-row">
           <span className="detail-label">Username:</span>
           <span className="detail-value">{user?.username || '-'}</span>
-        </div>
+        </div> */}
         <div className="detail-row">
           <span className="detail-label">Name:</span>
           <span className="detail-value">{user?.name || user?.username || '-'}</span>
         </div>
-        <div className="detail-row">
+        {/* <div className="detail-row">
           <span className="detail-label">Commission:</span>
           <span className="detail-value">{user?.commission ?? 0}</span>
-        </div>
-        <div className="detail-row">
+        </div> */}
+        {/* <div className="detail-row">
           <span className="detail-label">Rolling Commission:</span>
           <span className="detail-value">{formatRollingCommission(user?.rollingCommission)}</span>
         </div>
         <div className="detail-row">
           <span className="detail-label">Agent Rolling Commission:</span>
           <span className="detail-value">{formatRollingCommission(user?.agentRollingCommission)}</span>
-        </div>
+        </div> */}
         <div className="detail-row">
           <span className="detail-label">Currency:</span>
           <span className="detail-value">{user?.currency || '-'}</span>
@@ -469,7 +469,7 @@ function UserDetailScreen() {
               </li>
             ))}
           </ul>
-          <div style={{ padding: '15px 20px', borderTop: '1px solid #e9ecef' }}>
+          {/* <div style={{ padding: '15px 20px', borderTop: '1px solid #e9ecef' }}>
             <button
               type="button"
               className="password-modal-cancel"
@@ -478,7 +478,7 @@ function UserDetailScreen() {
             >
               ← Back to List
             </button>
-          </div>
+          </div> */}
         </div>
 
         <div className="account-main">

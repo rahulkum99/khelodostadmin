@@ -21,11 +21,11 @@
  }
 
  .report-filter-section {
-   background-color: #ffffff;
-   border-radius: 4px;
-   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #e0e6e6;
+  border: 1px solid #000501;
    padding: 16px 20px;
    margin-bottom: 20px;
+   border-radius: 4px;
  }
 
  .report-filter-row {
@@ -264,7 +264,6 @@
    padding: 8px 10px;
    border: 1px solid #c8ced3;
    box-shadow: inset 0 0 0 9999px var(--bs-table-accent-bg);
-   color: #000000;
    font-weight: 700;
    white-space: nowrap;
    overflow: visible;

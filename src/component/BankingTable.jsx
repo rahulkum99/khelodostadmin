@@ -58,9 +58,9 @@ function BankingTable({ title = "Banking", data: externalData, isLoading, error,
   const filteredData = searchLower === ''
     ? tableData
     : tableData.filter(item => {
-        const uid = item?.uid != null ? String(item.uid) : '';
-        return uid.toLowerCase().includes(searchLower);
-      });
+      const uid = item?.uid != null ? String(item.uid) : '';
+      return uid.toLowerCase().includes(searchLower);
+    });
   const hasNoSearchResults = tableData.length > 0 && filteredData.length === 0;
 
   // Calculate pagination
@@ -206,7 +206,7 @@ function BankingTable({ title = "Banking", data: externalData, isLoading, error,
           <div className="table-controls">
             <div className="entries-control">
               <label>Show</label>
-              <select 
+              <select
                 className="entries-select"
                 value={entriesPerPage}
                 onChange={(e) => {
@@ -294,12 +294,7 @@ function BankingTable({ title = "Banking", data: externalData, isLoading, error,
                     <span className="sort-arrows">▲▼</span>
                   </span>
                 </th>
-                <th>
-                  <span className="th-title-with-icon">
-                    <span>Full</span>
-                    <span className="sort-arrows">▲▼</span>
-                  </span>
-                </th>
+             
                 <th>
                   <span className="th-title-with-icon">
                     <span>Remark</span>
@@ -337,7 +332,7 @@ function BankingTable({ title = "Banking", data: externalData, isLoading, error,
                     </td>
                     <td>{formatCurrency(item.balance)}</td>
                     <td>{item.availableDW || '-'}</td>
-                    <td className={item.exposure === 0 ? 'exposure-zero' : ''}>
+                    <td className={item.exposure === 0 ? 'exposure-zero' : ''} style={{color:"red"}}>
                       ({formatCurrency(item.exposure)})
                     </td>
                     <td onClick={(e) => e.stopPropagation()}>
@@ -351,13 +346,13 @@ function BankingTable({ title = "Banking", data: externalData, isLoading, error,
                     <td className="ref-pl-positive">{formatCurrency(item.refPL)}</td>
                     <td onClick={(e) => e.stopPropagation()}>
                       <div className="deposit-withdraw-controls">
-                        <button 
+                        <button
                           className={`dw-btn deposit-btn ${formData[item.id]?.transactionType === 'deposit' ? 'active' : ''}`}
                           onClick={() => handleDeposit(item.id)}
                         >
                           D
                         </button>
-                        <button 
+                        <button
                           className={`dw-btn withdraw-btn ${formData[item.id]?.transactionType === 'withdraw' ? 'active' : ''}`}
                           onClick={() => handleWithdraw(item.id)}
                         >
@@ -370,16 +365,15 @@ function BankingTable({ title = "Banking", data: externalData, isLoading, error,
                           onChange={(e) => handleInputChange(item.id, 'depositWithdraw', e.target.value)}
                           placeholder="0"
                         />
+                        <button
+                          className={`full-btn ${Number(formData[item.id]?.depositWithdraw || 0) === Number(item.balance || 0) ? 'active' : ''}`}
+                          onClick={() => handleFull(item.id, item.balance)}
+                        >
+                          Full
+                        </button>
                       </div>
                     </td>
-                    <td onClick={(e) => e.stopPropagation()}>
-                      <button 
-                        className="full-btn"
-                        onClick={() => handleFull(item.id, item.balance)}
-                      >
-                        Full
-                      </button>
-                    </td>
+                 
                     <td onClick={(e) => e.stopPropagation()}>
                       <input
                         type="text"
@@ -401,14 +395,14 @@ function BankingTable({ title = "Banking", data: externalData, isLoading, error,
             Showing {showingFrom} to {showingTo} of {totalEntries} entries
           </div>
           <div className="pagination-controls">
-            <button 
+            <button
               className="pagination-btn"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(1)}
             >
               First
             </button>
-            <button 
+            <button
               className="pagination-btn"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
@@ -424,14 +418,14 @@ function BankingTable({ title = "Banking", data: externalData, isLoading, error,
                 {page}
               </button>
             ))}
-            <button 
+            <button
               className="pagination-btn"
               disabled={currentPage === totalPages || totalPages === 0}
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
             >
               Next
             </button>
-            <button 
+            <button
               className="pagination-btn"
               disabled={currentPage === totalPages || totalPages === 0}
               onClick={() => setCurrentPage(totalPages)}
