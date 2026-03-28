@@ -1,12 +1,33 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { FaRegEdit } from 'react-icons/fa'
+import { toast } from 'react-toastify'
 import Navbar from '../component/Navbar'
 import AccountStatement from '../component/AccountStatement'
 import UserActivityLog from '../component/UserActivityLog'
 import UserBetHistory from '../component/UserBetHistory'
+import ExposureLimitModal from '../component/ExposureLimitModal'
+import HierarchyUserPasswordModal from '../component/HierarchyUserPasswordModal'
 import './MyAccountScreen.css'
 import './ReportEventScreen.css'
-import { useGetUserProfitLossQuery } from '../redux/api/authApi'
+import { useGetUserProfitLossQuery, useGetUserHierarchyQuery } from '../redux/api/authApi'
+import { userSelector } from '../redux/slices/authReducer'
+import {
+  canManageExposureByRole,
+  canEditExposureForTarget,
+  hierarchyResponseToUserIdSet,
+} from '../utils/exposureEditAccess'
+
+function mapProfileUserType(role) {
+  const r = (role || '').toLowerCase()
+  if (r === 'master') return 'MASTER'
+  if (r === 'admin') return 'ADMIN'
+  if (r === 'agent') return 'AGENT'
+  if (r === 'super_master') return 'SUPER MASTER'
+  if (r === 'super_admin') return 'SUPER ADMIN'
+  return 'USER'
+}
 
 const SIDE_MENU_TABS = [
   { id: 'profile', label: 'User Profile' },
@@ -310,6 +331,46 @@ function UserDetailScreen() {
   const navigate = useNavigate()
   const location = useLocation()
   const user = location.state?.user
+  const [exposureLimitOverride, setExposureLimitOverride] = useState(null)
+  const [isExposureLimitModalOpen, setIsExposureLimitModalOpen] = useState(false)
+  const [isHierarchyPasswordModalOpen, setIsHierarchyPasswordModalOpen] = useState(false)
+
+  const authUser = useSelector(userSelector)
+  const authRole = (authUser?.role || '').toLowerCase()
+  const isSuperAdmin = authRole === 'super_admin'
+  // Same scope as exposure / wallet hierarchy (agent+, super admin all, else self + descendants)
+  const needsHierarchyForScopedActions =
+    canManageExposureByRole(authUser) && !isSuperAdmin
+
+  const { data: hierarchyData, isLoading: hierarchyLoading } = useGetUserHierarchyQuery(
+    { from: '2000-01-01T00:00:00Z', to: '2100-12-31T23:59:59Z' },
+    { skip: !needsHierarchyForScopedActions },
+  )
+
+  const hierarchyDescendantIds = useMemo(() => {
+    if (!needsHierarchyForScopedActions) return null
+    return hierarchyResponseToUserIdSet(hierarchyData)
+  }, [hierarchyData, needsHierarchyForScopedActions])
+
+  const profileSubjectId = user?._id || user?.id || userId
+
+  const canManageHierarchySubject = (targetId) =>
+    canEditExposureForTarget({
+      authUser,
+      targetUserId: targetId,
+      descendantIdSet: hierarchyDescendantIds,
+    })
+
+  const showExposureLimitEdit =
+    profileSubjectId &&
+    canManageHierarchySubject(profileSubjectId) &&
+    (!needsHierarchyForScopedActions || !hierarchyLoading)
+
+  const showHierarchyPasswordEdit =
+    profileSubjectId &&
+    canManageHierarchySubject(profileSubjectId) &&
+    (!needsHierarchyForScopedActions || !hierarchyLoading)
+
   const HIDE_PL_ROLES = ['agent', 'master', 'super_master', 'admin']
   const shouldHidePLTabs = HIDE_PL_ROLES.includes((user?.role || '').toLowerCase())
   const visibleTabs = shouldHidePLTabs
@@ -323,6 +384,10 @@ function UserDetailScreen() {
       setActiveTab(tab)
     }
   }, [location.search, visibleTabs])
+
+  useEffect(() => {
+    setExposureLimitOverride(null)
+  }, [user?._id, user?.id])
 
   const formatRollingCommission = (rollingCommission) => {
     if (!rollingCommission || typeof rollingCommission !== 'object') {
@@ -407,9 +472,56 @@ function UserDetailScreen() {
         {user?.exposureLimit != null && (
           <div className="detail-row">
             <span className="detail-label">Exposure Limit:</span>
-            <span className="detail-value">{user.exposureLimit}</span>
+            <span className="detail-value" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              {exposureLimitOverride ?? user.exposureLimit}
+              {showExposureLimitEdit && (
+                <button
+                  type="button"
+                  className="icon-btn"
+                  title="Edit exposure limit"
+                  onClick={() => setIsExposureLimitModalOpen(true)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: '2px',
+                    cursor: 'pointer',
+                    color: '#005792',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <FaRegEdit size={16} />
+                </button>
+              )}
+            </span>
           </div>
         )}
+
+        <div className="detail-row">
+          <span className="detail-label">Change Password:</span>
+          <span className="detail-value" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            ********
+            {showHierarchyPasswordEdit && (
+              <button
+                type="button"
+                className="icon-btn"
+                title="Change password"
+                onClick={() => setIsHierarchyPasswordModalOpen(true)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '2px',
+                  cursor: 'pointer',
+                  color: '#005792',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                }}
+              >
+                <FaRegEdit size={16} />
+              </button>
+            )}
+          </span>
+        </div>
       </div>
     </>
   )
@@ -452,6 +564,19 @@ function UserDetailScreen() {
     }
   }
 
+  const handleSubmitExposureLimit = (payload) => {
+    const msg =
+      payload?.response?.message || 'Exposure limit updated successfully'
+    toast.success(msg)
+    setExposureLimitOverride(payload?.exposureLimit)
+  }
+
+  const handleSubmitHierarchyPassword = (payload) => {
+    const msg =
+      payload?.response?.message || 'Password updated successfully'
+    toast.success(msg)
+  }
+
   return (
     <div className="my-account-container">
       <Navbar />
@@ -485,6 +610,38 @@ function UserDetailScreen() {
           {renderContent()}
         </div>
       </div>
+
+      <ExposureLimitModal
+        isOpen={isExposureLimitModalOpen}
+        onClose={() => setIsExposureLimitModalOpen(false)}
+        user={
+          profileSubjectId
+            ? {
+                id: profileSubjectId,
+                username: user?.username || user?.name,
+                userType: mapProfileUserType(user?.role),
+                exposureLimit:
+                  exposureLimitOverride ?? user?.exposureLimit ?? 0,
+              }
+            : null
+        }
+        onSubmit={handleSubmitExposureLimit}
+      />
+
+      <HierarchyUserPasswordModal
+        isOpen={isHierarchyPasswordModalOpen}
+        onClose={() => setIsHierarchyPasswordModalOpen(false)}
+        user={
+          profileSubjectId
+            ? {
+                id: profileSubjectId,
+                username: user?.username || user?.name,
+                userType: mapProfileUserType(user?.role),
+              }
+            : null
+        }
+        onSubmit={handleSubmitHierarchyPassword}
+      />
     </div>
   )
 }

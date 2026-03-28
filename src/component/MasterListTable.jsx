@@ -1,11 +1,19 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useGetUsersQuery, useDeleteUserMutation } from '../redux/api/authApi'
+import { useSelector } from 'react-redux'
+import { useGetUsersQuery, useGetUserHierarchyQuery, useDeleteUserMutation } from '../redux/api/authApi'
+import { userSelector } from '../redux/slices/authReducer'
+import {
+  canManageExposureByRole,
+  canEditExposureForTarget,
+  hierarchyResponseToUserIdSet,
+} from '../utils/exposureEditAccess'
 import { toast } from 'react-toastify'
 import './UserListTable.css'
 import AddMasterModal from './AddMasterModal'
 import BankingModal from './BankingModal'
 import StatusModal from './StatusModal'
+import ExposureLimitModal from './ExposureLimitModal'
 import SportsSettingsModal from './SportsSettingsModal'
 import { IoIosRefresh } from "react-icons/io";
 import { HiUserAdd } from "react-icons/hi";
@@ -36,6 +44,35 @@ function MasterListTable({ title = "Master List" }) {
   const [deleteTargetUser, setDeleteTargetUser] = useState(null);
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteError, setDeleteError] = useState('');
+  const [isExposureLimitModalOpen, setIsExposureLimitModalOpen] = useState(false);
+  const [selectedExposureLimitUser, setSelectedExposureLimitUser] = useState(null);
+
+  const authUser = useSelector(userSelector);
+  const authRole = (authUser?.role || '').toLowerCase();
+  const isSuperAdmin = authRole === 'super_admin';
+  const needsHierarchyForExposure =
+    canManageExposureByRole(authUser) && !isSuperAdmin;
+
+  const { data: hierarchyData, isLoading: hierarchyLoading } = useGetUserHierarchyQuery(
+    { from: '2000-01-01T00:00:00Z', to: '2100-12-31T23:59:59Z' },
+    { skip: !needsHierarchyForExposure },
+  );
+
+  const exposureDescendantIds = useMemo(() => {
+    if (!needsHierarchyForExposure) return null;
+    return hierarchyResponseToUserIdSet(hierarchyData);
+  }, [hierarchyData, needsHierarchyForExposure]);
+
+  const rowCanEditExposure = (targetId) =>
+    canEditExposureForTarget({
+      authUser,
+      targetUserId: targetId,
+      descendantIdSet: exposureDescendantIds,
+    });
+
+  const showExposureLimitEdit = (targetId) =>
+    rowCanEditExposure(targetId) &&
+    (!needsHierarchyForExposure || !hierarchyLoading);
 
   // Fetch all downline roles in one request: admin, master, agent, super_master
   const rolesQuery = 'admin,master,agent,super_master';
@@ -204,6 +241,28 @@ function MasterListTable({ title = "Master List" }) {
     } catch (err) {
       setDeleteError(err?.data?.message || err?.message || 'Failed to delete user');
     }
+  };
+
+  const handleOpenExposureLimitModal = (item) => {
+    setSelectedExposureLimitUser({
+      id: item.id,
+      username: item.username,
+      userType: item.userType,
+      exposureLimit: item.exposureLimit,
+    });
+    setIsExposureLimitModalOpen(true);
+  };
+
+  const handleCloseExposureLimitModal = () => {
+    setIsExposureLimitModalOpen(false);
+    setSelectedExposureLimitUser(null);
+  };
+
+  const handleSubmitExposureLimit = (payload) => {
+    const msg =
+      payload?.response?.message || 'Exposure limit updated successfully';
+    toast.success(msg);
+    refetch();
   };
 
   const formatCurrency = (value) => {
@@ -413,9 +472,16 @@ function MasterListTable({ title = "Master List" }) {
                     <td>
                       <span className="td-content-inline">
                         <span>{formatCurrency(item.exposureLimit)}</span>
-                        <button className="icon-btn" title="Edit">
-                          <FaRegEdit size={16} />
-                        </button>
+                        {showExposureLimitEdit(item.id) && (
+                          <button
+                            type="button"
+                            className="icon-btn"
+                            title="Edit exposure limit"
+                            onClick={() => handleOpenExposureLimitModal(item)}
+                          >
+                            <FaRegEdit size={16} />
+                          </button>
+                        )}
                       </span>
                     </td>
                     <td>{formatCurrency(item.availBal)}</td>
@@ -673,6 +739,13 @@ function MasterListTable({ title = "Master List" }) {
         }}
         user={selectedStatusUser}
         onSubmit={handleSubmitStatus}
+      />
+
+      <ExposureLimitModal
+        isOpen={isExposureLimitModalOpen}
+        onClose={handleCloseExposureLimitModal}
+        user={selectedExposureLimitUser}
+        onSubmit={handleSubmitExposureLimit}
       />
 
       <SportsSettingsModal

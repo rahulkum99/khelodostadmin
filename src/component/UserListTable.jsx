@@ -1,16 +1,25 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import {
   useGetUsersQuery,
+  useGetUserHierarchyQuery,
   useDeleteUserMutation,
   useLazyGetUserExposureGameListQuery,
   useLazyGetUserMarketExposureBetsQuery,
 } from '../redux/api/authApi'
+import { userSelector } from '../redux/slices/authReducer'
+import {
+  canManageExposureByRole,
+  canEditExposureForTarget,
+  hierarchyResponseToUserIdSet,
+} from '../utils/exposureEditAccess'
 import { toast } from 'react-toastify'
 import './UserListTable.css'
 import AddUserModal from './AddUserModal'
 import BankingModal from './BankingModal'
 import StatusModal from './StatusModal'
+import ExposureLimitModal from './ExposureLimitModal'
 import SportsSettingsModal from './SportsSettingsModal'
 import { IoIosRefresh } from "react-icons/io";
 import { HiUserAdd } from "react-icons/hi";
@@ -49,10 +58,39 @@ function UserListTable({ title = "User List" }) {
   const [isMarketBetsModalOpen, setIsMarketBetsModalOpen] = useState(false);
   const [selectedMarketBetsRows, setSelectedMarketBetsRows] = useState([]);
   const [selectedMarketTitle, setSelectedMarketTitle] = useState('');
+  const [isExposureLimitModalOpen, setIsExposureLimitModalOpen] = useState(false);
+  const [selectedExposureLimitUser, setSelectedExposureLimitUser] = useState(null);
   const [fetchUserExposureGameList, { isFetching: isExposureLoading }] =
     useLazyGetUserExposureGameListQuery();
   const [fetchUserMarketExposureBets, { isFetching: isMarketBetsLoading }] =
     useLazyGetUserMarketExposureBetsQuery();
+
+  const authUser = useSelector(userSelector);
+  const authRole = (authUser?.role || '').toLowerCase();
+  const isSuperAdmin = authRole === 'super_admin';
+  const needsHierarchyForExposure =
+    canManageExposureByRole(authUser) && !isSuperAdmin;
+
+  const { data: hierarchyData, isLoading: hierarchyLoading } = useGetUserHierarchyQuery(
+    { from: '2000-01-01T00:00:00Z', to: '2100-12-31T23:59:59Z' },
+    { skip: !needsHierarchyForExposure },
+  );
+
+  const exposureDescendantIds = useMemo(() => {
+    if (!needsHierarchyForExposure) return null;
+    return hierarchyResponseToUserIdSet(hierarchyData);
+  }, [hierarchyData, needsHierarchyForExposure]);
+
+  const rowCanEditExposure = (targetId) =>
+    canEditExposureForTarget({
+      authUser,
+      targetUserId: targetId,
+      descendantIdSet: exposureDescendantIds,
+    });
+
+  const showExposureLimitEdit = (targetId) =>
+    rowCanEditExposure(targetId) &&
+    (!needsHierarchyForExposure || !hierarchyLoading);
 
   // Determine role based on title
   const role = title.toLowerCase().includes('master') ? 'master' : 'user';
@@ -277,6 +315,28 @@ function UserListTable({ title = "User List" }) {
     setIsMarketBetsModalOpen(false);
     setSelectedMarketBetsRows([]);
     setSelectedMarketTitle('');
+  };
+
+  const handleOpenExposureLimitModal = (item) => {
+    setSelectedExposureLimitUser({
+      id: item.id,
+      username: item.username,
+      userType: item.userType,
+      exposureLimit: item.exposureLimit,
+    });
+    setIsExposureLimitModalOpen(true);
+  };
+
+  const handleCloseExposureLimitModal = () => {
+    setIsExposureLimitModalOpen(false);
+    setSelectedExposureLimitUser(null);
+  };
+
+  const handleSubmitExposureLimit = (payload) => {
+    const msg =
+      payload?.response?.message || 'Exposure limit updated successfully';
+    toast.success(msg);
+    refetch();
   };
 
   const handleCloseDeleteModal = () => {
@@ -536,9 +596,16 @@ function UserListTable({ title = "User List" }) {
                     <td>
                       <span className="td-content-inline">
                         <span>{formatCurrency(item.exposureLimit)}</span>
-                        <button className="icon-btn" title="Edit">
-                          <FaRegEdit size={16} />
-                        </button>
+                        {showExposureLimitEdit(item.id) && (
+                          <button
+                            type="button"
+                            className="icon-btn"
+                            title="Edit exposure limit"
+                            onClick={() => handleOpenExposureLimitModal(item)}
+                          >
+                            <FaRegEdit size={16} />
+                          </button>
+                        )}
                       </span>
                     </td>
                     <td>{formatCurrency(item.availBal)}</td>
@@ -949,6 +1016,13 @@ function UserListTable({ title = "User List" }) {
         }}
         user={selectedStatusUser}
         onSubmit={handleSubmitStatus}
+      />
+
+      <ExposureLimitModal
+        isOpen={isExposureLimitModalOpen}
+        onClose={handleCloseExposureLimitModal}
+        user={selectedExposureLimitUser}
+        onSubmit={handleSubmitExposureLimit}
       />
 
       <SportsSettingsModal

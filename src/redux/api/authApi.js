@@ -85,6 +85,22 @@ export const authApi = createApi({
       }),
       invalidatesTags: ['Users'],
     }),
+    updateUserExposure: builder.mutation({
+      query: ({ userId, adminPassword, exposureLimit }) => ({
+        url: `/user/${userId}/exposure`,
+        method: 'PATCH',
+        body: { adminPassword, exposureLimit },
+      }),
+      invalidatesTags: ['Users'],
+    }),
+    updateUserHierarchyPassword: builder.mutation({
+      query: ({ userId, adminPassword, newPassword }) => ({
+        url: `/user/${userId}/password`,
+        method: 'PATCH',
+        body: { adminPassword, newPassword },
+      }),
+      invalidatesTags: ['Users'],
+    }),
     deleteUser: builder.mutation({
       query: ({ userId, adminPassword }) => ({
         url: `/user/${userId}`,
@@ -432,6 +448,8 @@ export const {
   useCreateUserMutation,
   useGetUsersQuery,
   useUpdateUserStatusMutation,
+  useUpdateUserExposureMutation,
+  useUpdateUserHierarchyPasswordMutation,
   useDeleteUserMutation,
   useGetPasswordChangeHistoryQuery,
   useChangePasswordMutation,

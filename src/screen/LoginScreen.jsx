@@ -3,11 +3,12 @@ import './LoginScreen.css';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../redux/slices/authReducer';
-import { useLoginMutation } from '../redux/api/authApi';
+import { authApi, useLoginMutation } from '../redux/api/authApi';
+
 
 function LoginScreen() {
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [username, setUsername] = useState('superadmin');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ function LoginScreen() {
         throw new Error('Invalid login response');
       }
 
+      dispatch(authApi.util.resetApiState());
       dispatch(
         setCredentials({
           access_token: accessToken,
@@ -48,7 +50,9 @@ function LoginScreen() {
     <div className="login-page">
 
       <div className="login-card">
-        <div className="login-logo">King</div>
+        <div className="login-logo">
+          <img src="/images/logo.png" alt="logo" style={{ width: '240px', }} />
+        </div>
 
         <div className="login-input-group">
           <input

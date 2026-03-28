@@ -1,0 +1,93 @@
+/* Form layout inside exposure limit modal (uses status-modal shell from StatusModal.css) */
+
+.exposure-limit-form {
+  padding: 16px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.exposure-limit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.exposure-limit-field label,
+.exposure-limit-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+}
+
+.exposure-limit-readonly {
+  font-size: 15px;
+  font-weight: 600;
+  color: #003f6b;
+  padding: 8px 10px;
+  background: #f0f4f8;
+  border: 1px solid #d8e0e8;
+  border-radius: 3px;
+}
+
+.exposure-limit-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.exposure-limit-input:focus {
+  outline: none;
+  border-color: #005792;
+  box-shadow: 0 0 0 2px rgba(0, 87, 146, 0.15);
+}
+
+.exposure-limit-password-block .status-password-wrapper {
+  width: 100%;
+}
+
+.exposure-limit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+  margin-top: 4px;
+}
+
+.exposure-limit-btn {
+  min-width: 100px;
+  padding: 8px 16px;
+  border-radius: 3px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.exposure-limit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.exposure-limit-btn-cancel {
+  background: #fff;
+  color: #444;
+  border-color: #ccc;
+}
+
+.exposure-limit-btn-cancel:hover:not(:disabled) {
+  background: #f5f5f5;
+}
+
+.exposure-limit-btn-submit {
+  background: linear-gradient(-180deg, #005792 0, #003f6b 100%);
+  color: #fff;
+  border-color: #003f6b;
+}
+
+.exposure-limit-btn-submit:hover:not(:disabled) {
+  filter: brightness(1.05);
+}

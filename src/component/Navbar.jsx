@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 import { userSelector, clearCredentials } from '../redux/slices/authReducer'
-import { useGetWalletBalanceQuery, useAddAmountToWalletMutation } from '../redux/api/authApi'
+import { authApi, useGetWalletBalanceQuery, useAddAmountToWalletMutation } from '../redux/api/authApi'
 import { toast } from 'react-toastify'
 import './Navbar.css'
 
@@ -93,6 +93,7 @@ function Navbar() {
 
   const handleLogout = (e) => {
     e.preventDefault()
+    dispatch(authApi.util.resetApiState())
     dispatch(clearCredentials())
     navigate('/')
   }

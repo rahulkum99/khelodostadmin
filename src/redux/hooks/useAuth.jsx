@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useRefreshTokenMutation } from "../api/authApi";
 import { useDispatch } from "react-redux";
 import { setCredentials, clearCredentials } from "../slices/authReducer";
+import { authApi } from "../api/authApi";
 import Cookies from "js-cookie";
 
 export const useAuth = () => {
@@ -40,6 +41,7 @@ export const useAuth = () => {
       } catch (err) {
         console.error("Error refreshing token:", err);
         if (err?.status === 401 || err?.status === '401') {
+          dispatch(authApi.util.resetApiState());
           dispatch(clearCredentials());
           Cookies.remove("access_token");
           Cookies.remove("refresh_token");
