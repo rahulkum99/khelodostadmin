@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Navbar from '../component/Navbar'
 import './ReportEventScreen.css'
 import { useGetUserProfitLossQuery } from '../redux/api/authApi'
+import { getUserProfitLossDateRange, PROFIT_LOSS_LIVE } from '../utils/profitLossDateRange'
 
 function UserProfitLossEventsScreen() {
   const { userId, sportName } = useParams()
@@ -25,13 +26,20 @@ function UserProfitLossEventsScreen() {
     }
   }, [sportName])
 
+  const { from: plFrom, to: plTo } = useMemo(() => {
+    if (filters?.from && filters?.to) {
+      return { from: filters.from, to: filters.to }
+    }
+    return getUserProfitLossDateRange(filters?.dataSource || PROFIT_LOSS_LIVE)
+  }, [filters?.from, filters?.to, filters?.dataSource])
+
   const { data, isLoading, isError } = useGetUserProfitLossQuery(
     {
       userId: canonicalUserId,
       sport: decodedSport || undefined,
-      dataSource: filters?.dataSource,
-      fromDate: filters?.fromDate,
-      toDate: filters?.toDate,
+      from: plFrom,
+      to: plTo,
+      limit: 500,
     },
     { skip: !canonicalUserId }
   )

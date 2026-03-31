@@ -449,7 +449,27 @@ function MasterListTable({ title = "Master List" }) {
                     <td>
                       <span className="td-content-inline">
                         <span className="user-badge">{item.userType}</span>
-                        <span className="username-text">{item.username}</span>
+                        <button
+                          type="button"
+                          className="username-text"
+                          onClick={() =>
+                            navigate(
+                              `/downline-userlist?adminId=${item.id}&adminName=${encodeURIComponent(item.username)}`
+                            )
+                          }
+                          title="View users under this admin"
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            padding: 0,
+                            margin: 0,
+                            color: '#007bff',
+                            textDecoration: 'underline',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {item.username}
+                        </button>
                       </span>
                     </td>
                     <td>

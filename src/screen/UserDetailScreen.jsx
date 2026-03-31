@@ -18,6 +18,13 @@ import {
   canEditExposureForTarget,
   hierarchyResponseToUserIdSet,
 } from '../utils/exposureEditAccess'
+import {
+  PROFIT_LOSS_LIVE,
+  PROFIT_LOSS_OLD,
+  PROFIT_LOSS_OLD_MONTH,
+  getPresetDateInputs,
+  dateInputRangeToIso,
+} from '../utils/profitLossDateRange'
 
 function mapProfileUserType(role) {
   const r = (role || '').toLowerCase()
@@ -41,19 +48,26 @@ function UserProfitLossTab({ userId, user }) {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const [dataSource, setDataSource] = useState('LIVE_DATA')
-  const [fromDate, setFromDate] = useState('2026-01-01')
-  const [toDate, setToDate] = useState('2026-02-09')
+  /** Live/Old presets fill From–To; you can edit dates (settledAt window). */
+  const [dataSource, setDataSource] = useState(PROFIT_LOSS_LIVE)
+  const [fromDate, setFromDate] = useState(() => getPresetDateInputs(PROFIT_LOSS_LIVE).fromDate)
+  const [toDate, setToDate] = useState(() => getPresetDateInputs(PROFIT_LOSS_LIVE).toDate)
   const [entriesPerPage, setEntriesPerPage] = useState(10)
   const [currentPage, setCurrentPage] = useState(1)
-  const [searchTerm, setSearchTerm] = useState('')
 
   const canonicalUserId = user?._id || userId
+
+  const { from: fromIso, to: toIso } = useMemo(
+    () => dateInputRangeToIso(fromDate, toDate),
+    [fromDate, toDate],
+  )
 
   const { data, isLoading, isError } = useGetUserProfitLossQuery(
     {
       userId: canonicalUserId,
-      // sport undefined here: this tab shows summary across all sports
+      from: fromIso,
+      to: toIso,
+      limit: 500,
     },
     { skip: !canonicalUserId }
   )
@@ -66,6 +80,7 @@ function UserProfitLossTab({ userId, user }) {
     apiRows.forEach((item, index) => {
       const sportName = (item.sport || 'Unknown').toString()
       const profitLoss = Number(item.profitLoss || 0)
+      const commission = Number(item.commission || 0)
       const existing = bySport.get(sportName) || {
         id: `${sportName}-${index}`,
         sportName,
@@ -73,27 +88,19 @@ function UserProfitLossTab({ userId, user }) {
         commission: 0,
       }
       existing.profitLoss += profitLoss
+      existing.commission += commission
       bySport.set(sportName, existing)
     })
     return Array.from(bySport.values())
   }, [apiRows])
 
-  const filteredRows = useMemo(() => {
-    const q = searchTerm.trim().toLowerCase()
-    let next = [...rows]
-    if (q) {
-      next = next.filter((r) => r.sportName.toLowerCase().includes(q))
-    }
-    return next
-  }, [rows, searchTerm])
-
-  const totalEntries = filteredRows.length
+  const totalEntries = rows.length
   const totalPages = Math.max(1, Math.ceil(totalEntries / entriesPerPage))
   const paginatedRows = useMemo(() => {
     const start = (currentPage - 1) * entriesPerPage
     const end = start + entriesPerPage
-    return filteredRows.slice(start, end)
-  }, [filteredRows, currentPage, entriesPerPage])
+    return rows.slice(start, end)
+  }, [rows, currentPage, entriesPerPage])
 
   const overallTotalPL = useMemo(
     () => rows.reduce((acc, r) => acc + Number(r.profitLoss || 0), 0),
@@ -115,8 +122,8 @@ function UserProfitLossTab({ userId, user }) {
         user,
         filters: {
           dataSource,
-          fromDate,
-          toDate,
+          from: fromIso,
+          to: toIso,
         },
       },
     })
@@ -125,20 +132,25 @@ function UserProfitLossTab({ userId, user }) {
   return (
     <div className="report-event-content full-width" style={{ padding: 0 }}>
       <div className="report-filter-section" style={{ marginBottom: 16 }}>
-        <div className="report-filter-row">
+        <div className="report-filter-row" style={{ flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div className="filter-group">
-            <label className="filter-label">Data Source</label>
+            <label className="filter-label">Data</label>
             <div className="select-wrapper">
               <select
                 className="filter-select"
                 value={dataSource}
                 onChange={(e) => {
-                  setDataSource(e.target.value)
+                  const v = e.target.value
+                  setDataSource(v)
+                  const p = getPresetDateInputs(v)
+                  setFromDate(p.fromDate)
+                  setToDate(p.toDate)
                   setCurrentPage(1)
                 }}
               >
-                <option value="LIVE_DATA">LIVE DATA</option>
-                <option value="SETTLED_DATA">SETTLED DATA</option>
+                <option value={PROFIT_LOSS_LIVE}>Live Data</option>
+                <option value={PROFIT_LOSS_OLD}>Backup Data</option>
+                <option value={PROFIT_LOSS_OLD_MONTH}>Old Data</option>
               </select>
               <span className="select-arrow">▼</span>
             </div>
@@ -174,9 +186,15 @@ function UserProfitLossTab({ userId, user }) {
             </div>
           </div>
 
-          <button className="report-get-btn" onClick={() => setCurrentPage(1)}>
+          <button
+            type="button"
+            className="report-get-btn"
+            onClick={() => setCurrentPage(1)}
+          >
             Get P&amp;L
           </button>
+
+         
         </div>
       </div>
 
@@ -205,18 +223,6 @@ function UserProfitLossTab({ userId, user }) {
               <label>entries</label>
             </div>
 
-            <div className="search-control">
-              <label>Search:</label>
-              <input
-                type="text"
-                className="search-input"
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value)
-                  setCurrentPage(1)
-                }}
-              />
-            </div>
           </div>
 
           <div className="report-table-wrapper">
@@ -251,7 +257,7 @@ function UserProfitLossTab({ userId, user }) {
                 ) : (
                   <>
                     {paginatedRows.map((row) => (
-                      <tr key={row.id}>
+                      <tr key={row.sportName}>
                         <td
                           className="sport-link"
                           onClick={() => handleSportClick(row.sportName)}

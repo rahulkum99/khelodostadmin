@@ -77,6 +77,14 @@ export const authApi = createApi({
       }),
       providesTags: ['Users'],
     }),
+    getUsersByAdmin: builder.query({
+      query: ({ adminId, page = 1, limit = 10 } = {}) => ({
+        url: `/user/by-admin/${adminId}/users`,
+        method: 'GET',
+        params: { page, limit },
+      }),
+      providesTags: ['Users'],
+    }),
     updateUserStatus: builder.mutation({
       query: ({ userId, status, adminPassword }) => ({
         url: `/user/${userId}/status`,
@@ -299,15 +307,23 @@ export const authApi = createApi({
       ],
     }),
     getUserProfitLoss: builder.query({
-      query: ({ userId, sport } = {}) => ({
+      query: ({ userId, sport, from, to, limit } = {}) => ({
         url: '/bets/admin/user-profit-loss',
         method: 'GET',
         params: {
           userId,
           ...(sport ? { sport } : {}),
+          ...(from ? { from } : {}),
+          ...(to ? { to } : {}),
+          ...(limit != null && limit !== '' ? { limit } : {}),
         },
       }),
-      providesTags: (result, error, { userId }) => [{ type: 'Bets', id: `profit-loss-${userId}` }],
+      providesTags: (result, error, arg) => [
+        {
+          type: 'Bets',
+          id: `profit-loss-${arg?.userId}-${arg?.from || ''}-${arg?.to || ''}-${arg?.sport || ''}`,
+        },
+      ],
     }),
     getUserEventProfitLoss: builder.query({
       query: ({ userId, eventId, by } = {}) => ({
@@ -447,6 +463,7 @@ export const {
   useGetUserActivityLogsQuery,
   useCreateUserMutation,
   useGetUsersQuery,
+  useGetUsersByAdminQuery,
   useUpdateUserStatusMutation,
   useUpdateUserExposureMutation,
   useUpdateUserHierarchyPasswordMutation,

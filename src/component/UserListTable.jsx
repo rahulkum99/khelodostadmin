@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import {
   useGetUsersQuery,
+  useGetUsersByAdminQuery,
   useGetUserHierarchyQuery,
   useDeleteUserMutation,
   useLazyGetUserExposureGameListQuery,
@@ -35,7 +36,7 @@ import {
   DeleteIcon,
 } from '../icon'
 
-function UserListTable({ title = "User List" }) {
+function UserListTable({ title = "User List", adminId = null }) {
   const navigate = useNavigate();
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
@@ -94,18 +95,41 @@ function UserListTable({ title = "User List" }) {
 
   // Determine role based on title
   const role = title.toLowerCase().includes('master') ? 'master' : 'user';
+  const normalizedAdminId = (adminId || '').toString().trim();
+  const isByAdminMode = normalizedAdminId.length > 0;
 
-  // Fetch users from API
-  const { data, isLoading, error, refetch } = useGetUsersQuery({
-    role,
-    page: currentPage,
-    limit: entriesPerPage
-  });
+  const usersQuery = useGetUsersQuery(
+    {
+      role,
+      page: currentPage,
+      limit: entriesPerPage
+    },
+    { skip: isByAdminMode },
+  );
+  const usersByAdminQuery = useGetUsersByAdminQuery(
+    {
+      adminId: normalizedAdminId,
+      page: currentPage,
+      limit: entriesPerPage,
+    },
+    { skip: !isByAdminMode },
+  );
+  const activeUsersQuery = isByAdminMode ? usersByAdminQuery : usersQuery;
+  const { data, isLoading, error, refetch } = activeUsersQuery;
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
 
-  // Extract users and pagination from API response
-  const users = data?.data?.users || [];
-  const pagination = data?.data?.pagination || { page: 1, limit: 10, total: 0, pages: 1 };
+  // Extract users/pagination from multiple response shapes
+  const users =
+    data?.data?.users ||
+    data?.users ||
+    [];
+  const pagination = data?.data?.pagination || data?.pagination || { page: 1, limit: 10, total: users.length, pages: 1 };
+
+  // When switching into/out of by-admin mode, clear stale filters/pagination
+  useEffect(() => {
+    setCurrentPage(1);
+    setSearchTerm('');
+  }, [normalizedAdminId]);
 
   // Filter users based on search term (client-side filtering)
   const filteredUsers = users.filter(user => {
@@ -620,20 +644,6 @@ function UserListTable({ title = "User List" }) {
                       <div className="actions-group">
                         <button
                           className="action-icon-btn"
-                          title="Banking"
-                          onClick={() =>
-                            handleOpenBanking({
-                              id: item.id,
-                              username: item.username,
-                              userType: item.userType,
-                              balance: item.balance,
-                            })
-                          }
-                        >
-                          <BankingIcon size={20} />
-                        </button>
-                        <button
-                          className="action-icon-btn"
                           title="Profit/Loss"
                           onClick={() =>
                             navigate(`/user-detail/${item.id}?tab=profit-loss`, {
@@ -656,20 +666,6 @@ function UserListTable({ title = "User List" }) {
                         </button>
                         <button
                           className="action-icon-btn"
-                          title="Settings"
-                          onClick={() =>
-                            handleOpenStatus({
-                              id: item.id,
-                              username: item.username,
-                              userType: item.userType,
-                              status: item.status,
-                            })
-                          }
-                        >
-                          <SettingsIcon size={18} />
-                        </button>
-                        <button
-                          className="action-icon-btn"
                           title="Profile"
                           onClick={() =>
                             navigate(`/user-detail/${item.id}`, {
@@ -679,21 +675,53 @@ function UserListTable({ title = "User List" }) {
                         >
                           <ProfileIcon size={18} />
                         </button>
-                        <button
-                          className="action-icon-btn"
-                          title="Sport Settings"
-                          onClick={handleOpenSports}
-                        >
-                          <SportSettingIcon size={18} />
-                        </button>
-                        <button
-                          className="action-icon-btn delete-btn"
-                          title="Delete"
-                          onClick={() => handleOpenDeleteModal(item)}
-                          disabled={isDeleting}
-                        >
-                          <DeleteIcon size={18} />
-                        </button>
+                        {!isByAdminMode && (
+                          <>
+                            <button
+                              className="action-icon-btn"
+                              title="Banking"
+                              onClick={() =>
+                                handleOpenBanking({
+                                  id: item.id,
+                                  username: item.username,
+                                  userType: item.userType,
+                                  balance: item.balance,
+                                })
+                              }
+                            >
+                              <BankingIcon size={20} />
+                            </button>
+                            <button
+                              className="action-icon-btn"
+                              title="Settings"
+                              onClick={() =>
+                                handleOpenStatus({
+                                  id: item.id,
+                                  username: item.username,
+                                  userType: item.userType,
+                                  status: item.status,
+                                })
+                              }
+                            >
+                              <SettingsIcon size={18} />
+                            </button>
+                            <button
+                              className="action-icon-btn"
+                              title="Sport Settings"
+                              onClick={handleOpenSports}
+                            >
+                              <SportSettingIcon size={18} />
+                            </button>
+                            <button
+                              className="action-icon-btn delete-btn"
+                              title="Delete"
+                              onClick={() => handleOpenDeleteModal(item)}
+                              disabled={isDeleting}
+                            >
+                              <DeleteIcon size={18} />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
