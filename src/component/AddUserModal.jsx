@@ -78,8 +78,8 @@ function AddUserModal({ isOpen, onClose, onSubmit }) {
       name: formData.name || formData.username,
       password: formData.password,
       commission: parseFloat(formData.commission) || 0,
-      // Opening balance: use form value if provided, otherwise default to 100
-      openingBalance: parseFloat(formData.openingBalance) || 100,
+      // Opening balance: avoid auto-crediting; default to 0 when invalid/empty
+      openingBalance: parseFloat(formData.openingBalance) || 0,
       rollingCommission: zeroRollingCommission,
       agentRollingCommission: zeroRollingCommission,
       currency: 'INR',

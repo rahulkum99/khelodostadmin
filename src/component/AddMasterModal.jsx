@@ -133,7 +133,7 @@ function AddMasterModal({ isOpen, onClose, onSubmit }) {
       name: formData.name || formData.username,
       password: formData.password,
       commission: parseFloat(formData.commission) || 0,
-      openingBalance: parseFloat(formData.openingBalance) || 100,
+      openingBalance: parseFloat(formData.openingBalance) || 0,
       rollingCommission: zeroRollingCommission,
       agentRollingCommission: zeroRollingCommission,
       currency: 'INR',

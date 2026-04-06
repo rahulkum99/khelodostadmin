@@ -51,7 +51,7 @@ function Navbar() {
     return () => cancelAnimationFrame(raf)
   }, [openDropdowns])
 
-  const { data: walletData, refetch: refetchWallet } = useGetWalletBalanceQuery(undefined, { skip: !user })
+  const { data: walletData } = useGetWalletBalanceQuery(undefined, { skip: !user })
   const walletBalance = walletData?.data?.balance
   const [addAmountToWallet, { isLoading: isAddingBalance }] = useAddAmountToWalletMutation()
 
@@ -70,7 +70,7 @@ function Navbar() {
   }
 
   const handleRefresh = () => {
-    refetchWallet()
+    window.location.reload()
   }
 
   const displayBalance = (walletBalance != null ? Number(walletBalance) : (user?.balance != null ? Number(user.balance) : 0)).toLocaleString('en-IN', {

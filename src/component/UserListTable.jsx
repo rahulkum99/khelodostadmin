@@ -675,53 +675,51 @@ function UserListTable({ title = "User List", adminId = null }) {
                         >
                           <ProfileIcon size={18} />
                         </button>
-                        {!isByAdminMode && (
-                          <>
-                            <button
-                              className="action-icon-btn"
-                              title="Banking"
-                              onClick={() =>
-                                handleOpenBanking({
-                                  id: item.id,
-                                  username: item.username,
-                                  userType: item.userType,
-                                  balance: item.balance,
-                                })
-                              }
-                            >
-                              <BankingIcon size={20} />
-                            </button>
-                            <button
-                              className="action-icon-btn"
-                              title="Settings"
-                              onClick={() =>
-                                handleOpenStatus({
-                                  id: item.id,
-                                  username: item.username,
-                                  userType: item.userType,
-                                  status: item.status,
-                                })
-                              }
-                            >
-                              <SettingsIcon size={18} />
-                            </button>
-                            <button
-                              className="action-icon-btn"
-                              title="Sport Settings"
-                              onClick={handleOpenSports}
-                            >
-                              <SportSettingIcon size={18} />
-                            </button>
-                            <button
-                              className="action-icon-btn delete-btn"
-                              title="Delete"
-                              onClick={() => handleOpenDeleteModal(item)}
-                              disabled={isDeleting}
-                            >
-                              <DeleteIcon size={18} />
-                            </button>
-                          </>
-                        )}
+
+                        <button
+                          className="action-icon-btn"
+                          title="Banking"
+                          onClick={() =>
+                            handleOpenBanking({
+                              id: item.id,
+                              username: item.username,
+                              userType: item.userType,
+                              balance: item.balance,
+                            })
+                          }
+                        >
+                          <BankingIcon size={20} />
+                        </button>
+                        <button
+                          className="action-icon-btn"
+                          title="Settings"
+                          onClick={() =>
+                            handleOpenStatus({
+                              id: item.id,
+                              username: item.username,
+                              userType: item.userType,
+                              status: item.status,
+                            })
+                          }
+                        >
+                          <SettingsIcon size={18} />
+                        </button>
+                        <button
+                          className="action-icon-btn"
+                          title="Sport Settings"
+                          onClick={handleOpenSports}
+                        >
+                          <SportSettingIcon size={18} />
+                        </button>
+                        <button
+                          className="action-icon-btn delete-btn"
+                          title="Delete"
+                          onClick={() => handleOpenDeleteModal(item)}
+                          disabled={isDeleting}
+                        >
+                          <DeleteIcon size={18} />
+                        </button>
+
                       </div>
                     </td>
                   </tr>

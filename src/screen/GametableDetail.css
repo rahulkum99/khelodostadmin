@@ -177,6 +177,14 @@
   background: #e5f1ff;
 }
 
+.gd-book-row-back {
+  background: #beddf4;
+}
+
+.gd-book-row-lay {
+  background: #f3dce2;
+}
+
 .gd-book-market-name {
   display: flex;
   align-items: center;
