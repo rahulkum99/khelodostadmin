@@ -70,18 +70,27 @@ export const authApi = createApi({
       invalidatesTags: ['Users'],
     }),
     getUsers: builder.query({
-      query: ({ role = 'user', page = 1, limit = 10 } = {}) => ({
+      query: ({ role = 'user', page = 1, limit = 10, search } = {}) => ({
         url: '/user/',
         method: 'GET',
-        params: { role, page, limit },
+        params: {
+          role,
+          page,
+          limit,
+          ...(search ? { search } : {}),
+        },
       }),
       providesTags: ['Users'],
     }),
     getUsersByAdmin: builder.query({
-      query: ({ adminId, page = 1, limit = 10 } = {}) => ({
+      query: ({ adminId, page = 1, limit = 10, search } = {}) => ({
         url: `/user/by-admin/${adminId}/users`,
         method: 'GET',
-        params: { page, limit },
+        params: {
+          page,
+          limit,
+          ...(search ? { search } : {}),
+        },
       }),
       providesTags: ['Users'],
     }),

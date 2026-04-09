@@ -76,27 +76,20 @@ function MasterListTable({ title = "Master List" }) {
 
   // Fetch all downline roles in one request: admin, master, agent, super_master
   const rolesQuery = 'admin,master,agent,super_master';
+  const normalizedSearch = (searchTerm || '').trim();
+  const safeSearchTerm =
+    normalizedSearch.toLowerCase() === '' ? '' : normalizedSearch;
 
   const { data, isLoading, error, refetch } = useGetUsersQuery({
     role: rolesQuery,
     page: currentPage,
-    limit: entriesPerPage
+    limit: entriesPerPage,
+    ...(safeSearchTerm ? { search: safeSearchTerm } : {}),
   });
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
 
   const users = data?.data?.users || [];
   const pagination = data?.data?.pagination || { page: 1, limit: 10, total: 0, pages: 1 };
-
-  const filteredUsers = users.filter(user => {
-    if (!searchTerm) return true;
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      user.username?.toLowerCase().includes(searchLower) ||
-      user.name?.toLowerCase().includes(searchLower) ||
-      user.role?.toLowerCase().includes(searchLower) ||
-      (user.isActive ? 'active' : 'inactive').includes(searchLower)
-    );
-  });
 
   // Clear balance overrides when fresh data arrives from refetch
   useEffect(() => {
@@ -104,7 +97,7 @@ function MasterListTable({ title = "Master List" }) {
   }, [data]);
 
   // Map API users to table format using latest response shape
-  const tableData = filteredUsers.map(user => {
+  const tableData = users.map(user => {
     const uid = user._id || user.id;
     const balance = balanceOverrides[uid] ?? Number(user.balance ?? 0);
     const exposure = Number(user.exposer ?? 0);
@@ -156,11 +149,6 @@ function MasterListTable({ title = "Master List" }) {
   useEffect(() => {
     refetch();
   }, [currentPage, entriesPerPage, refetch]);
-
-  // Never allow search to be "superadmin" (e.g. from browser autocomplete)
-  useEffect(() => {
-    if ((searchTerm || '').toLowerCase() === 'superadmin') setSearchTerm('');
-  }, [searchTerm]);
 
   const handleMasterCreated = () => {
     refetch();
@@ -340,6 +328,7 @@ function MasterListTable({ title = "Master List" }) {
               onChange={(e) => {
                 const v = e.target.value;
                 setSearchTerm((v || '').toLowerCase() === 'superadmin' ? '' : v);
+                setCurrentPage(1);
               }}
               placeholder="Search by username, name, or status..."
               disabled={isLoading}

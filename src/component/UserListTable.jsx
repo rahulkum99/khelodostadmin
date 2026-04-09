@@ -97,12 +97,16 @@ function UserListTable({ title = "User List", adminId = null }) {
   const role = title.toLowerCase().includes('master') ? 'master' : 'user';
   const normalizedAdminId = (adminId || '').toString().trim();
   const isByAdminMode = normalizedAdminId.length > 0;
+  const normalizedSearch = (searchTerm || '').trim();
+  const safeSearchTerm =
+    normalizedSearch.toLowerCase() === '' ? '' : normalizedSearch;
 
   const usersQuery = useGetUsersQuery(
     {
       role,
       page: currentPage,
-      limit: entriesPerPage
+      limit: entriesPerPage,
+      ...(safeSearchTerm ? { search: safeSearchTerm } : {}),
     },
     { skip: isByAdminMode },
   );
@@ -111,6 +115,7 @@ function UserListTable({ title = "User List", adminId = null }) {
       adminId: normalizedAdminId,
       page: currentPage,
       limit: entriesPerPage,
+      ...(safeSearchTerm ? { search: safeSearchTerm } : {}),
     },
     { skip: !isByAdminMode },
   );
@@ -131,30 +136,13 @@ function UserListTable({ title = "User List", adminId = null }) {
     setSearchTerm('');
   }, [normalizedAdminId]);
 
-  // Filter users based on search term (client-side filtering)
-  const filteredUsers = users.filter(user => {
-    if (!searchTerm) return true;
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      user.username?.toLowerCase().includes(searchLower) ||
-      user.name?.toLowerCase().includes(searchLower) ||
-      user.role?.toLowerCase().includes(searchLower) ||
-      (user.isActive ? 'active' : 'inactive').includes(searchLower)
-    );
-  });
-
   // Clear balance overrides when fresh data arrives from refetch
   useEffect(() => {
     if (data) setBalanceOverrides({});
   }, [data]);
 
-  // Never allow search to be "superadmin" (e.g. from browser autocomplete)
-  useEffect(() => {
-    if ((searchTerm || '').toLowerCase() === 'superadmin') setSearchTerm('');
-  }, [searchTerm]);
-
   // Map API users to table format using latest response shape
-  const tableData = filteredUsers.map(user => {
+  const tableData = users.map(user => {
     const uid = user._id || user.id;
     const balance = balanceOverrides[uid] ?? Number(user.balance ?? 0);
     const exposure = Number(user.exposer ?? 0);
@@ -480,6 +468,7 @@ function UserListTable({ title = "User List", adminId = null }) {
               onChange={(e) => {
                 const v = e.target.value;
                 setSearchTerm((v || '').toLowerCase() === 'superadmin' ? '' : v);
+                setCurrentPage(1);
               }}
               placeholder="Search by username, name, or status..."
               disabled={isLoading}
@@ -642,6 +631,21 @@ function UserListTable({ title = "User List", adminId = null }) {
                     </td>
                     <td>
                       <div className="actions-group">
+
+                        <button
+                          className="action-icon-btn"
+                          title="Banking"
+                          onClick={() =>
+                            handleOpenBanking({
+                              id: item.id,
+                              username: item.username,
+                              userType: item.userType,
+                              balance: item.balance,
+                            })
+                          }
+                        >
+                          <BankingIcon size={20} />
+                        </button>
                         <button
                           className="action-icon-btn"
                           title="Profit/Loss"
@@ -664,32 +668,9 @@ function UserListTable({ title = "User List", adminId = null }) {
                         >
                           <BetHistoryIcon size={18} />
                         </button>
-                        <button
-                          className="action-icon-btn"
-                          title="Profile"
-                          onClick={() =>
-                            navigate(`/user-detail/${item.id}`, {
-                              state: { user: item.userData },
-                            })
-                          }
-                        >
-                          <ProfileIcon size={18} />
-                        </button>
 
-                        <button
-                          className="action-icon-btn"
-                          title="Banking"
-                          onClick={() =>
-                            handleOpenBanking({
-                              id: item.id,
-                              username: item.username,
-                              userType: item.userType,
-                              balance: item.balance,
-                            })
-                          }
-                        >
-                          <BankingIcon size={20} />
-                        </button>
+
+
                         <button
                           className="action-icon-btn"
                           title="Settings"
@@ -703,6 +684,18 @@ function UserListTable({ title = "User List", adminId = null }) {
                           }
                         >
                           <SettingsIcon size={18} />
+                        </button>
+
+                        <button
+                          className="action-icon-btn"
+                          title="Profile"
+                          onClick={() =>
+                            navigate(`/user-detail/${item.id}`, {
+                              state: { user: item.userData },
+                            })
+                          }
+                        >
+                          <ProfileIcon size={18} />
                         </button>
                         <button
                           className="action-icon-btn"
